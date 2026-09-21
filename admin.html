@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yönetici Kontrol Paneli - EduKodlab</title>
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --accent-blue: #38bdf8;
+      --accent-purple: #a855f7;
+      --accent-red: #ef4444;
+      --accent-green: #22c55e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    
+    body { 
+      background: var(--bg-main); 
+      color: var(--text-main); 
+      min-height: 100vh; 
+      display: flex; 
+      flex-direction: column;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(239, 68, 68, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.1) 0px, transparent 50%);
+    }
+
+    header { 
+      background: rgba(15, 23, 42, 0.9); 
+      padding: 20px 40px; 
+      border-bottom: 1px solid var(--border-color); 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+
+    .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent-red); }
+    .badge { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+
+    .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; flex: 1; width: 100%; }
+
+    .route-info {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: var(--accent-blue);
+      margin-bottom: 30px;
+    }
+
+    .item-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 25px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .user-info { font-weight: bold; color: var(--accent-blue); font-size: 1.05rem; }
+    .cat-tag { background: rgba(168, 85, 247, 0.2); color: var(--accent-purple); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+
+    .url-box {
+      background: rgba(15, 23, 42, 0.9);
+      padding: 10px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #a7f3d0;
+      margin: 15px 0;
+      word-break: break-all;
+    }
+
+    .actions { display: flex; gap: 12px; margin-top: 18px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-approve { background: var(--accent-green); color: white; }
+    .btn-approve:hover { opacity: 0.9; }
+    .btn-reject { background: var(--accent-red); color: white; }
+    .btn-reject:hover { opacity: 0.9; }
+
+    footer { text-align: center; padding: 25px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem; margin-top: auto; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">EduKodlab Admin</div>
+    <span class="badge">Sadece Yönetici Erişimi</span>
+  </header>
+
+  <div class="container">
+    <div class="route-info">
+      🔒 Erişim Rotası: /api/secured/adminpanel
+    </div>
+
+    <h2 style="margin-bottom: 20px; font-size: 1.4rem;">Onay Bekleyen İçerikler</h2>
+
+    <div id="content-list">
+      <!-- Bekleyen Kart -->
+      <div class="item-card" id="card-487252734323987900">
+        <div class="item-header">
+          <span class="user-info">@eymenprodq</span>
+          <span class="cat-tag">Şablonlar</span>
+        </div>
+
+        <div style="line-height: 1.6; color: #cbd5e1;">
+          <strong style="color: white; font-size: 1.1rem;">Başlık: Roblox Stand & Oyun Şablonu V2</strong><br>
+          <span style="color: var(--text-muted);">Açıklama: Kullanıcıların kolayca düzenleyebileceği ücretsiz stand şablonu.</span>
+        </div>
+
+        <div class="url-box">
+          Hedef URL: siteismi.vercel.app/eymenprodq/sablonlar/487252734323987900
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-approve" onclick="approve('487252734323987900')">Onayla ve Yayınla</button>
+          <button class="btn btn-reject" onclick="reject('487252734323987900')">Reddet / Sil</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 EduKodlab Yönetim Paneli
+  </footer>
+
+  <script>
+    function approve(id) {
+      alert("İçerik onaylandı ve özel URL yayınlandı!");
+      document.getElementById("card-" + id).remove();
+    }
+
+    function reject(id) {
+      if(confirm("Bu içeriği silmek istediğinize emin misiniz?")) {
+        document.getElementById("card-" + id).remove();
+      }
+    }
+  </script>
+
+  <!-- Tawk.to Canlı Destek -->
+  <script type="text/javascript">
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  (function(){
+  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+  s1.async=true;
+  s1.src='https://embed.tawk.to/6aaa9769d5bb1934472d59e2/1k2l5utmu';
+  s1.charset='UTF-8';
+  s1.setAttribute('crossorigin','*');
+  s0.parentNode.insertBefore(s1,s0);
+  })();
+  </script>
+
+</body>
+</html>

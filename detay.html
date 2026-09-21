@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox Stand & Oyun Şablonu V2 - EduKodlab</title>
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --accent-blue: #38bdf8;
+      --accent-purple: #a855f7;
+      --accent-green: #22c55e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    
+    body { 
+      background: var(--bg-main); 
+      color: var(--text-main); 
+      min-height: 100vh; 
+      display: flex; 
+      flex-direction: column;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%);
+    }
+
+    header { 
+      background: rgba(15, 23, 42, 0.8); 
+      backdrop-filter: blur(12px);
+      padding: 18px 40px; 
+      border-bottom: 1px solid var(--border-color); 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+
+    .logo { 
+      font-size: 1.6rem; 
+      font-weight: 800; 
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none; 
+    }
+
+    nav a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+    nav a:hover { color: var(--accent-blue); }
+
+    .container { max-width: 900px; margin: 40px auto; padding: 0 20px; flex: 1; width: 100%; }
+
+    .detail-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 35px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .url-badge {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--accent-blue);
+      margin-bottom: 20px;
+      word-break: break-all;
+    }
+
+    .tag {
+      display: inline-block;
+      background: rgba(168, 85, 247, 0.15);
+      color: var(--accent-purple);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+    }
+
+    h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 800; }
+    .meta { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px; }
+    .meta strong { color: var(--accent-blue); }
+
+    .description {
+      line-height: 1.7;
+      color: #cbd5e1;
+      font-size: 1rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 25px;
+      margin-bottom: 35px;
+    }
+
+    .download-box {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px dashed rgba(56, 189, 248, 0.4);
+      border-radius: 12px;
+      padding: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+      transition: 0.2s;
+    }
+    .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5); }
+
+    footer { text-align: center; padding: 25px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem; margin-top: auto; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="logo">EduKodlab</a>
+    <nav>
+      <a href="index.html">← Ana Sayfaya Dön</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="detail-card">
+      <div class="url-badge">
+        📍 Özel Sayfa Bağlantısı: siteismi.vercel.app/eymenprodq/sablonlar/487252734323987900
+      </div>
+
+      <span class="tag">Roblox Şablonu</span>
+      <h1>Roblox Stand & Oyun Şablonu V2</h1>
+      <div class="meta">
+        Yükleyen: <strong>@eymenprodq</strong> | İçerik Kimliği (ID): <code>487252734323987900</code>
+      </div>
+
+      <div class="description">
+        <h3>İçerik Detayları ve Kullanım:</h3>
+        <p style="margin-top: 10px;">
+          Bu şablon içerisinde özelleştirilebilir kod blokları, kullanıcı etkileşim sistemleri ve hazır arayüz bileşenleri yer almaktadır. Dosyayı indirip Roblox Studio üzerinden açarak doğrudan kullanmaya başlayabilirsiniz.
+        </p>
+      </div>
+
+      <div class="download-box">
+        <div>
+          <h4 style="color: var(--text-main); font-size: 1.1rem;">Dosya / Şablon İndirme Alanı</h4>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Tüm taramaları yapılmış güvenli içerik.</p>
+        </div>
+        <a href="#" class="btn-download">Şablonu İndir (.rbxl)</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 EduKodlab - Tüm hakları saklıdır.
+  </footer>
+
+  <!-- Tawk.to Canlı Destek -->
+  <script type="text/javascript">
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  (function(){
+  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+  s1.async=true;
+  s1.src='https://embed.tawk.to/6aaa9769d5bb1934472d59e2/1k2l5utmu';
+  s1.charset='UTF-8';
+  s1.setAttribute('crossorigin','*');
+  s0.parentNode.insertBefore(s1,s0);
+  })();
+  </script>
+
+</body>
+</html>
