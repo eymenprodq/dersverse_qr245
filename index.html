@@ -9,13 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-color: #0a0a12;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --text-color: #f3f4f6;
-            --text-muted: #9ca3af;
+            --dersverse-bg: #0a0a12;
+            --dersverse-card-bg: rgba(255, 255, 255, 0.05);
+            --dersverse-border: rgba(255, 255, 255, 0.1);
+            --dersverse-primary: #6366f1;
+            --dersverse-primary-hover: #4f46e5;
+            --dersverse-text: #f3f4f6;
+            --dersverse-text-muted: #9ca3af;
         }
 
         * {
@@ -26,18 +26,18 @@
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--dersverse-bg);
+            color: var(--dersverse-text);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             user-select: none;
         }
 
-        header {
+        header.dersverse-header {
             background: rgba(10, 10, 18, 0.8);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--dersverse-border);
             padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
@@ -47,7 +47,7 @@
             z-index: 100;
         }
 
-        .logo {
+        .dersverse-logo {
             font-size: 1.5rem;
             font-weight: bold;
             background: linear-gradient(135deg, #6366f1, #a855f7);
@@ -56,14 +56,14 @@
             text-decoration: none;
         }
 
-        .nav-actions {
+        .dersverse-nav-actions {
             display: flex;
             gap: 1rem;
             align-items: center;
         }
 
-        .btn {
-            background: var(--primary);
+        .dersverse-btn {
+            background: var(--dersverse-primary);
             color: white;
             border: none;
             padding: 0.6rem 1.2rem;
@@ -73,51 +73,51 @@
             transition: all 0.2s ease;
         }
 
-        .btn:hover {
-            background: var(--primary-hover);
+        .dersverse-btn:hover {
+            background: var(--dersverse-primary-hover);
         }
 
-        .btn-outline {
+        .dersverse-btn-outline {
             background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
+            border: 1px solid var(--dersverse-border);
+            color: var(--dersverse-text);
         }
 
-        .btn-outline:hover {
+        .dersverse-btn-outline:hover {
             background: rgba(255, 255, 255, 0.1);
         }
 
-        main {
+        main.dersverse-main {
             max-width: 1200px;
             margin: 2rem auto;
             padding: 0 1rem;
             width: 100%;
         }
 
-        .hero {
+        .dersverse-hero {
             text-align: center;
             margin-bottom: 3rem;
         }
 
-        .hero h1 {
+        .dersverse-hero h1 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
         }
 
-        .hero p {
-            color: var(--text-muted);
+        .dersverse-hero p {
+            color: var(--dersverse-text-muted);
             font-size: 1.1rem;
         }
 
-        .grid {
+        .dersverse-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
         }
 
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+        .dersverse-card {
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
             border-radius: 12px;
             padding: 1.5rem;
             display: flex;
@@ -125,26 +125,26 @@
             justify-content: space-between;
         }
 
-        .card-tag {
+        .dersverse-card-tag {
             font-size: 0.8rem;
-            color: var(--primary);
+            color: var(--dersverse-primary);
             text-transform: uppercase;
             font-weight: bold;
             margin-bottom: 0.5rem;
         }
 
-        .card-title {
+        .dersverse-card-title {
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
         }
 
-        .card-desc {
-            color: var(--text-muted);
+        .dersverse-card-desc {
+            color: var(--dersverse-text-muted);
             font-size: 0.9rem;
             margin-bottom: 1rem;
         }
 
-        .modal {
+        .dersverse-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -158,30 +158,32 @@
             z-index: 1000;
         }
 
-        .modal-content {
+        .dersverse-modal-content {
             background: #12121f;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--dersverse-border);
             padding: 2rem;
             border-radius: 12px;
             width: 90%;
             max-width: 500px;
         }
 
-        .form-group {
+        .dersverse-form-group {
             margin-bottom: 1rem;
         }
 
-        .form-group label {
+        .dersverse-form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            color: var(--text-muted);
+            color: var(--dersverse-text-muted);
         }
 
-        .form-group input, .form-group select, .form-group textarea {
+        .dersverse-form-group input, 
+        .dersverse-form-group select, 
+        .dersverse-form-group textarea {
             width: 100%;
             padding: 0.75rem;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--dersverse-border);
             border-radius: 6px;
             color: white;
         }
@@ -189,37 +191,37 @@
 </head>
 <body>
 
-    <header>
-        <a href="#" class="logo">DersVerse</a>
-        <div class="nav-actions">
-            <button class="btn btn-outline" onclick="openModal()">İçerik Paylaş</button>
-            <button class="btn" id="auth-btn" onclick="handleAuth()">Google ile Giriş Yap</button>
+    <header class="dersverse-header">
+        <a href="#" class="dersverse-logo">DersVerse</a>
+        <div class="dersverse-nav-actions">
+            <button class="dersverse-btn dersverse-btn-outline" onclick="dersverseOpenModal()">İçerik Paylaş</button>
+            <button class="dersverse-btn" id="dersverse-auth-btn" onclick="dersverseHandleAuth()">Google ile Giriş Yap</button>
         </div>
     </header>
 
-    <main>
-        <section class="hero">
+    <main class="dersverse-main">
+        <section class="dersverse-hero">
             <h1>DersVerse Evrenine Hoş Geldiniz</h1>
             <p>Tüm ders notları ve dijital eğitim materyalleri tek bir çatı altında!</p>
         </section>
 
-        <div class="grid" id="content-grid">
-            <!-- İçerikler Supabase'den Çekilecek -->
+        <div class="dersverse-grid" id="dersverse-content-grid">
+            <!-- İçerikler Supabase'den Yüklenecek -->
         </div>
     </main>
 
-    <!-- İçerik Gönderme Modalı -->
-    <div class="modal" id="add-modal">
-        <div class="modal-content">
+    <!-- DersVerse İçerik Paylaşım Modalı -->
+    <div class="dersverse-modal" id="dersverse-add-modal">
+        <div class="dersverse-modal-content">
             <h2 style="margin-bottom: 1rem;">Yeni İçerik Paylaş</h2>
-            <form id="content-form" onsubmit="submitContent(event)">
-                <div class="form-group">
+            <form id="dersverse-content-form" onsubmit="dersverseSubmitContent(event)">
+                <div class="dersverse-form-group">
                     <label>Başlık</label>
-                    <input type="text" id="title" required placeholder="Örn: 7. Sınıf Matematik Notları">
+                    <input type="text" id="dersverse-title" required placeholder="Örn: 7. Sınıf Matematik Notları">
                 </div>
-                <div class="form-group">
+                <div class="dersverse-form-group">
                     <label>Ders / Kategori</label>
-                    <select id="category" required>
+                    <select id="dersverse-category" required>
                         <option value="Matematik">Matematik</option>
                         <option value="Fen Bilimleri">Fen Bilimleri</option>
                         <option value="Türkçe">Türkçe</option>
@@ -228,42 +230,42 @@
                         <option value="Kodlama & Teknoloji">Kodlama & Teknoloji</option>
                     </select>
                 </div>
-                <div class="form-group">
+                <div class="dersverse-form-group">
                     <label>Açıklama</label>
-                    <textarea id="description" rows="3" required placeholder="İçerik detayları..."></textarea>
+                    <textarea id="dersverse-description" rows="3" required placeholder="İçerik detayları..."></textarea>
                 </div>
-                <div class="form-group">
+                <div class="dersverse-form-group">
                     <label>Bağlantı (Link / Google Drive)</label>
-                    <input type="url" id="link" required placeholder="https://...">
+                    <input type="url" id="dersverse-link" required placeholder="https://...">
                 </div>
                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                    <button type="button" class="btn btn-outline" onclick="closeModal()">İptal</button>
-                    <button type="submit" class="btn">Gönder (Onaya Gider)</button>
+                    <button type="button" class="dersverse-btn dersverse-btn-outline" onclick="dersverseCloseModal()">İptal</button>
+                    <button type="submit" class="dersverse-btn">Gönder (Onaya Gider)</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // Supabase Bağlantı Yapılandırması
-        const SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // DersVerse - Supabase Bağlantı Yapılandırması
+        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
+        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
+        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
 
-        // Oturum Kontrolü
-        async function checkUser() {
-            const { data: { user } } = await supabase.auth.getUser();
-            const authBtn = document.getElementById('auth-btn');
+        // Kullanıcı Oturum Kontrolü
+        async function dersverseCheckUser() {
+            const { data: { user } } = await dersverseSupabase.auth.getUser();
+            const authBtn = document.getElementById('dersverse-auth-btn');
             if (user) {
                 authBtn.innerText = 'Çıkış Yap (' + user.email.split('@')[0] + ')';
             } else {
                 authBtn.innerText = 'Google ile Giriş Yap';
             }
-            setupDevToolsProtection(user);
+            dersverseSetupProtection(user);
         }
 
-        // Geliştirici Kısıtlamaları (Admin Hariç)
-        function setupDevToolsProtection(user) {
+        // Geliştirici Kısıtlamaları (Admin Hariç Koruma)
+        function dersverseSetupProtection(user) {
             const isAdmin = user && user.email === 'femememe1973@gmail.com';
             if (isAdmin) return;
 
@@ -278,14 +280,14 @@
             });
         }
 
-        // Google ile Giriş / Çıkış
-        async function handleAuth() {
-            const { data: { user } } = await supabase.auth.getUser();
+        // Google OAuth Giriş / Çıkış
+        async function dersverseHandleAuth() {
+            const { data: { user } } = await dersverseSupabase.auth.getUser();
             if (user) {
-                await supabase.auth.signOut();
+                await dersverseSupabase.auth.signOut();
                 window.location.reload();
             } else {
-                await supabase.auth.signInWithOAuth({
+                await dersverseSupabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
                         redirectTo: 'https://dersverse-two.vercel.app'
@@ -294,50 +296,50 @@
             }
         }
 
-        function openModal() { document.getElementById('add-modal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('add-modal').style.display = 'none'; }
+        function dersverseOpenModal() { document.getElementById('dersverse-add-modal').style.display = 'flex'; }
+        function dersverseCloseModal() { document.getElementById('dersverse-add-modal').style.display = 'none'; }
 
-        // Onaylı İçerikleri Listeleme
-        async function loadContents() {
-            const grid = document.getElementById('content-grid');
-            const { data, error } = await supabase
+        // Onaylanmış İçerikleri Listeleme
+        async function dersverseLoadContents() {
+            const grid = document.getElementById('dersverse-content-grid');
+            const { data, error } = await dersverseSupabase
                 .from('contents')
                 .select('*')
                 .eq('status', 'approved');
 
             if (error || !data || data.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">Henüz yayınlanmış bir içerik bulunmuyor.</p>';
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--dersverse-text-muted);">Henüz yayınlanmış bir içerik bulunmuyor.</p>';
                 return;
             }
 
             grid.innerHTML = data.map(item => `
-                <div class="card">
+                <div class="dersverse-card">
                     <div>
-                        <div class="card-tag">${item.category || 'Genel'}</div>
-                        <h3 class="card-title">${item.title}</h3>
-                        <p class="card-desc">${item.description}</p>
+                        <div class="dersverse-card-tag">${item.category || 'Genel'}</div>
+                        <h3 class="dersverse-card-title">${item.title}</h3>
+                        <p class="dersverse-card-desc">${item.description}</p>
                     </div>
-                    <a href="${item.link}" target="_blank" class="btn btn-outline" style="text-align: center; text-decoration: none;">İncele / İndir</a>
+                    <a href="${item.link}" target="_blank" class="dersverse-btn dersverse-btn-outline" style="text-align: center; text-decoration: none;">İncele / İndir</a>
                 </div>
             `).join('');
         }
 
-        // Veritabanına İçerik Ekleme
-        async function submitContent(e) {
+        // Veritabanına Yeni İçerik Ekleme
+        async function dersverseSubmitContent(e) {
             e.preventDefault();
-            const { data: { user } } = await supabase.auth.getUser();
+            const { data: { user } } = await dersverseSupabase.auth.getUser();
 
             if (!user) {
                 alert('İçerik paylaşabilmek için lütfen Google hesabınızla giriş yapınız.');
                 return;
             }
 
-            const title = document.getElementById('title').value;
-            const category = document.getElementById('category').value;
-            const description = document.getElementById('description').value;
-            const link = document.getElementById('link').value;
+            const title = document.getElementById('dersverse-title').value;
+            const category = document.getElementById('dersverse-category').value;
+            const description = document.getElementById('dersverse-description').value;
+            const link = document.getElementById('dersverse-link').value;
 
-            const { error } = await supabase.from('contents').insert([{
+            const { error } = await dersverseSupabase.from('contents').insert([{
                 title,
                 category,
                 description,
@@ -350,14 +352,14 @@
                 alert('Hata: ' + error.message);
             } else {
                 alert('İçeriğiniz başarıyla iletildi. Yönetici onayından sonra yayınlanacaktır.');
-                closeModal();
-                document.getElementById('content-form').reset();
+                dersverseCloseModal();
+                document.getElementById('dersverse-content-form').reset();
             }
         }
 
         window.onload = () => {
-            checkUser();
-            loadContents();
+            dersverseCheckUser();
+            dersverseLoadContents();
         };
     </script>
 </body>
