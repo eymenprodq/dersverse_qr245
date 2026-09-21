@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="7HO7fMJQkkZRbFemkvJ7JASrZmYOfqoAglMJqsvDW9o" />
     <title>DersVerse - Tüm Derslerin Dijital Evreni</title>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -30,7 +31,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            user-select: none; /* Metin seçimini engeller */
+            user-select: none;
         }
 
         header {
@@ -108,29 +109,6 @@
             font-size: 1.1rem;
         }
 
-        .categories {
-            display: flex;
-            gap: 0.5rem;
-            overflow-x: auto;
-            padding-bottom: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .category-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .category-btn.active {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -145,11 +123,6 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: transform 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
         }
 
         .card-tag {
@@ -169,10 +142,8 @@
             color: var(--text-muted);
             font-size: 0.9rem;
             margin-bottom: 1rem;
-            flex-grow: 1;
         }
 
-        /* Modal Stilleri */
         .modal {
             display: none;
             position: fixed;
@@ -221,7 +192,7 @@
     <header>
         <a href="#" class="logo">DersVerse</a>
         <div class="nav-actions">
-            <button class="btn btn-outline" id="add-content-btn" onclick="openModal()">İçerik Paylaş</button>
+            <button class="btn btn-outline" onclick="openModal()">İçerik Paylaş</button>
             <button class="btn" id="auth-btn" onclick="handleAuth()">Google ile Giriş Yap</button>
         </div>
     </header>
@@ -229,21 +200,11 @@
     <main>
         <section class="hero">
             <h1>DersVerse Evrenine Hoş Geldiniz</h1>
-            <p>Matematik, Fen, Türkçe, Sosyal, İngilizce ve Kodlama ders notları ve materyalleri!</p>
+            <p>Tüm ders notları ve dijital eğitim materyalleri tek bir çatı altında!</p>
         </section>
 
-        <div class="categories">
-            <button class="category-btn active">Tümü</button>
-            <button class="category-btn">Matematik</button>
-            <button class="category-btn">Fen Bilimleri</button>
-            <button class="category-btn">Türkçe</button>
-            <button class="category-btn">Sosyal Bilgiler</button>
-            <button class="category-btn">İngilizce</button>
-            <button class="category-btn">Kodlama & Teknoloji</button>
-        </div>
-
         <div class="grid" id="content-grid">
-            <!-- Onaylı içerikler Supabase veritabanından çekilir -->
+            <!-- İçerikler Supabase'den Çekilecek -->
         </div>
     </main>
 
@@ -272,7 +233,7 @@
                     <textarea id="description" rows="3" required placeholder="İçerik detayları..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Bağlantı (Google Drive / Link)</label>
+                    <label>Bağlantı (Link / Google Drive)</label>
                     <input type="url" id="link" required placeholder="https://...">
                 </div>
                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
@@ -286,10 +247,10 @@
     <script>
         // Supabase Bağlantı Yapılandırması
         const SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
-        const SUPABASE_ANON_KEY = 'BURAYA_SUPABASE_ANON_KEY_GELECEK'; // Supabase > Project Settings > API kısmındaki anon public key
+        const SUPABASE_ANON_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Kullanıcı Oturum Kontrolü
+        // Oturum Kontrolü
         async function checkUser() {
             const { data: { user } } = await supabase.auth.getUser();
             const authBtn = document.getElementById('auth-btn');
@@ -301,7 +262,7 @@
             setupDevToolsProtection(user);
         }
 
-        // Ön Yüz Geliştirici Kısıtlamaları (Admin Olmayanlar İçin)
+        // Geliştirici Kısıtlamaları (Admin Hariç)
         function setupDevToolsProtection(user) {
             const isAdmin = user && user.email === 'femememe1973@gmail.com';
             if (isAdmin) return;
@@ -317,21 +278,26 @@
             });
         }
 
-        // Auth İşlemleri
+        // Google ile Giriş / Çıkış
         async function handleAuth() {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 await supabase.auth.signOut();
                 window.location.reload();
             } else {
-                await supabase.auth.signInWithOAuth({ provider: 'google' });
+                await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: 'https://dersverse-two.vercel.app'
+                    }
+                });
             }
         }
 
         function openModal() { document.getElementById('add-modal').style.display = 'flex'; }
         function closeModal() { document.getElementById('add-modal').style.display = 'none'; }
 
-        // İçerik Listeleme (Yalnızca Onaylanmışlar)
+        // Onaylı İçerikleri Listeleme
         async function loadContents() {
             const grid = document.getElementById('content-grid');
             const { data, error } = await supabase
@@ -356,7 +322,7 @@
             `).join('');
         }
 
-        // Veritabanına İçerik Gönderme
+        // Veritabanına İçerik Ekleme
         async function submitContent(e) {
             e.preventDefault();
             const { data: { user } } = await supabase.auth.getUser();
