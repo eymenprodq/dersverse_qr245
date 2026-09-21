@@ -1,186 +1,233 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roblox Stand & Oyun Şablonu V2 - EduKodlab</title>
-  <style>
-    :root {
-      --bg-main: #0b0f19;
-      --card-bg: rgba(30, 41, 59, 0.7);
-      --accent-blue: #38bdf8;
-      --accent-purple: #a855f7;
-      --accent-green: #22c55e;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: rgba(255, 255, 255, 0.1);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="7HO7fMJQkkZRbFemkvJ7JASrZmYOfqoAglMJqsvDW9o" />
+    <title>İçerik Detayı - DersVerse</title>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --dersverse-bg: #0a0a12;
+            --dersverse-card-bg: rgba(255, 255, 255, 0.05);
+            --dersverse-border: rgba(255, 255, 255, 0.1);
+            --dersverse-primary: #6366f1;
+            --dersverse-primary-hover: #4f46e5;
+            --dersverse-text: #f3f4f6;
+            --dersverse-text-muted: #9ca3af;
+        }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-    
-    body { 
-      background: var(--bg-main); 
-      color: var(--text-main); 
-      min-height: 100vh; 
-      display: flex; 
-      flex-direction: column;
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.12) 0px, transparent 50%);
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    header { 
-      background: rgba(15, 23, 42, 0.8); 
-      backdrop-filter: blur(12px);
-      padding: 18px 40px; 
-      border-bottom: 1px solid var(--border-color); 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-    }
+        body {
+            background-color: var(--dersverse-bg);
+            color: var(--dersverse-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
 
-    .logo { 
-      font-size: 1.6rem; 
-      font-weight: 800; 
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-decoration: none; 
-    }
+        header.dersverse-header {
+            background: rgba(10, 10, 18, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--dersverse-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-    nav a { color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.95rem; }
-    nav a:hover { color: var(--accent-blue); }
+        .dersverse-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
 
-    .container { max-width: 900px; margin: 40px auto; padding: 0 20px; flex: 1; width: 100%; }
+        .dersverse-btn {
+            background: var(--dersverse-primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
 
-    .detail-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 35px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
+        .dersverse-btn:hover {
+            background: var(--dersverse-primary-hover);
+        }
 
-    .url-badge {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid var(--border-color);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-family: monospace;
-      font-size: 0.85rem;
-      color: var(--accent-blue);
-      margin-bottom: 20px;
-      word-break: break-all;
-    }
+        .dersverse-btn-outline {
+            background: transparent;
+            border: 1px solid var(--dersverse-border);
+            color: var(--dersverse-text);
+        }
 
-    .tag {
-      display: inline-block;
-      background: rgba(168, 85, 247, 0.15);
-      color: var(--accent-purple);
-      border: 1px solid rgba(168, 85, 247, 0.3);
-      padding: 4px 12px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-bottom: 15px;
-    }
+        .dersverse-btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
 
-    h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 800; }
-    .meta { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px; }
-    .meta strong { color: var(--accent-blue); }
+        main.dersverse-main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
 
-    .description {
-      line-height: 1.7;
-      color: #cbd5e1;
-      font-size: 1rem;
-      border-top: 1px solid var(--border-color);
-      padding-top: 25px;
-      margin-bottom: 35px;
-    }
+        .dersverse-detail-card {
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
 
-    .download-box {
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px dashed rgba(56, 189, 248, 0.4);
-      border-radius: 12px;
-      padding: 25px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
+        .dersverse-detail-tag {
+            display: inline-block;
+            font-size: 0.85rem;
+            color: var(--dersverse-primary);
+            text-transform: uppercase;
+            font-weight: bold;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+        }
 
-    .btn-download {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: white;
-      padding: 12px 28px;
-      border-radius: 10px;
-      font-weight: 800;
-      text-decoration: none;
-      box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
-      transition: 0.2s;
-    }
-    .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 197, 94, 0.5); }
+        .dersverse-detail-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
 
-    footer { text-align: center; padding: 25px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem; margin-top: auto; }
-  </style>
+        .dersverse-detail-desc {
+            color: #d1d5db;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            white-space: pre-line;
+        }
+
+        .dersverse-detail-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .dersverse-not-found {
+            text-align: center;
+            padding: 4rem 1rem;
+            color: var(--dersverse-text-muted);
+        }
+    </style>
 </head>
 <body>
 
-  <header>
-    <a href="index.html" class="logo">EduKodlab</a>
-    <nav>
-      <a href="index.html">← Ana Sayfaya Dön</a>
-    </nav>
-  </header>
+    <header class="dersverse-header">
+        <a href="index.html" class="dersverse-logo">DersVerse</a>
+        <a href="index.html" class="dersverse-btn dersverse-btn-outline">← Ana Sayfaya Dön</a>
+    </header>
 
-  <div class="container">
-    <div class="detail-card">
-      <div class="url-badge">
-        📍 Özel Sayfa Bağlantısı: siteismi.vercel.app/eymenprodq/sablonlar/487252734323987900
-      </div>
-
-      <span class="tag">Roblox Şablonu</span>
-      <h1>Roblox Stand & Oyun Şablonu V2</h1>
-      <div class="meta">
-        Yükleyen: <strong>@eymenprodq</strong> | İçerik Kimliği (ID): <code>487252734323987900</code>
-      </div>
-
-      <div class="description">
-        <h3>İçerik Detayları ve Kullanım:</h3>
-        <p style="margin-top: 10px;">
-          Bu şablon içerisinde özelleştirilebilir kod blokları, kullanıcı etkileşim sistemleri ve hazır arayüz bileşenleri yer almaktadır. Dosyayı indirip Roblox Studio üzerinden açarak doğrudan kullanmaya başlayabilirsiniz.
-        </p>
-      </div>
-
-      <div class="download-box">
-        <div>
-          <h4 style="color: var(--text-main); font-size: 1.1rem;">Dosya / Şablon İndirme Alanı</h4>
-          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Tüm taramaları yapılmış güvenli içerik.</p>
+    <main class="dersverse-main">
+        <div id="dersverse-detail-container">
+            <p style="text-align: center; color: var(--dersverse-text-muted);">İçerik yükleniyor...</p>
         </div>
-        <a href="#" class="btn-download">Şablonu İndir (.rbxl)</a>
-      </div>
-    </div>
-  </div>
+    </main>
 
-  <footer>
-    &copy; 2026 EduKodlab - Tüm hakları saklıdır.
-  </footer>
+    <script>
+        // DersVerse - Supabase Yapılandırması
+        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
+        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
+        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
 
-  <!-- Tawk.to Canlı Destek -->
-  <script type="text/javascript">
-  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-  (function(){
-  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-  s1.async=true;
-  s1.src='https://embed.tawk.to/6aaa9769d5bb1934472d59e2/1k2l5utmu';
-  s1.charset='UTF-8';
-  s1.setAttribute('crossorigin','*');
-  s0.parentNode.insertBefore(s1,s0);
-  })();
-  </script>
+        // URL'den id Parametresini Al
+        function dersverseGetContentId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
 
+        // Güvenlik Kısıtlamaları (Admin Hariç Koruma)
+        async function dersverseSetupProtection() {
+            const { data: { user } } = await dersverseSupabase.auth.getUser();
+            const isAdmin = user && user.email === 'femememe1973@gmail.com';
+            if (isAdmin) return;
+
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('keydown', e => {
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) ||
+                    (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key))) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+
+        // Detay İçeriğini Çekme ve Ekrana Basma
+        async function dersverseLoadDetail() {
+            const contentId = dersverseGetContentId();
+            const container = document.getElementById('dersverse-detail-container');
+
+            if (!contentId) {
+                container.innerHTML = `
+                    <div class="dersverse-not-found">
+                        <h2>Geçersiz Bağlantı</h2>
+                        <p style="margin-top: 0.5rem;">Lütfen geçerli bir içerik seçiniz.</p>
+                        <a href="index.html" class="dersverse-btn" style="margin-top: 1.5rem;">Ana Sayfaya Dön</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const { data, error } = await dersverseSupabase
+                .from('contents')
+                .select('*')
+                .eq('id', contentId)
+                .single();
+
+            if (error || !data) {
+                container.innerHTML = `
+                    <div class="dersverse-not-found">
+                        <h2>İçerik Bulunamadı</h2>
+                        <p style="margin-top: 0.5rem;">Aradığınız içerik kaldırılmış veya onaylanmamış olabilir.</p>
+                        <a href="index.html" class="dersverse-btn" style="margin-top: 1.5rem;">Ana Sayfaya Dön</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="dersverse-detail-card">
+                    <span class="dersverse-detail-tag">${data.category || 'Genel'}</span>
+                    <h1 class="dersverse-detail-title">${data.title}</h1>
+                    <p class="dersverse-detail-desc">${data.description}</p>
+                    <div class="dersverse-detail-actions">
+                        <a href="${data.link}" target="_blank" rel="noopener noreferrer" class="dersverse-btn">Materyali İncele / İndir ↗</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.onload = () => {
+            dersverseSetupProtection();
+            dersverseLoadDetail();
+        };
+    </script>
 </body>
 </html>
