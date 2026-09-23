@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="7HO7fMJQkkZRbFemkvJ7JASrZmYOfqoAglMJqsvDW9o" />
+    <title>Öğretmen Portalı - DersVerse</title>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --dersverse-bg: #0a0a12;
+            --dersverse-card-bg: rgba(255, 255, 255, 0.05);
+            --dersverse-border: rgba(255, 255, 255, 0.1);
+            --dersverse-primary: #6366f1;
+            --dersverse-primary-hover: #4f46e5;
+            --dersverse-text: #f3f4f6;
+            --dersverse-text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dersverse-bg);
+            color: var(--dersverse-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            padding: 1rem;
+        }
+
+        .dersverse-auth-container {
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .dersverse-logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .dersverse-subtitle {
+            text-align: center;
+            color: var(--dersverse-text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .dersverse-badge-info {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid var(--dersverse-primary);
+            color: #818cf8;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .dersverse-form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .dersverse-form-group label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--dersverse-text);
+            font-weight: 500;
+        }
+
+        .dersverse-form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .dersverse-form-input:focus {
+            outline: none;
+            border-color: var(--dersverse-primary);
+        }
+
+        .dersverse-btn {
+            width: 100%;
+            background: var(--dersverse-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: background 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .dersverse-btn:hover {
+            background: var(--dersverse-primary-hover);
+        }
+
+        .dersverse-toggle-mode {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--dersverse-text-muted);
+        }
+
+        .dersverse-toggle-mode a {
+            color: #818cf8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .dersverse-toggle-mode a:hover {
+            text-decoration: underline;
+        }
+
+        .back-home {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--dersverse-text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .back-home:hover {
+            color: var(--dersverse-text);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dersverse-auth-container">
+        <a href="index.html" class="dersverse-logo">DersVerse</a>
+        <div id="dersverse-form-subtitle" class="dersverse-subtitle">Öğretmen Portalı - Giriş Yap</div>
+
+        <div class="dersverse-badge-info">
+            ✔ Bu sayfa yalnızca onaylı öğretmenler içindir. Kayıt olurken öğretmen doğrulama kodunu kullanmalısınız.
+        </div>
+
+        <form id="dersverse-teacher-auth-form" onsubmit="dersverseHandleTeacherAuth(event)">
+            <div class="dersverse-form-group" id="name-group" style="display: none;">
+                <label for="dersverse-fullname">Ad Soyad (Unvanınızla Örn: Öğr. Ahmet Yılmaz)</label>
+                <input type="text" id="dersverse-fullname" class="dersverse-form-input" placeholder="Adınızı ve unvanınızı girin">
+            </div>
+
+            <div class="dersverse-form-group">
+                <label for="dersverse-email">E-posta Adresi</label>
+                <input type="email" id="dersverse-email" required class="dersverse-form-input" placeholder="ornek@ogretmen.k12.tr">
+            </div>
+
+            <div class="dersverse-form-group">
+                <label for="dersverse-password">Şifre</label>
+                <input type="password" id="dersverse-password" required class="dersverse-form-input" placeholder="••••••••">
+            </div>
+
+            <div class="dersverse-form-group" id="code-group" style="display: none;">
+                <label for="dersverse-teacher-code">Öğretmen Doğrulama Kodu</label>
+                <input type="text" id="dersverse-teacher-code" class="dersverse-form-input" placeholder="Size verilen kodu girin">
+            </div>
+
+            <button type="submit" id="dersverse-auth-submit-btn" class="dersverse-btn">Giriş Yap</button>
+        </form>
+
+        <div class="dersverse-toggle-mode">
+            <span id="dersverse-toggle-text">Hesabınız yok mu?</span> 
+            <a href="#" onclick="dersverseToggleMode(event)" id="dersverse-toggle-link">Kayıt Ol</a>
+        </div>
+
+        <a href="index.html" class="dersverse-home-link back-home">← Ana Sayfaya Dön</a>
+    </div>
+
+    <!-- Tawk.to Canlı Destek Entegrasyonu -->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/6aaa9769d5bb1934472d59e2/1k2l5utmu';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
+
+    <script>
+        // DersVerse - Supabase Yapılandırması
+        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
+        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
+        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+
+        // Sabit Öğretmen Kayıt Kodu
+        const TEACHER_SECRET_CODE = "DERSVERSE2026OGRETMEN";
+
+        let isRegisterMode = false;
+
+        function dersverseToggleMode(e) {
+            e.preventDefault();
+            isRegisterMode = !isRegisterMode;
+            
+            const subtitle = document.getElementById('dersverse-form-subtitle');
+            const nameGroup = document.getElementById('name-group');
+            const codeGroup = document.getElementById('code-group');
+            const submitBtn = document.getElementById('dersverse-auth-submit-btn');
+            const toggleText = document.getElementById('dersverse-toggle-text');
+            const toggleLink = document.getElementById('dersverse-toggle-link');
+
+            if (isRegisterMode) {
+                subtitle.innerText = "Öğretmen Portalı - Yeni Hesap Oluştur";
+                nameGroup.style.display = "block";
+                codeGroup.style.display = "block";
+                submitBtn.innerText = "Öğretmen Kaydı Oluştur";
+                toggleText.innerText = "Zaten hesabınız var mı?";
+                toggleLink.innerText = "Giriş Yap";
+            } else {
+                subtitle.innerText = "Öğretmen Portalı - Giriş Yap";
+                nameGroup.style.display = "none";
+                codeGroup.style.display = "none";
+                submitBtn.innerText = "Giriş Yap";
+                toggleText.innerText = "Hesabınız yok mu?";
+                toggleLink.innerText = "Kayıt Ol";
+            }
+        }
+
+        async function dersverseHandleTeacherAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('dersverse-email').value;
+            const password = document.getElementById('dersverse-password').value;
+            const submitBtn = document.getElementById('dersverse-auth-submit-btn');
+
+            submitBtn.disabled = true;
+
+            if (isRegisterMode) {
+                const fullName = document.getElementById('dersverse-fullname').value;
+                const teacherCode = document.getElementById('dersverse-teacher-code').value;
+
+                if (teacherCode !== TEACHER_SECRET_CODE) {
+                    alert("Geçersiz öğretmen doğrulama kodu! Lütfen sistem yöneticisinden doğru kodu edinin.");
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                const { data, error } = await dersverseSupabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            role: 'teacher',
+                            is_teacher: true
+                        }
+                    }
+                });
+
+                if (error) {
+                    alert("Kayıt hatası: " + error.message);
+                    submitBtn.disabled = false;
+                } else {
+                    alert("Öğretmen hesabınız başarıyla oluşturuldu! E-posta adresinizi onayladıktan sonra giriş yapabilirsiniz.");
+                    isRegisterMode = false;
+                    document.getElementById('dersverse-teacher-auth-form').reset();
+                    dersverseToggleMode(new Event('click'));
+                    submitBtn.disabled = false;
+                }
+
+            } else {
+                const { data, error } = await dersverseSupabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    alert("Giriş başarısız: " + error.message);
+                    submitBtn.disabled = false;
+                } else {
+                    alert("Başarıyla giriş yapıldı!");
+                    window.location.href = "index.html";
+                }
+            }
+        }
+    </script>
+</body>
+</html>
