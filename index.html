@@ -66,6 +66,7 @@
             display: flex;
             gap: 1rem;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .dersverse-btn {
@@ -77,6 +78,10 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .dersverse-btn:hover {
@@ -91,6 +96,15 @@
 
         .dersverse-btn-outline:hover {
             background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* APK İndir Butonuna Özel Vurgu */
+        .dersverse-btn-apk {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .dersverse-btn-apk:hover {
+            background: linear-gradient(135deg, #059669, #047857);
         }
 
         main.dersverse-main {
@@ -249,6 +263,10 @@
     <header class="dersverse-header">
         <a href="#" class="dersverse-logo">DersVerse</a>
         <div class="dersverse-nav-actions">
+            <!-- APK İndir Butonu -->
+            <a href="https://dersverse.vercel.app/DersVerse.apk" download class="dersverse-btn dersverse-btn-apk">
+                📱 APK İndir
+            </a>
             <button class="dersverse-btn dersverse-btn-outline" onclick="dersverseOpenModal()">İçerik Paylaş</button>
             <button class="dersverse-btn" id="dersverse-auth-btn" onclick="dersverseHandleAuth()">Kayıt Ol / Giriş Yap</button>
         </div>
