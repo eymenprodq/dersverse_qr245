@@ -272,6 +272,31 @@
             padding: 5rem 1rem;
         }
     </style>
+    <script>
+        // Kesin Sağ Tık ve Tuş Engelleme Koruması (Adminler Hariç Tutulabilir veya Tümüyle Kilitlenebilir)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && (
+                e.key === 'u' || e.key === 'U' || 
+                e.key === 's' || e.key === 'S' || 
+                e.key === 'i' || e.key === 'I' || 
+                e.key === 'j' || e.key === 'J' || 
+                e.key === 'c' || e.key === 'C' ||
+                e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67
+            )) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
 </head>
 <body>
 
@@ -281,7 +306,6 @@
             <span class="admin-badge">Süper Admin</span>
         </a>
         <div class="admin-nav-actions">
-            <!-- Kadir Eymen Açıkoğlu ve rozetlerin görüneceği alan -->
             <span id="admin-user-display" style="color: var(--dersverse-text); font-size: 0.95rem; font-weight: 600;"></span>
             <a href="ogretmen.html" class="btn btn-outline" target="_blank">Öğretmen Portalı</a>
             <a href="index.html" class="btn btn-outline">← Ana Siteye Dön</a>
@@ -410,32 +434,6 @@
     </script>
 
     <script>
-        // Kesin Sağ Tık ve Tuş Engelleme Koruması
-document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-    return false;
-});
-
-document.addEventListener('keydown', function(e) {
-    // F12 tuşu
-    if (e.key === 'F12' || e.keyCode === 123) {
-        e.preventDefault();
-        return false;
-    }
-    // Ctrl+U, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+S
-    if (e.ctrlKey && (
-        e.key === 'u' || e.key === 'U' || 
-        e.key === 's' || e.key === 'S' || 
-        e.key === 'i' || e.key === 'I' || 
-        e.key === 'j' || e.key === 'J' || 
-        e.key === 'c' || e.key === 'C' ||
-        e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67
-    )) {
-        e.preventDefault();
-        return false;
-    }
-});
-        
         // Supabase Bağlantısı
         const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
         const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
@@ -444,12 +442,12 @@ document.addEventListener('keydown', function(e) {
         let allContents = [];
         let currentContentFilter = 'pending';
 
-        // Özel İsim ve Rozet Tanımlama Fonksiyonu (Her yerde kullanılabilir)
+        // Özel İsim ve Rozet Tanımlama Fonksiyonu
         function getFormattedUserDisplay(email) {
             if (email === 'femememe1973@gmail.com') {
                 return {
                     name: 'Kadir Eymen Açıkoğlu',
-                    badge: '✔️ 🔨', // Doğrulama ve Çekiç (Yönetici) simgesi
+                    badge: '✔️ 🔨',
                     isAdmin: true
                 };
             }
@@ -470,7 +468,6 @@ document.addEventListener('keydown', function(e) {
                 return false;
             }
 
-            // Kadir Eymen Açıkoğlu ismini ve rozetleri üst kısma yazdır
             const userInfo = getFormattedUserDisplay(user.email);
             document.getElementById('admin-user-display').innerHTML = `${userInfo.name} <span style="font-size: 1.1rem; margin-left: 4px;" title="Süper Yönetici">${userInfo.badge}</span>`;
             
