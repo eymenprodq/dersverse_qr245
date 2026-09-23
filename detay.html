@@ -88,6 +88,7 @@
             margin: 2rem auto;
             padding: 0 1rem;
             width: 100%;
+            flex: 1;
         }
 
         .dersverse-detail-card {
@@ -120,7 +121,7 @@
             color: #d1d5db;
             font-size: 1.1rem;
             line-height: 1.6;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             white-space: pre-line;
         }
 
@@ -135,6 +136,67 @@
             padding: 4rem 1rem;
             color: var(--dersverse-text-muted);
         }
+
+        /* Yorumlar Bölümü Stilleri */
+        .dersverse-comments-section {
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .dersverse-comments-title {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .dersverse-comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .dersverse-comment-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--dersverse-border);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .dersverse-comment-author {
+            font-size: 0.85rem;
+            color: var(--dersverse-primary);
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .dersverse-comment-text {
+            font-size: 0.95rem;
+            color: var(--dersverse-text);
+            line-height: 1.4;
+        }
+
+        .dersverse-comment-form {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .dersverse-comment-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .dersverse-comment-input:focus {
+            outline: none;
+            border-color: var(--dersverse-primary);
+        }
     </style>
 </head>
 <body>
@@ -147,6 +209,18 @@
     <main class="dersverse-main">
         <div id="dersverse-detail-container">
             <p style="text-align: center; color: var(--dersverse-text-muted);">İçerik yükleniyor...</p>
+        </div>
+
+        <!-- Yorumlar Alanı -->
+        <div class="dersverse-comments-section">
+            <h3 class="dersverse-comments-title">Yorumlar</h3>
+            <div id="dersverse-comments-list" class="dersverse-comments-list">
+                <!-- Yorumlar dinamik olarak buraya gelecek -->
+            </div>
+            <form id="dersverse-comment-form" onsubmit="dersverseSubmitComment(event)" class="dersverse-comment-form">
+                <input type="text" id="dersverse-comment-input" required placeholder="Düşüncelerinizi paylaşın..." class="dersverse-comment-input">
+                <button type="submit" class="dersverse-btn">Gönder</button>
+            </form>
         </div>
     </main>
 
@@ -225,21 +299,87 @@
                 return;
             }
 
+            const isTeacher = data.is_teacher || false;
+            const authorName = escapeHtml(data.user_name || 'Kullanıcı');
+
             container.innerHTML = `
                 <div class="dersverse-detail-card">
-                    <span class="dersverse-detail-tag">${data.category || 'Genel'}</span>
-                    <h1 class="dersverse-detail-title">${data.title}</h1>
-                    <p class="dersverse-detail-desc">${data.description}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <span class="dersverse-detail-tag" style="margin-bottom:0;">${escapeHtml(data.category || 'Genel')}</span>
+                        ${isTeacher ? '<span style="font-size: 0.8rem; background: rgba(99,102,241,0.2); color: #818cf8; padding: 4px 10px; border-radius: 12px; border: 1px solid #6366f1;">✔ Doğrulanmış Öğretmen</span>' : ''}
+                    </div>
+                    <h1 class="dersverse-detail-title">${escapeHtml(data.title)}</h1>
+                    <p class="dersverse-detail-desc">${escapeHtml(data.description)}</p>
+                    <p style="font-size: 0.85rem; color: var(--dersverse-text-muted); margin-bottom: 1.5rem;">Paylaşan: ${authorName}</p>
                     <div class="dersverse-detail-actions">
-                        <a href="${data.link}" target="_blank" rel="noopener noreferrer" class="dersverse-btn">Materyali İncele / İndir ↗</a>
+                        ${data.link ? `<a href="${escapeHtml(data.link)}" target="_blank" rel="noopener noreferrer" class="dersverse-btn">Materyali İncele / İndir ↗</a>` : ''}
                     </div>
                 </div>
             `;
         }
 
+        // Yorumları Yükleme
+        async function dersverseLoadComments() {
+            const contentId = dersverseGetContentId();
+            if (!contentId) return;
+
+            const { data, error } = await dersverseSupabase
+                .from('comments')
+                .select('*')
+                .eq('content_id', contentId)
+                .order('created_at', { ascending: false });
+
+            const listDiv = document.getElementById('dersverse-comments-list');
+            if (!data || data.length === 0) {
+                listDiv.innerHTML = '<p style="color: var(--dersverse-text-muted); font-size: 0.95rem;">Henüz yorum yapılmamış. İlk yorumu siz yazın!</p>';
+                return;
+            }
+
+            listDiv.innerHTML = data.map(c => `
+                <div class="dersverse-comment-item">
+                    <div class="dersverse-comment-author">${escapeHtml(c.user_email ? c.user_email.split('@')[0] : 'Kullanıcı')}</div>
+                    <div class="dersverse-comment-text">${escapeHtml(c.comment)}</div>
+                </div>
+            `).join('');
+        }
+
+        // Yorum Gönderme
+        async function dersverseSubmitComment(e) {
+            e.preventDefault();
+            const contentId = dersverseGetContentId();
+            const { data: { user } } = await dersverseSupabase.auth.getUser();
+            
+            if (!user) {
+                alert('Yorum yapabilmek için giriş yapmalısınız.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const commentText = document.getElementById('dersverse-comment-input').value;
+            const { error } = await dersverseSupabase.from('comments').insert([{
+                content_id: contentId,
+                user_id: user.id,
+                user_email: user.email,
+                comment: commentText
+            }]);
+
+            if (error) {
+                alert('Yorum gönderilemedi: ' + error.message);
+            } else {
+                document.getElementById('dersverse-comment-input').value = '';
+                dersverseLoadComments();
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
         window.onload = () => {
             dersverseSetupProtection();
             dersverseLoadDetail();
+            dersverseLoadComments();
         };
     </script>
 </body>
