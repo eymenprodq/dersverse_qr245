@@ -65,11 +65,27 @@
             margin-bottom: 1.2rem;
         }
 
-        .form-group label {
-            display: block;
+        .form-label-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 0.5rem;
+        }
+
+        .form-group label {
             font-size: 0.85rem;
             color: var(--dersverse-text-muted);
+        }
+
+        .forgot-link {
+            font-size: 0.8rem;
+            color: var(--dersverse-primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .forgot-link:hover {
+            text-decoration: underline;
         }
 
         .form-group input {
@@ -165,7 +181,10 @@
                 <input type="email" id="email" required placeholder="ornek@mail.com">
             </div>
             <div class="form-group">
-                <label>Şifre</label>
+                <div class="form-label-wrapper">
+                    <label>Şifre</label>
+                    <a class="forgot-link" onclick="handleForgotPassword()">Şifremi Unuttum?</a>
+                </div>
                 <input type="password" id="password" required placeholder="******">
             </div>
             <button type="submit" class="btn btn-primary">Giriş Yap / Kayıt Ol</button>
@@ -232,6 +251,26 @@
                 }
             } else {
                 window.location.href = "index.html";
+            }
+        }
+
+        // Şifremi Unuttum İşlemi
+        async function handleForgotPassword() {
+            const email = document.getElementById('email').value;
+
+            if (!email) {
+                alert("Lütfen önce e-posta adresinizi giriniz.");
+                return;
+            }
+
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                redirectTo: 'https://dersverse-two.vercel.app/reset-password.html'
+            });
+
+            if (error) {
+                alert("Hata: " + error.message);
+            } else {
+                alert("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen gelen kutunuzu kontrol edin.");
             }
         }
     </script>
