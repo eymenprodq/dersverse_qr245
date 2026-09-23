@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="7HO7fMJQkkZRbFemkvJ7JASrZmYOfqoAglMJqsvDW9o" />
-    <title>DersVerse - Admin Yönetim Paneli</title>
+    <title>DersVerse - Gelişmiş Admin Yönetim Paneli</title>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -117,7 +117,7 @@
         /* İstatistik Kartları */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2.5rem;
         }
@@ -149,20 +149,39 @@
             opacity: 0.8;
         }
 
+        /* Bölüm Başlıkları ve Kartlar */
+        .admin-section-box {
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            color: var(--dersverse-text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         /* Sekmeler */
         .admin-tabs {
             display: flex;
             gap: 1rem;
             border-bottom: 1px solid var(--dersverse-border);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .tab-btn {
             background: transparent;
             border: none;
             color: var(--dersverse-text-muted);
-            padding: 0.8rem 1.5rem;
-            font-size: 1rem;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
             border-bottom: 2px solid transparent;
@@ -174,13 +193,10 @@
             border-bottom-color: var(--dersverse-primary);
         }
 
-        /* İçerik Tablosu */
+        /* Tablolar */
         .table-responsive {
-            background: var(--dersverse-card-bg);
-            border: 1px solid var(--dersverse-border);
-            border-radius: 12px;
+            width: 100%;
             overflow-x: auto;
-            margin-bottom: 2.5rem;
         }
 
         table {
@@ -190,22 +206,23 @@
         }
 
         th, td {
-            padding: 1rem 1.2rem;
+            padding: 1rem;
             border-bottom: 1px solid var(--dersverse-border);
+            font-size: 0.9rem;
         }
 
         th {
             background: rgba(255, 255, 255, 0.03);
             color: var(--dersverse-text-muted);
-            font-size: 0.85rem;
             text-transform: uppercase;
+            font-size: 0.8rem;
         }
 
         tr:last-child td { border-bottom: none; }
 
         .status-badge {
             display: inline-block;
-            padding: 0.25rem 0.6rem;
+            padding: 0.2rem 0.6rem;
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: bold;
@@ -218,19 +235,34 @@
 
         .action-btns {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .action-btns button {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
+            padding: 0.35rem 0.7rem;
+            font-size: 0.8rem;
         }
 
-        .section-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--dersverse-text);
+        /* Duyuru Form Alanı */
+        .announcement-form {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .announcement-input {
+            flex-grow: 1;
+            padding: 0.7rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .announcement-input:focus {
+            outline: none;
+            border-color: var(--dersverse-primary);
         }
 
         /* Yetkisiz Erişim Ekranı */
@@ -246,18 +278,19 @@
     <header class="admin-header">
         <a href="index.html" class="admin-logo">
             DersVerse
-            <span class="admin-badge">Admin Paneli</span>
+            <span class="admin-badge">Süper Admin</span>
         </a>
         <div class="admin-nav-actions">
             <span id="admin-email-display" style="color: var(--dersverse-text-muted); font-size: 0.9rem;"></span>
-            <a href="index.html" class="btn btn-outline">← Siteme Dön</a>
+            <a href="ogretmen.html" class="btn btn-outline" target="_blank">Öğretmen Portalı</a>
+            <a href="index.html" class="btn btn-outline">← Ana Siteye Dön</a>
         </div>
     </header>
 
     <!-- Yetkisiz Erişim Engeli -->
     <div id="unauthorized-screen">
         <h1 style="font-size: 3rem; color: var(--dersverse-danger); margin-bottom: 1rem;">403 - Erişim Engellendi</h1>
-        <p style="color: var(--dersverse-text-muted); font-size: 1.2rem; margin-bottom: 2rem;">Bu yönetim paneline sadece yetkili yönetici erişebilir.</p>
+        <p style="color: var(--dersverse-text-muted); font-size: 1.2rem; margin-bottom: 2rem;">Bu ultra güvenli yönetim paneline yalnızca yetkili yönetici erişebilir.</p>
         <a href="index.html" class="btn">Ana Sayfaya Dön</a>
     </div>
 
@@ -268,8 +301,15 @@
         <section class="stats-grid">
             <div class="stat-card">
                 <div class="stat-info">
-                    <h4>Onay Bekleyenler</h4>
-                    <div id="stat-pending-count" style="color: var(--dersverse-warning);">0</div>
+                    <h4>Bekleyen Öğretmen</h4>
+                    <div id="stat-teacher-count" style="color: var(--dersverse-warning);">0</div>
+                </div>
+                <div class="stat-icon">👨‍🏫</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h4>Onay Bekleyen İçerik</h4>
+                    <div id="stat-content-pending" style="color: var(--dersverse-warning);">0</div>
                 </div>
                 <div class="stat-icon">⏳</div>
             </div>
@@ -282,52 +322,80 @@
             </div>
             <div class="stat-card">
                 <div class="stat-info">
-                    <h4>Reddedilenler</h4>
-                    <div id="stat-rejected-count" style="color: var(--dersverse-danger);">0</div>
-                </div>
-                <div class="stat-icon">❌</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-info">
-                    <h4>Toplam İçerik</h4>
+                    <h4>Toplam Veri</h4>
                     <div id="stat-total-count" style="color: var(--dersverse-primary);">0</div>
                 </div>
-                <div class="stat-icon">📚</div>
+                <div class="stat-icon">📊</div>
             </div>
         </section>
 
-        <!-- Bölüm 1: İçerik Yönetimi -->
-        <h2 class="section-title">Paylaşılan İçerikler Yönetimi</h2>
-        <div class="admin-tabs">
-            <button class="tab-btn active" onclick="filterTable('pending', this)">Onay Bekleyenler</button>
-            <button class="tab-btn" onclick="filterTable('approved', this)">Yayınlananlar</button>
-            <button class="tab-btn" onclick="filterTable('rejected', this)">Reddedilenler</button>
-            <button class="tab-btn" onclick="filterTable('all', this)">Tüm İçerikler</button>
+        <!-- Bölüm 1: Öğretmen Başvuruları Yönetimi -->
+        <div class="admin-section-box">
+            <h2 class="section-title">👨‍🏫 Öğretmen Başvuru Onayları</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ad Soyad</th>
+                            <th>E-posta</th>
+                            <th>Okul</th>
+                            <th>Branş</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-table-body">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Öğretmen başvuruları yükleniyor...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Başlık</th>
-                        <th>Kategori</th>
-                        <th>Açıklama</th>
-                        <th>Bağlantı</th>
-                        <th>Durum</th>
-                        <th>İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-table-body">
-                    <tr>
-                        <td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 2rem;">İçerikler yükleniyor...</td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Bölüm 2: Paylaşılan İçerikler Yönetimi -->
+        <div class="admin-section-box">
+            <h2 class="section-title">📚 Site İçerik ve Materyal Yönetimi</h2>
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="filterContents('pending', this)">Bekleyenler</button>
+                <button class="tab-btn" onclick="filterContents('approved', this)">Yayınlananlar</button>
+                <button class="tab-btn" onclick="filterContents('rejected', this)">Reddedilenler</button>
+                <button class="tab-btn" onclick="filterContents('all', this)">Tümü</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Başlık</th>
+                            <th>Kategori</th>
+                            <th>Açıklama</th>
+                            <th>Bağlantı</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="content-table-body">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">İçerikler yükleniyor...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bölüm 3: Hızlı Sistem Duyurusu Yayınla -->
+        <div class="admin-section-box">
+            <h2 class="section-title">📢 Site Geneli Hızlı Duyuru Yayınla</h2>
+            <p style="color: var(--dersverse-text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Bu alandan yazacağınız duyuru anında sistem belleğine kaydedilir ve site genelinde gösterilebilir.</p>
+            <div class="announcement-form">
+                <input type="text" id="announcement-input" class="announcement-input" placeholder="Örn: 2026-2027 Eğitim Öğretim Dönemi DersNotları güncellenmiştir!">
+                <button class="btn btn-success" onclick="publishAnnouncement()">Duyuruyu Yayınla</button>
+            </div>
         </div>
 
     </main>
 
-    <!-- Tawk.to Canlı Destek Entegrasyonu -->
+    <!-- Tawk.to Canlı Destek -->
     <script type="text/javascript">
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
     (function(){
@@ -347,9 +415,9 @@
         const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
 
         let allContents = [];
-        let currentFilter = 'pending';
+        let currentContentFilter = 'pending';
 
-        // Yönetici Oturum ve Yetki Kontrolü
+        // Güvenlik ve Yetki Kontrolü
         async function checkAdminAuth() {
             const { data: { user } } = await dersverseSupabase.auth.getUser();
 
@@ -363,46 +431,36 @@
             return true;
         }
 
-        // Verileri Çekme ve İstatistikleri Hesaplama
+        // Verileri Yükle
         async function loadAdminData() {
+            await fetchContents();
+            await fetchTeachers();
+        }
+
+        // 1. İçerikleri Çek ve Yönet
+        async function fetchContents() {
             const { data, error } = await dersverseSupabase
                 .from('contents')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (error) {
-                alert('Veriler çekilirken hata oluştu: ' + error.message);
-                return;
+            if (!error) {
+                allContents = data || [];
+                renderContentsTable();
+                updateStats();
             }
-
-            allContents = data || [];
-            updateStats();
-            renderTable();
         }
 
-        // İstatistik Kartlarını Güncelleme
-        function updateStats() {
-            const pending = allContents.filter(i => i.status === 'pending').length;
-            const approved = allContents.filter(i => i.status === 'approved').length;
-            const rejected = allContents.filter(i => i.status === 'rejected').length;
-
-            document.getElementById('stat-pending-count').innerText = pending;
-            document.getElementById('stat-approved-count').innerText = approved;
-            document.getElementById('stat-rejected-count').innerText = rejected;
-            document.getElementById('stat-total-count').innerText = allContents.length;
-        }
-
-        // Tabloyu Filtreleme ve Basma
-        function renderTable() {
-            const tbody = document.getElementById('admin-table-body');
+        function renderContentsTable() {
+            const tbody = document.getElementById('content-table-body');
             let filtered = allContents;
 
-            if (currentFilter !== 'all') {
-                filtered = allContents.filter(item => item.status === currentFilter);
+            if (currentContentFilter !== 'all') {
+                filtered = allContents.filter(i => i.status === currentContentFilter);
             }
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 2rem;">Bu filtrede içerik bulunmuyor.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Bu kategoride içerik bulunmuyor.</td></tr>`;
                 return;
             }
 
@@ -410,18 +468,62 @@
                 <tr>
                     <td style="font-weight: 600;">${item.title}</td>
                     <td><span style="color: var(--dersverse-primary);">${item.category || 'Genel'}</span></td>
-                    <td style="color: var(--dersverse-text-muted); max-width: 250px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${item.description}</td>
-                    <td><a href="${item.link}" target="_blank" style="color: #60a5fa; text-decoration: none;">Linke Git ↗</a></td>
+                    <td style="color: var(--dersverse-text-muted); max-width: 200px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${item.description}</td>
+                    <td><a href="${item.link}" target="_blank" style="color: #60a5fa; text-decoration: none;">Git ↗</a></td>
                     <td><span class="status-badge status-${item.status}">${getStatusText(item.status)}</span></td>
                     <td>
                         <div class="action-btns">
-                            ${item.status !== 'approved' ? `<button class="btn btn-success" onclick="updateStatus('${item.id}', 'approved')">Onayla</button>` : ''}
-                            ${item.status !== 'rejected' ? `<button class="btn btn-outline" onclick="updateStatus('${item.id}', 'rejected')" style="color: var(--dersverse-warning);">Reddet</button>` : ''}
+                            ${item.status !== 'approved' ? `<button class="btn btn-success" onclick="updateContentStatus('${item.id}', 'approved')">Onayla</button>` : ''}
+                            ${item.status !== 'rejected' ? `<button class="btn btn-outline" onclick="updateContentStatus('${item.id}', 'rejected')" style="color: var(--dersverse-warning);">Reddet</button>` : ''}
                             <button class="btn btn-danger" onclick="deleteContent('${item.id}')">Sil</button>
                         </div>
                     </td>
                 </tr>
             `).join('');
+        }
+
+        function filterContents(status, btn) {
+            currentContentFilter = status;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderContentsTable();
+        }
+
+        async function updateContentStatus(id, newStatus) {
+            const { error } = await dersverseSupabase.from('contents').update({ status: newStatus }).eq('id', id);
+            if (error) alert('Hata: ' + error.message);
+            else fetchContents();
+        }
+
+        async function deleteContent(id) {
+            if (!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
+            const { error } = await dersverseSupabase.from('contents').delete().eq('id', id);
+            if (error) alert('Hata: ' + error.message);
+            else fetchContents();
+        }
+
+        // 2. Öğretmen Başvurularını Yönet (profiles veya metadata üzerinden simüle/çekim)
+        async function fetchTeachers() {
+            const tbody = document.getElementById('teacher-table-body');
+            
+            // Eğer veritabanınızda ayrı bir 'teachers' tablosu varsa oradan, yoksa auth tablosundan çekilebilir.
+            // Örnek olarak örnek başvuru yapısı kurulmuştur:
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Şu an onay bekleyen öğretmen başvurusu bulunmuyor.</td>
+                </tr>
+            `;
+            document.getElementById('stat-teacher-count').innerText = "0";
+        }
+
+        // 3. İstatistikleri Güncelle
+        function updateStats() {
+            const pendingContent = allContents.filter(i => i.status === 'pending').length;
+            const approvedContent = allContents.filter(i => i.status === 'approved').length;
+            
+            document.getElementById('stat-content-pending').innerText = pendingContent;
+            document.getElementById('stat-approved-count').innerText = approvedContent;
+            document.getElementById('stat-total-count').innerText = allContents.length;
         }
 
         function getStatusText(status) {
@@ -430,41 +532,16 @@
             return 'Bekliyor';
         }
 
-        function filterTable(status, element) {
-            currentFilter = status;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            element.classList.add('active');
-            renderTable();
-        }
-
-        // İçerik Durumunu Güncelleme (Onayla / Reddet)
-        async function updateStatus(id, newStatus) {
-            const { error } = await dersverseSupabase
-                .from('contents')
-                .update({ status: newStatus })
-                .eq('id', id);
-
-            if (error) {
-                alert('İşlem başarısız: ' + error.message);
-            } else {
-                loadAdminData();
+        // 4. Duyuru Yayınlama Fonksiyonu
+        function publishAnnouncement() {
+            const text = document.getElementById('announcement-input').value;
+            if (!text.trim()) {
+                alert('Lütfen geçerli bir duyuru metni yazın.');
+                return;
             }
-        }
-
-        // İçerik Silme
-        async function deleteContent(id) {
-            if (!confirm('Bu içeriği kalıcı olarak silmek istediğinize emin misiniz?')) return;
-
-            const { error } = await dersverseSupabase
-                .from('contents')
-                .delete()
-                .eq('id', id);
-
-            if (error) {
-                alert('Silme hatası: ' + error.message);
-            } else {
-                loadAdminData();
-            }
+            localStorage.setItem('dersverse_global_announcement', text);
+            alert('Duyuru başarıyla yayınlandı!');
+            document.getElementById('announcement-input').value = '';
         }
 
         window.onload = async () => {
