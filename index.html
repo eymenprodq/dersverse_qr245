@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="7HO7fMJQkkZRbFemkvJ7JASrZmYOfqoAglMJqsvDW9o" />
     <title>DersVerse - Tüm Derslerin Dijital Evreni</title>
+    
+    <!-- PWA / APK Manifest ve Logo Entegrasyonu -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="dersverse-logo-512x512.png">
+    <link rel="apple-touch-icon" href="dersverse-logo-512x512.png">
+
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -298,7 +304,7 @@
                     <textarea id="dersverse-description" rows="3" required placeholder="İçerik detayları..."></textarea>
                 </div>
                 
-                <!-- DOSYA YÜKLEME ALANI (Doğrudan yüklenenler direkt yayınlanır) -->
+                <!-- DOSYA YÜKLEME ALANI -->
                 <div class="dersverse-form-group" style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--dersverse-primary);">
                     <label style="color: white; font-weight: bold;">Dosya Yükle (Direkt Yayınlanır)</label>
                     <input type="file" id="dersverse-file-upload" accept=".pdf,.html,.mp4,.mp3,.zip,.png,.jpg,.jpeg" style="border: none; padding: 0.5rem 0;">
