@@ -10,7 +10,8 @@ async function dersverseCheckUser() {
     const { data: { user } } = await dersverseSupabase.auth.getUser();
     const authBtn = document.getElementById('dersverse-auth-btn');
     if (user) {
-        authBtn.innerText = 'Çıkış Yap (' + user.email.split('@')[0] + ')';
+        const displayName = user.user_metadata?.full_name || user.email.split('@')[0];
+        authBtn.innerText = 'Çıkış Yap (' + displayName + ')';
     } else {
         authBtn.innerText = 'Kayıt Ol / Giriş Yap';
     }
@@ -44,13 +45,8 @@ async function dersverseHandleAuth() {
     }
 }
 
-function dersverseOpenModal() { 
-    document.getElementById('dersverse-add-modal').style.display = 'flex'; 
-}
-
-function dersverseCloseModal() { 
-    document.getElementById('dersverse-add-modal').style.display = 'none'; 
-}
+function dersverseOpenModal() { document.getElementById('dersverse-add-modal').style.display = 'flex'; }
+function dersverseCloseModal() { document.getElementById('dersverse-add-modal').style.display = 'none'; }
 
 // Onaylanmış İçerikleri Yükleme
 async function dersverseLoadContents() {
@@ -68,7 +64,7 @@ async function dersverseLoadContents() {
     dersverseRenderContents(dersverseAllContents);
 }
 
-// İçerik Kartlarını Ekrana Basma
+// İçerik Kartlarını Ekrana Basma (Öğretmen Rozeti Desteğiyle)
 function dersverseRenderContents(contents) {
     const grid = document.getElementById('dersverse-content-grid');
 
@@ -77,16 +73,25 @@ function dersverseRenderContents(contents) {
         return;
     }
 
-    grid.innerHTML = contents.map(item => `
-        <div class="dersverse-card">
-            <div>
-                <div class="dersverse-card-tag">${escapeHtml(item.category || 'Genel')}</div>
-                <h3 class="dersverse-card-title">${escapeHtml(item.title)}</h3>
-                <p class="dersverse-card-desc">${escapeHtml(item.description)}</p>
+    grid.innerHTML = contents.map(item => {
+        const isTeacher = item.is_teacher || false;
+        const authorName = escapeHtml(item.user_name || 'Kullanıcı');
+        
+        return `
+            <div class="dersverse-card">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span class="dersverse-card-tag" style="margin-bottom:0;">${escapeHtml(item.category || 'Genel')}</span>
+                        ${isTeacher ? '<span style="font-size: 0.75rem; background: rgba(99,102,241,0.2); color: #818cf8; padding: 2px 8px; border-radius: 12px; border: 1px solid #6366f1;">✔ Doğrulanmış Öğretmen</span>' : ''}
+                    </div>
+                    <h3 class="dersverse-card-title">${escapeHtml(item.title)}</h3>
+                    <p class="dersverse-card-desc">${escapeHtml(item.description)}</p>
+                    <p style="font-size: 0.8rem; color: var(--dersverse-text-muted); margin-bottom: 1rem;">Paylaşan: ${authorName}</p>
+                </div>
+                <a href="detay.html?id=${item.id}" class="dersverse-btn dersverse-btn-outline" style="text-align: center; text-decoration: none;">Detayları Gör & Yorum Yap</a>
             </div>
-            <a href="detay.html?id=${item.id}" class="dersverse-btn dersverse-btn-outline" style="text-align: center; text-decoration: none;">Detayları Gör</a>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Arama ve Kategori Filtreleme Mantığı
@@ -107,7 +112,7 @@ function dersverseFilterContents() {
     dersverseRenderContents(filtered);
 }
 
-// İçerik Ekleme ve Durum Kontrolü (Dosya = Direkt Onay / Link = Onaya Gider)
+// İçerik Ekleme (Dosya yüklenirse direkt onay, link ise pending)
 async function dersverseSubmitContent(e) {
     e.preventDefault();
     const { data: { user } } = await dersverseSupabase.auth.getUser();
@@ -132,9 +137,9 @@ async function dersverseSubmitContent(e) {
         return;
     }
 
-    let contentStatus = 'pending'; // Varsayılan olarak harici linkler onaya gider
+    let contentStatus = 'pending'; 
+    let uploadUrlField = null;
 
-    // Dosya seçilmişse doğrudan storage'a yükle ve durumunu 'approved' yap
     if (file) {
         submitBtn.innerText = "Yükleniyor... Lütfen Bekleyin";
         submitBtn.disabled = true;
@@ -157,18 +162,24 @@ async function dersverseSubmitContent(e) {
             .from('uploads')
             .getPublicUrl(filePath);
 
+        uploadUrlField = urlData.publicUrl;
         finalLink = urlData.publicUrl;
-        contentStatus = 'approved'; // Dosya yüklendiği için direkt onaylıyoruz
+        contentStatus = 'approved'; 
     }
 
-    // Veritabanına kayıt
+    const userName = user.user_metadata?.full_name || user.email.split('@')[0];
+    const isTeacher = user.user_metadata?.role === 'teacher' || false;
+
     const { error: dbError } = await dersverseSupabase.from('contents').insert([{
         title,
         category,
         description,
         link: finalLink,
+        download_url: uploadUrlField,
         user_id: user.id,
-        status: contentStatus
+        user_name: userName,
+        status: contentStatus,
+        is_teacher: isTeacher
     }]);
 
     if (dbError) {
@@ -185,7 +196,7 @@ async function dersverseSubmitContent(e) {
         document.getElementById('dersverse-content-form').reset();
         submitBtn.innerText = "Paylaş";
         submitBtn.disabled = false;
-        dersverseLoadContents(); // Listeyi güncelle
+        dersverseLoadContents(); 
     }
 }
 
