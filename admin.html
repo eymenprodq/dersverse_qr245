@@ -410,6 +410,32 @@
     </script>
 
     <script>
+        // Kesin Sağ Tık ve Tuş Engelleme Koruması
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+
+document.addEventListener('keydown', function(e) {
+    // F12 tuşu
+    if (e.key === 'F12' || e.keyCode === 123) {
+        e.preventDefault();
+        return false;
+    }
+    // Ctrl+U, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+S
+    if (e.ctrlKey && (
+        e.key === 'u' || e.key === 'U' || 
+        e.key === 's' || e.key === 'S' || 
+        e.key === 'i' || e.key === 'I' || 
+        e.key === 'j' || e.key === 'J' || 
+        e.key === 'c' || e.key === 'C' ||
+        e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67
+    )) {
+        e.preventDefault();
+        return false;
+    }
+});
+        
         // Supabase Bağlantısı
         const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
         const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
