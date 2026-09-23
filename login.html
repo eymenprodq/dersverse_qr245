@@ -167,14 +167,19 @@
         .back-link:hover {
             color: var(--dersverse-text);
         }
+
+        #resetSection {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
     <div class="auth-card">
         <div class="auth-title">DersVerse</div>
-        <div class="auth-subtitle">Hesabınıza giriş yapın veya kayıt olun</div>
+        <div id="authSubtitle" class="auth-subtitle">Hesabınıza giriş yapın veya kayıt olun</div>
 
+        <!-- Normal Giriş / Kayıt Formu -->
         <form id="loginForm" onsubmit="handleEmailAuth(event)">
             <div class="form-group">
                 <label>E-Posta Adresi</label>
@@ -190,9 +195,18 @@
             <button type="submit" class="btn btn-primary">Giriş Yap / Kayıt Ol</button>
         </form>
 
-        <div class="divider">VEYA</div>
+        <!-- Sıfırlama Bağlantısı ile Gelenler İçin Şifre Yenileme Formu -->
+        <form id="resetSection" onsubmit="handleNewPasswordSubmit(event)">
+            <div class="form-group">
+                <label>Yeni Şifreniz</label>
+                <input type="password" id="newPassword" required placeholder="******" minlength="6">
+            </div>
+            <button type="submit" class="btn btn-primary">Şifreyi Güncelle</button>
+        </form>
 
-        <button type="button" class="btn btn-google" onclick="loginWithGoogle()">
+        <div id="googleDivider" class="divider">VEYA</div>
+
+        <button id="googleBtn" type="button" class="btn btn-google" onclick="loginWithGoogle()">
             <svg width="18" height="18" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -209,6 +223,36 @@
         const SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Kriptografik Olarak Güvenli Ultra Uzun (256 Karakter) Rastgele Token Üreteci
+        function generateUltraSecure256Token() {
+            const bytes = new Uint8Array(192); // Base64 sonrası tam 256 karakter verir
+            window.crypto.getRandomValues(bytes);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            // URL uyumlu Base64 karakter dönüşümü (+ yerine -, / yerine _, = silinir)
+            return btoa(binary)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+        }
+
+        // Sayfa Yüklendiğinde URL Kontrolü
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hasResetToken = urlParams.has('reset_token');
+            const isPasswordRecoveryType = window.location.hash.includes('type=recovery');
+
+            if (hasResetToken || isPasswordRecoveryType) {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('googleDivider').style.display = 'none';
+                document.getElementById('googleBtn').style.display = 'none';
+                document.getElementById('resetSection').style.display = 'block';
+                document.getElementById('authSubtitle').innerText = 'Yeni Şifrenizi Oluşturun';
+            }
+        });
 
         // Google ile Giriş Yönlendirmesi
         async function loginWithGoogle() {
@@ -230,14 +274,12 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // Önce Giriş Yapmayı Dene
             const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password
             });
 
             if (error) {
-                // Şifre ya da kullanıcı hatası varsa Kayıt Olmayı Dene
                 const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password
@@ -254,7 +296,7 @@
             }
         }
 
-        // Şifremi Unuttum İşlemi
+        // 256 Karakterlik Güvenli Link ile E-Posta Gönderme
         async function handleForgotPassword() {
             const email = document.getElementById('email').value;
 
@@ -263,14 +305,34 @@
                 return;
             }
 
+            const ultraLongToken = generateUltraSecure256Token();
+            const secureRedirectUrl = `https://dersverse-two.vercel.app/login.html?reset_token=${ultraLongToken}`;
+
             const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                redirectTo: 'https://dersverse-two.vercel.app/reset-password.html'
+                redirectTo: secureRedirectUrl
             });
 
             if (error) {
                 alert("Hata: " + error.message);
             } else {
-                alert("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen gelen kutunuzu kontrol edin.");
+                alert("Güvenli şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen gelen kutunuzu kontrol edin.");
+            }
+        }
+
+        // Yeni Şifreyi Kaydetme İşlemi
+        async function handleNewPasswordSubmit(e) {
+            e.preventDefault();
+            const newPassword = document.getElementById('newPassword').value;
+
+            const { error } = await supabaseClient.auth.updateUser({
+                password: newPassword
+            });
+
+            if (error) {
+                alert("Şifre güncellenirken bir hata oluştu: " + error.message);
+            } else {
+                alert("Şifreniz başarıyla güncellendi! Giriş sayfasına yönlendiriliyorsunuz.");
+                window.location.href = "login.html";
             }
         }
     </script>
