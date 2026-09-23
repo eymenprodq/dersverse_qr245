@@ -5,31 +5,22 @@ const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERS
 
 let dersverseAllContents = [];
 
-// GLOBAL KULLANICI İSMİ VE ROZET DÜZENLEYİCİ
-function dersverseGetFormattedUser(email, originalName = '') {
-    if (email === 'femememe1973@gmail.com') {
-        return {
-            name: 'Kadir Eymen Açıkoğlu',
-            badge: ' ✔️ 🔨', // Doğrulama ve Çekiç (Yönetici) İşareti
-            isAdmin: true
-        };
-    }
-    return {
-        name: originalName || email.split('@')[0],
-        badge: '',
-        isAdmin: false
-    };
-}
-
-// Kullanıcı Oturum Kontrolü
+// Kullanıcı Oturum Kontrolü ve Rozet Desteği
 async function dersverseCheckUser() {
     const { data: { user } } = await dersverseSupabase.auth.getUser();
     const authBtn = document.getElementById('dersverse-auth-btn');
-    if (user) {
-        const userInfo = dersverseGetFormattedUser(user.email, user.user_metadata?.full_name);
-        authBtn.innerText = 'Çıkış Yap (' + userInfo.name + userInfo.badge + ')';
-    } else {
-        authBtn.innerText = 'Kayıt Ol / Giriş Yap';
+    if (authBtn) {
+        if (user) {
+            let displayName = user.user_metadata?.full_name || user.email.split('@')[0];
+            let badge = '';
+            if (user.email === 'femememe1973@gmail.com') {
+                displayName = 'Kadir Eymen Açıkoğlu';
+                badge = ' ✔️ 🔨';
+            }
+            authBtn.innerText = 'Çıkış Yap (' + displayName + badge + ')';
+        } else {
+            authBtn.innerText = 'Kayıt Ol / Giriş Yap';
+        }
     }
     dersverseSetupProtection(user);
 }
@@ -83,6 +74,7 @@ async function dersverseLoadContents() {
 // İçerik Kartlarını Ekrana Basma
 function dersverseRenderContents(contents) {
     const grid = document.getElementById('dersverse-content-grid');
+    if (!grid) return;
 
     if (!contents || contents.length === 0) {
         grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--dersverse-text-muted);">Aradığınız kriterlere uygun içerik bulunamadı.</p>';
@@ -93,8 +85,7 @@ function dersverseRenderContents(contents) {
         let authorDisplay = escapeHtml(item.user_name || 'Kullanıcı');
         let authorBadge = '';
         
-        // Eğer paylaşan isim sizse veya ID/isim eşleşiyorsa otomatik rozet basılır
-        if (item.user_name === 'Kadir Eymen Açıkoğlu') {
+        if (authorDisplay === 'Kadir Eymen Açıkoğlu' || (item.user_email && item.user_email === 'femememe1973@gmail.com')) {
             authorDisplay = 'Kadir Eymen Açıkoğlu';
             authorBadge = ' ✔️ 🔨';
         }
@@ -117,8 +108,11 @@ function dersverseRenderContents(contents) {
 
 // Arama ve Kategori Filtreleme Mantığı
 function dersverseFilterContents() {
-    const searchVal = document.getElementById('dersverse-search-input').value.toLowerCase();
-    const categoryVal = document.getElementById('dersverse-category-filter').value;
+    const searchInput = document.getElementById('dersverse-search-input');
+    const categoryFilter = document.getElementById('dersverse-category-filter');
+    
+    const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
+    const categoryVal = categoryFilter ? categoryFilter.value : 'Tümü';
 
     const filtered = dersverseAllContents.filter(item => {
         const titleMatch = item.title && item.title.toLowerCase().includes(searchVal);
@@ -133,7 +127,7 @@ function dersverseFilterContents() {
     dersverseRenderContents(filtered);
 }
 
-// İçerik Ekleme (Dosya Veya Harici Link)
+// İçerik Ekleme (Dosya Yükleme veya Harici LGS/YKS vb. Link Desteğiyle)
 async function dersverseSubmitContent(e) {
     e.preventDefault();
     const { data: { user } } = await dersverseSupabase.auth.getUser();
@@ -154,7 +148,7 @@ async function dersverseSubmitContent(e) {
     const submitBtn = document.getElementById('submit-content-btn');
 
     if (!file && !manualLink) {
-        alert("Lütfen LGS/YKS gibi kaynaklar için ya bir dosya yükleyin ya da Google Drive / Yandex gibi harici bir indirme bağlantısı (link) girin!");
+        alert("Lütfen LGS veya diğer ders kaynakları için ya bir dosya yükleyin ya da Google Drive / Yandex gibi harici bir indirme bağlantısı (link) girin!");
         return;
     }
 
@@ -163,8 +157,10 @@ async function dersverseSubmitContent(e) {
     let uploadUrlField = null;
 
     if (file) {
-        submitBtn.innerText = "Yükleniyor... Lütfen Bekleyin";
-        submitBtn.disabled = true;
+        if (submitBtn) {
+            submitBtn.innerText = "Yükleniyor... Lütfen Bekleyin";
+            submitBtn.disabled = true;
+        }
 
         const fileName = `${Date.now()}_${file.name}`;
         const filePath = `all_media/${fileName}`;
@@ -175,8 +171,10 @@ async function dersverseSubmitContent(e) {
 
         if (uploadError) {
             alert("Dosya yükleme hatası: " + uploadError.message);
-            submitBtn.innerText = "Paylaş";
-            submitBtn.disabled = false;
+            if (submitBtn) {
+                submitBtn.innerText = "Paylaş";
+                submitBtn.disabled = false;
+            }
             return;
         }
 
@@ -191,8 +189,10 @@ async function dersverseSubmitContent(e) {
         contentStatus = 'pending';
     }
 
-    const userInfo = dersverseGetFormattedUser(user.email, user.user_metadata?.full_name);
-    const userName = userInfo.name;
+    let userName = user.user_metadata?.full_name || user.email.split('@')[0];
+    if (user.email === 'femememe1973@gmail.com') {
+        userName = 'Kadir Eymen Açıkoğlu';
+    }
 
     const { error: dbError } = await dersverseSupabase.from('contents').insert([{
         title,
@@ -202,23 +202,29 @@ async function dersverseSubmitContent(e) {
         download_url: uploadUrlField,
         user_id: user.id,
         user_name: userName,
+        user_email: user.email,
         status: contentStatus
     }]);
 
     if (dbError) {
         alert('Hata: ' + dbError.message);
-        submitBtn.innerText = "Paylaş";
-        submitBtn.disabled = false;
+        if (submitBtn) {
+            submitBtn.innerText = "Paylaş";
+            submitBtn.disabled = false;
+        }
     } else {
         if (contentStatus === 'approved') {
             alert('Dosyanız başarıyla yüklendi ve doğrudan siteye eklendi!');
         } else {
-            alert('İçerik bağlantınız başarıyla iletildi. Yönetici onayından sonra yayınlanacaktır.');
+            alert('İçerik/LGS bağlantınız başarıyla iletildi. Yönetici onayından sonra yayınlanacaktır.');
         }
         dersverseCloseModal();
-        document.getElementById('dersverse-content-form').reset();
-        submitBtn.innerText = "Paylaş";
-        submitBtn.disabled = false;
+        const form = document.getElementById('dersverse-content-form');
+        if (form) form.reset();
+        if (submitBtn) {
+            submitBtn.innerText = "Paylaş";
+            submitBtn.disabled = false;
+        }
         dersverseLoadContents(); 
     }
 }
