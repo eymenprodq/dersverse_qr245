@@ -180,6 +180,7 @@
             border: 1px solid var(--dersverse-border);
             border-radius: 12px;
             overflow-x: auto;
+            margin-bottom: 2.5rem;
         }
 
         table {
@@ -223,6 +224,13 @@
         .action-btns button {
             padding: 0.4rem 0.8rem;
             font-size: 0.85rem;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dersverse-text);
         }
 
         /* Yetkisiz Erişim Ekranı */
@@ -288,7 +296,8 @@
             </div>
         </section>
 
-        <!-- Sekme Sistemi -->
+        <!-- Bölüm 1: İçerik Yönetimi -->
+        <h2 class="section-title">Paylaşılan İçerikler Yönetimi</h2>
         <div class="admin-tabs">
             <button class="tab-btn active" onclick="filterTable('pending', this)">Onay Bekleyenler</button>
             <button class="tab-btn" onclick="filterTable('approved', this)">Yayınlananlar</button>
@@ -296,7 +305,6 @@
             <button class="tab-btn" onclick="filterTable('all', this)">Tüm İçerikler</button>
         </div>
 
-        <!-- Yönetim Tablosu -->
         <div class="table-responsive">
             <table>
                 <thead>
