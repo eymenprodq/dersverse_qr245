@@ -92,7 +92,6 @@ function dersverseRenderContents(contents) {
     grid.innerHTML = contents.map(item => {
         const isTeacher = item.is_teacher || false;
         
-        // Eğer paylaşan kişi sizseniz (e-posta veya isim kontrolüyle ya da özel alanla) rozet otomatik uygulanır
         let authorDisplay = escapeHtml(item.user_name || 'Kullanıcı');
         let authorBadge = '';
         
@@ -136,7 +135,7 @@ function dersverseFilterContents() {
     dersverseRenderContents(filtered);
 }
 
-// İçerik Ekleme
+// LGS ve Diğer Büyük Dosyalar İçin Esnek İçerik Ekleme (Dosya Veya Harici Link)
 async function dersverseSubmitContent(e) {
     e.preventDefault();
     const { data: { user } } = await dersverseSupabase.auth.getUser();
@@ -152,16 +151,17 @@ async function dersverseSubmitContent(e) {
     const description = document.getElementById('dersverse-description').value;
     
     const fileInput = document.getElementById('dersverse-file-upload');
-    const file = fileInput.files[0];
-    let finalLink = document.getElementById('dersverse-link').value;
+    const file = fileInput ? fileInput.files[0] : null;
+    let manualLink = document.getElementById('dersverse-link') ? document.getElementById('dersverse-link').value : '';
     const submitBtn = document.getElementById('submit-content-btn');
 
-    if (!file && !finalLink) {
-        alert("Lütfen ya bir dosya yükleyin ya da bir dış bağlantı (link) girin!");
+    if (!file && !manualLink) {
+        alert("Lütfen LGS/YKS gibi kaynaklar için ya bir dosya yükleyin ya da Google Drive / Yandex gibi harici bir indirme bağlantısı (link) girin!");
         return;
     }
 
     let contentStatus = 'pending'; 
+    let finalLink = manualLink;
     let uploadUrlField = null;
 
     if (file) {
@@ -189,9 +189,11 @@ async function dersverseSubmitContent(e) {
         uploadUrlField = urlData.publicUrl;
         finalLink = urlData.publicUrl;
         contentStatus = 'approved'; 
+    } else {
+        // Eğer harici link girildiyse (LGS arşivi vb.) yöneticinin onayından geçmesi için pending yapılır
+        contentStatus = 'pending';
     }
 
-    // Otomatik isim ve e-posta kaydı
     const userInfo = dersverseGetFormattedUser(user.email, user.user_metadata?.full_name);
     const userName = userInfo.name;
     const isTeacher = user.user_metadata?.role === 'teacher' || false;
@@ -217,7 +219,7 @@ async function dersverseSubmitContent(e) {
         if (contentStatus === 'approved') {
             alert('Dosyanız başarıyla yüklendi ve doğrudan siteye eklendi!');
         } else {
-            alert('Harici bağlantınız başarıyla iletildi. Yönetici onayından sonra yayınlanacaktır.');
+            alert('LGS/Ders içerik bağlantınız başarıyla iletildi. Yönetici onayından sonra yayınlanacaktır.');
         }
         dersverseCloseModal();
         document.getElementById('dersverse-content-form').reset();
