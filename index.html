@@ -96,7 +96,7 @@
 
         .dersverse-hero {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
         }
 
         .dersverse-hero h1 {
@@ -107,6 +107,48 @@
         .dersverse-hero p {
             color: var(--dersverse-text-muted);
             font-size: 1.1rem;
+        }
+
+        /* Arama ve Filtre Kontrol Alanı */
+        .dersverse-filter-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .dersverse-search-input {
+            flex: 2;
+            min-width: 220px;
+            padding: 0.75rem 1rem;
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 8px;
+            color: var(--dersverse-text);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .dersverse-search-input:focus {
+            border-color: var(--dersverse-primary);
+        }
+
+        .dersverse-category-select {
+            flex: 1;
+            min-width: 160px;
+            padding: 0.75rem 1rem;
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 8px;
+            color: var(--dersverse-text);
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .dersverse-category-select option {
+            background: #12121f;
+            color: var(--dersverse-text);
         }
 
         .dersverse-grid {
@@ -195,7 +237,7 @@
         <a href="#" class="dersverse-logo">DersVerse</a>
         <div class="dersverse-nav-actions">
             <button class="dersverse-btn dersverse-btn-outline" onclick="dersverseOpenModal()">İçerik Paylaş</button>
-            <button class="dersverse-btn" id="dersverse-auth-btn" onclick="dersverseHandleAuth()">Google ile Giriş Yap</button>
+            <button class="dersverse-btn" id="dersverse-auth-btn" onclick="dersverseHandleAuth()">Kayıt Ol / Giriş Yap</button>
         </div>
     </header>
 
@@ -204,6 +246,20 @@
             <h1>DersVerse Evrenine Hoş Geldiniz</h1>
             <p>Tüm ders notları ve dijital eğitim materyalleri tek bir çatı altında!</p>
         </section>
+
+        <!-- Arama ve Filtreleme Alanı -->
+        <div class="dersverse-filter-container">
+            <input type="text" id="dersverse-search-input" class="dersverse-search-input" placeholder="İçerik veya ders adı ara..." oninput="dersverseFilterContents()">
+            <select id="dersverse-category-filter" class="dersverse-category-select" onchange="dersverseFilterContents()">
+                <option value="Tümü">Tüm Kategoriler</option>
+                <option value="Matematik">Matematik</option>
+                <option value="Fen Bilimleri">Fen Bilimleri</option>
+                <option value="Türkçe">Türkçe</option>
+                <option value="Sosyal Bilgiler">Sosyal Bilgiler</option>
+                <option value="İngilizce">İngilizce</option>
+                <option value="Kodlama & Teknoloji">Kodlama & Teknoloji</option>
+            </select>
+        </div>
 
         <div class="dersverse-grid" id="dersverse-content-grid">
             <!-- İçerikler Supabase'den Yüklenecek -->
@@ -265,6 +321,8 @@
         const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
         const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
 
+        let dersverseAllContents = [];
+
         // Kullanıcı Oturum Kontrolü
         async function dersverseCheckUser() {
             const { data: { user } } = await dersverseSupabase.auth.getUser();
@@ -272,7 +330,7 @@
             if (user) {
                 authBtn.innerText = 'Çıkış Yap (' + user.email.split('@')[0] + ')';
             } else {
-                authBtn.innerText = 'Google ile Giriş Yap';
+                authBtn.innerText = 'Kayıt Ol / Giriş Yap';
             }
             dersverseSetupProtection(user);
         }
@@ -293,48 +351,73 @@
             });
         }
 
-        // Google OAuth Giriş / Çıkış
+        // Giriş/Çıkış Yönlendirme Mantığı
         async function dersverseHandleAuth() {
             const { data: { user } } = await dersverseSupabase.auth.getUser();
             if (user) {
                 await dersverseSupabase.auth.signOut();
                 window.location.reload();
             } else {
-                await dersverseSupabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: {
-                        redirectTo: 'https://dersverse-two.vercel.app'
-                    }
-                });
+                window.location.href = "login.html";
             }
         }
 
         function dersverseOpenModal() { document.getElementById('dersverse-add-modal').style.display = 'flex'; }
         function dersverseCloseModal() { document.getElementById('dersverse-add-modal').style.display = 'none'; }
 
-        // Onaylanmış İçerikleri Listeleme
+        // Onaylanmış İçerikleri Yükleme
         async function dersverseLoadContents() {
-            const grid = document.getElementById('dersverse-content-grid');
             const { data, error } = await dersverseSupabase
                 .from('contents')
                 .select('*')
                 .eq('status', 'approved');
 
-            if (error || !data || data.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--dersverse-text-muted);">Henüz yayınlanmış bir içerik bulunmuyor.</p>';
+            if (error) {
+                console.error("Veri yüklenirken hata:", error);
                 return;
             }
 
-            grid.innerHTML = data.map(item => `
+            dersverseAllContents = data || [];
+            dersverseRenderContents(dersverseAllContents);
+        }
+
+        // İçerik Kartlarını Ekrana Basma
+        function dersverseRenderContents(contents) {
+            const grid = document.getElementById('dersverse-content-grid');
+
+            if (!contents || contents.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--dersverse-text-muted);">Aradığınız kriterlere uygun içerik bulunamadı.</p>';
+                return;
+            }
+
+            grid.innerHTML = contents.map(item => `
                 <div class="dersverse-card">
                     <div>
-                        <div class="dersverse-card-tag">${item.category || 'Genel'}</div>
-                        <h3 class="dersverse-card-title">${item.title}</h3>
-                        <p class="dersverse-card-desc">${item.description}</p>
+                        <div class="dersverse-card-tag">${escapeHtml(item.category || 'Genel')}</div>
+                        <h3 class="dersverse-card-title">${escapeHtml(item.title)}</h3>
+                        <p class="dersverse-card-desc">${escapeHtml(item.description)}</p>
                     </div>
                     <a href="detay.html?id=${item.id}" class="dersverse-btn dersverse-btn-outline" style="text-align: center; text-decoration: none;">Detayları Gör</a>
                 </div>
             `).join('');
+        }
+
+        // Arama ve Kategori Filtreleme Mantığı
+        function dersverseFilterContents() {
+            const searchVal = document.getElementById('dersverse-search-input').value.toLowerCase();
+            const categoryVal = document.getElementById('dersverse-category-filter').value;
+
+            const filtered = dersverseAllContents.filter(item => {
+                const titleMatch = item.title && item.title.toLowerCase().includes(searchVal);
+                const descMatch = item.description && item.description.toLowerCase().includes(searchVal);
+                const matchesSearch = titleMatch || descMatch;
+
+                const matchesCategory = categoryVal === 'Tümü' || item.category === categoryVal;
+
+                return matchesSearch && matchesCategory;
+            });
+
+            dersverseRenderContents(filtered);
         }
 
         // Veritabanına Yeni İçerik Ekleme
@@ -343,7 +426,8 @@
             const { data: { user } } = await dersverseSupabase.auth.getUser();
 
             if (!user) {
-                alert('İçerik paylaşabilmek için lütfen Google hesabınızla giriş yapınız.');
+                alert('İçerik paylaşabilmek için lütfen giriş yapınız.');
+                window.location.href = "login.html";
                 return;
             }
 
@@ -368,6 +452,11 @@
                 dersverseCloseModal();
                 document.getElementById('dersverse-content-form').reset();
             }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
         window.onload = () => {
