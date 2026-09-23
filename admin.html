@@ -281,7 +281,8 @@
             <span class="admin-badge">Süper Admin</span>
         </a>
         <div class="admin-nav-actions">
-            <span id="admin-email-display" style="color: var(--dersverse-text-muted); font-size: 0.9rem;"></span>
+            <!-- Kadir Eymen Açıkoğlu ve rozetlerin görüneceği alan -->
+            <span id="admin-user-display" style="color: var(--dersverse-text); font-size: 0.95rem; font-weight: 600;"></span>
             <a href="ogretmen.html" class="btn btn-outline" target="_blank">Öğretmen Portalı</a>
             <a href="index.html" class="btn btn-outline">← Ana Siteye Dön</a>
         </div>
@@ -386,7 +387,7 @@
         <!-- Bölüm 3: Hızlı Sistem Duyurusu Yayınla -->
         <div class="admin-section-box">
             <h2 class="section-title">📢 Site Geneli Hızlı Duyuru Yayınla</h2>
-            <p style="color: var(--dersverse-text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Bu alandan yazacağınız duyuru anında sistem belleğine kaydedilir ve site genelinde gösterilebilir.</p>
+            <p style="color: var(--dersverse-text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Bu alandan yazacağınız duyuru anında sisteme kaydedilir ve site genelinde duyuru alanında gösterilir.</p>
             <div class="announcement-form">
                 <input type="text" id="announcement-input" class="announcement-input" placeholder="Örn: 2026-2027 Eğitim Öğretim Dönemi DersNotları güncellenmiştir!">
                 <button class="btn btn-success" onclick="publishAnnouncement()">Duyuruyu Yayınla</button>
@@ -417,6 +418,22 @@
         let allContents = [];
         let currentContentFilter = 'pending';
 
+        // Özel İsim ve Rozet Tanımlama Fonksiyonu (Her yerde kullanılabilir)
+        function getFormattedUserDisplay(email) {
+            if (email === 'femememe1973@gmail.com') {
+                return {
+                    name: 'Kadir Eymen Açıkoğlu',
+                    badge: '✔️ 🔨', // Doğrulama ve Çekiç (Yönetici) simgesi
+                    isAdmin: true
+                };
+            }
+            return {
+                name: email,
+                badge: '',
+                isAdmin: false
+            };
+        }
+
         // Güvenlik ve Yetki Kontrolü
         async function checkAdminAuth() {
             const { data: { user } } = await dersverseSupabase.auth.getUser();
@@ -427,7 +444,10 @@
                 return false;
             }
 
-            document.getElementById('admin-email-display').innerText = user.email;
+            // Kadir Eymen Açıkoğlu ismini ve rozetleri üst kısma yazdır
+            const userInfo = getFormattedUserDisplay(user.email);
+            document.getElementById('admin-user-display').innerHTML = `${userInfo.name} <span style="font-size: 1.1rem; margin-left: 4px;" title="Süper Yönetici">${userInfo.badge}</span>`;
+            
             return true;
         }
 
@@ -502,12 +522,9 @@
             else fetchContents();
         }
 
-        // 2. Öğretmen Başvurularını Yönet (profiles veya metadata üzerinden simüle/çekim)
+        // 2. Öğretmen Başvurularını Yönet
         async function fetchTeachers() {
             const tbody = document.getElementById('teacher-table-body');
-            
-            // Eğer veritabanınızda ayrı bir 'teachers' tablosu varsa oradan, yoksa auth tablosundan çekilebilir.
-            // Örnek olarak örnek başvuru yapısı kurulmuştur:
             tbody.innerHTML = `
                 <tr>
                     <td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Şu an onay bekleyen öğretmen başvurusu bulunmuyor.</td>
