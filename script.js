@@ -93,7 +93,8 @@ function dersverseRenderContents(contents) {
         let authorDisplay = escapeHtml(item.user_name || 'Kullanıcı');
         let authorBadge = '';
         
-        if (item.user_email === 'femememe1973@gmail.com' || item.user_name === 'Kadir Eymen Açıkoğlu') {
+        // Eğer paylaşan isim sizse veya ID/isim eşleşiyorsa otomatik rozet basılır
+        if (item.user_name === 'Kadir Eymen Açıkoğlu') {
             authorDisplay = 'Kadir Eymen Açıkoğlu';
             authorBadge = ' ✔️ 🔨';
         }
@@ -201,7 +202,6 @@ async function dersverseSubmitContent(e) {
         download_url: uploadUrlField,
         user_id: user.id,
         user_name: userName,
-        user_email: user.email,
         status: contentStatus
     }]);
 
