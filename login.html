@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DersVerse - Giriş Yap</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: white; border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); text-align: center; }
+        h2 { margin-bottom: 20px; color: #1a1a1a; font-size: 24px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { font-size: 13px; color: #666; font-weight: 600; margin-bottom: 5px; display: block; }
+        input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; outline: none; }
+        input:focus { border-color: #4F46E5; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .btn-primary { background: #4F46E5; color: white; }
+        .btn-primary:hover { background: #4338CA; }
+        .btn-google { background: white; color: #333; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; }
+        .btn-google:hover { background: #f8f8f8; }
+        .divider { margin: 15px 0; color: #888; font-size: 13px; display: flex; align-items: center; text-transform: uppercase; }
+        .divider::before, .divider::after { content: ""; flex: 1; border-bottom: 1px solid #ddd; }
+        .divider::before { margin-right: 10px; }
+        .divider::after { margin-left: 10px; }
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+        .tab { flex: 1; padding: 10px; background: none; border: none; font-size: 14px; color: #777; cursor: pointer; border-bottom: 2px solid transparent; margin-top: 0; }
+        .tab.active { color: #4F46E5; border-color: #4F46E5; font-weight: bold; }
+        #msg { margin-top: 15px; font-size: 14px; font-weight: 500; }
+        .err { color: #dc2626; }
+        .succ { color: #16a34a; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>DersVerse</h2>
+
+    <button class="btn-google" onclick="loginGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google">
+        Google ile Giriş Yap
+    </button>
+
+    <div class="divider">veya</div>
+
+    <div class="tabs">
+        <button class="tab active" id="tabLogin" onclick="setMode('login')">Giriş Yap</button>
+        <button class="tab" id="tabRegister" onclick="setMode('register')">Kayıt Ol</button>
+    </div>
+
+    <form onsubmit="handleAuth(event)">
+        <div class="input-group">
+            <label>E-Posta</label>
+            <input type="email" id="email" required placeholder="ornek@domain.com">
+        </div>
+        <div class="input-group">
+            <label>Şifre</label>
+            <input type="password" id="password" required placeholder="******">
+        </div>
+        <button type="submit" class="btn-primary" id="btnSubmit">Giriş Yap</button>
+    </form>
+
+    <div id="msg"></div>
+</div>
+
+<script>
+    const SUPABASE_URL = "https://YOUR_SUPABASE_PROJECT_ID.supabase.co"; 
+    const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY"; 
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let mode = 'login';
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            window.location.href = "index.html";
+        }
+    });
+
+    function setMode(m) {
+        mode = m;
+        document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+        document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
+        document.getElementById('btnSubmit').textContent = mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol';
+        document.getElementById('msg').textContent = '';
+    }
+
+    async function handleAuth(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const msg = document.getElementById('msg');
+        msg.textContent = "İşlem yapılıyor...";
+        msg.className = "";
+
+        if (mode === 'login') {
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                msg.textContent = "Hata: " + error.message;
+                msg.className = "err";
+            } else {
+                msg.textContent = "Giriş başarılı! Yönlendiriliyorsunuz...";
+                msg.className = "succ";
+                setTimeout(() => { window.location.href = "index.html"; }, 800);
+            }
+        } else {
+            const { error } = await supabase.auth.signUp({ email, password });
+            if (error) {
+                msg.textContent = "Hata: " + error.message;
+                msg.className = "err";
+            } else {
+                msg.textContent = "Kayıt başarılı! Yönlendiriliyorsunuz...";
+                msg.className = "succ";
+                setTimeout(() => { window.location.href = "index.html"; }, 800);
+            }
+        }
+    }
+
+    async function loginGoogle() {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin + '/index.html'
+            }
+        });
+        if (error) alert("Google Giriş Hatası: " + error.message);
+    }
+</script>
+
+</body>
+</html>
