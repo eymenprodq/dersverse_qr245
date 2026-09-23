@@ -80,7 +80,7 @@ async function dersverseLoadContents() {
     dersverseRenderContents(dersverseAllContents);
 }
 
-// İçerik Kartlarını Ekrana Basma (Öğretmen ve Admin Rozet Desteğiyle)
+// İçerik Kartlarını Ekrana Basma
 function dersverseRenderContents(contents) {
     const grid = document.getElementById('dersverse-content-grid');
 
@@ -90,8 +90,6 @@ function dersverseRenderContents(contents) {
     }
 
     grid.innerHTML = contents.map(item => {
-        const isTeacher = item.is_teacher || false;
-        
         let authorDisplay = escapeHtml(item.user_name || 'Kullanıcı');
         let authorBadge = '';
         
@@ -105,7 +103,6 @@ function dersverseRenderContents(contents) {
                 <div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                         <span class="dersverse-card-tag" style="margin-bottom:0;">${escapeHtml(item.category || 'Genel')}</span>
-                        ${isTeacher ? '<span style="font-size: 0.75rem; background: rgba(99,102,241,0.2); color: #818cf8; padding: 2px 8px; border-radius: 12px; border: 1px solid #6366f1;">✔ Doğrulanmış Öğretmen</span>' : ''}
                     </div>
                     <h3 class="dersverse-card-title">${escapeHtml(item.title)}</h3>
                     <p class="dersverse-card-desc">${escapeHtml(item.description)}</p>
@@ -135,7 +132,7 @@ function dersverseFilterContents() {
     dersverseRenderContents(filtered);
 }
 
-// LGS ve Diğer Büyük Dosyalar İçin Esnek İçerik Ekleme (Dosya Veya Harici Link)
+// İçerik Ekleme (Dosya Veya Harici Link)
 async function dersverseSubmitContent(e) {
     e.preventDefault();
     const { data: { user } } = await dersverseSupabase.auth.getUser();
@@ -190,13 +187,11 @@ async function dersverseSubmitContent(e) {
         finalLink = urlData.publicUrl;
         contentStatus = 'approved'; 
     } else {
-        // Eğer harici link girildiyse (LGS arşivi vb.) yöneticinin onayından geçmesi için pending yapılır
         contentStatus = 'pending';
     }
 
     const userInfo = dersverseGetFormattedUser(user.email, user.user_metadata?.full_name);
     const userName = userInfo.name;
-    const isTeacher = user.user_metadata?.role === 'teacher' || false;
 
     const { error: dbError } = await dersverseSupabase.from('contents').insert([{
         title,
@@ -207,8 +202,7 @@ async function dersverseSubmitContent(e) {
         user_id: user.id,
         user_name: userName,
         user_email: user.email,
-        status: contentStatus,
-        is_teacher: isTeacher
+        status: contentStatus
     }]);
 
     if (dbError) {
@@ -219,7 +213,7 @@ async function dersverseSubmitContent(e) {
         if (contentStatus === 'approved') {
             alert('Dosyanız başarıyla yüklendi ve doğrudan siteye eklendi!');
         } else {
-            alert('LGS/Ders içerik bağlantınız başarıyla iletildi. Yönetici onayından sonra yayınlanacaktır.');
+            alert('İçerik bağlantınız başarıyla iletildi. Yönetici onayından sonra yayınlanacaktır.');
         }
         dersverseCloseModal();
         document.getElementById('dersverse-content-form').reset();
