@@ -168,6 +168,7 @@
             color: var(--dersverse-text);
         }
 
+        /* Sıfırlama alanı varsayılan gizli */
         #resetSection {
             display: none;
         }
@@ -195,7 +196,7 @@
             <button type="submit" class="btn btn-primary">Giriş Yap / Kayıt Ol</button>
         </form>
 
-        <!-- Sıfırlama Bağlantısı ile Gelenler İçin Şifre Yenileme Formu -->
+        <!-- Şifre Sıfırlama Bağlantısı ile Gelenler İçin Yeni Şifre Formu -->
         <form id="resetSection" onsubmit="handleNewPasswordSubmit(event)">
             <div class="form-group">
                 <label>Yeni Şifreniz</label>
@@ -224,33 +225,27 @@
         const SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Kriptografik Olarak Güvenli Ultra Uzun (256 Karakter) Rastgele Token Üreteci
-        function generateUltraSecure256Token() {
-            const bytes = new Uint8Array(192); // Base64 sonrası tam 256 karakter verir
-            window.crypto.getRandomValues(bytes);
-            let binary = '';
-            for (let i = 0; i < bytes.byteLength; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            // URL uyumlu Base64 karakter dönüşümü (+ yerine -, / yerine _, = silinir)
-            return btoa(binary)
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=/g, '');
+        // Ekranı "Yeni Şifre Oluştur" Moduna Geçiren Fonksiyon
+        function showResetForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('googleDivider').style.display = 'none';
+            document.getElementById('googleBtn').style.display = 'none';
+            document.getElementById('resetSection').style.display = 'block';
+            document.getElementById('authSubtitle').innerText = 'Yeni Şifrenizi Oluşturun';
         }
 
-        // Sayfa Yüklendiğinde URL Kontrolü
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const hasResetToken = urlParams.has('reset_token');
-            const isPasswordRecoveryType = window.location.hash.includes('type=recovery');
+        // Supabase Kimlik Doğrulama Durumunu ve URL'i Dinleme
+        supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'PASSWORD_RECOVERY') {
+                showResetForm();
+            }
+        });
 
-            if (hasResetToken || isPasswordRecoveryType) {
-                document.getElementById('loginForm').style.display = 'none';
-                document.getElementById('googleDivider').style.display = 'none';
-                document.getElementById('googleBtn').style.display = 'none';
-                document.getElementById('resetSection').style.display = 'block';
-                document.getElementById('authSubtitle').innerText = 'Yeni Şifrenizi Oluşturun';
+        // Sayfa Yüklendiğinde URL Hash Kontrolü
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash;
+            if (hash.includes('type=recovery') || hash.includes('access_token')) {
+                showResetForm();
             }
         });
 
@@ -296,7 +291,7 @@
             }
         }
 
-        // 256 Karakterlik Güvenli Link ile E-Posta Gönderme
+        // Şifre Sıfırlama E-Postası Gönderme
         async function handleForgotPassword() {
             const email = document.getElementById('email').value;
 
@@ -305,17 +300,14 @@
                 return;
             }
 
-            const ultraLongToken = generateUltraSecure256Token();
-            const secureRedirectUrl = `https://dersverse-two.vercel.app/login.html?reset_token=${ultraLongToken}`;
-
             const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                redirectTo: secureRedirectUrl
+                redirectTo: 'https://dersverse-two.vercel.app/login.html'
             });
 
             if (error) {
                 alert("Hata: " + error.message);
             } else {
-                alert("Güvenli şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen gelen kutunuzu kontrol edin.");
+                alert("Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen gelen kutunuzu kontrol edin.");
             }
         }
 
@@ -331,7 +323,7 @@
             if (error) {
                 alert("Şifre güncellenirken bir hata oluştu: " + error.message);
             } else {
-                alert("Şifreniz başarıyla güncellendi! Giriş sayfasına yönlendiriliyorsunuz.");
+                alert("Şifreniz başarıyla güncellendi! Giriş yapabilirsiniz.");
                 window.location.href = "login.html";
             }
         }
