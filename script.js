@@ -5,13 +5,29 @@ const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERS
 
 let dersverseAllContents = [];
 
+// GLOBAL KULLANICI İSMİ VE ROZET DÜZENLEYİCİ
+function dersverseGetFormattedUser(email, originalName = '') {
+    if (email === 'femememe1973@gmail.com') {
+        return {
+            name: 'Kadir Eymen Açıkoğlu',
+            badge: ' ✔️ 🔨', // Doğrulama ve Çekiç (Yönetici) İşareti
+            isAdmin: true
+        };
+    }
+    return {
+        name: originalName || email.split('@')[0],
+        badge: '',
+        isAdmin: false
+    };
+}
+
 // Kullanıcı Oturum Kontrolü
 async function dersverseCheckUser() {
     const { data: { user } } = await dersverseSupabase.auth.getUser();
     const authBtn = document.getElementById('dersverse-auth-btn');
     if (user) {
-        const displayName = user.user_metadata?.full_name || user.email.split('@')[0];
-        authBtn.innerText = 'Çıkış Yap (' + displayName + ')';
+        const userInfo = dersverseGetFormattedUser(user.email, user.user_metadata?.full_name);
+        authBtn.innerText = 'Çıkış Yap (' + userInfo.name + userInfo.badge + ')';
     } else {
         authBtn.innerText = 'Kayıt Ol / Giriş Yap';
     }
@@ -64,7 +80,7 @@ async function dersverseLoadContents() {
     dersverseRenderContents(dersverseAllContents);
 }
 
-// İçerik Kartlarını Ekrana Basma (Öğretmen Rozeti Desteğiyle)
+// İçerik Kartlarını Ekrana Basma (Öğretmen ve Admin Rozet Desteğiyle)
 function dersverseRenderContents(contents) {
     const grid = document.getElementById('dersverse-content-grid');
 
@@ -75,8 +91,16 @@ function dersverseRenderContents(contents) {
 
     grid.innerHTML = contents.map(item => {
         const isTeacher = item.is_teacher || false;
-        const authorName = escapeHtml(item.user_name || 'Kullanıcı');
         
+        // Eğer paylaşan kişi sizseniz (e-posta veya isim kontrolüyle ya da özel alanla) rozet otomatik uygulanır
+        let authorDisplay = escapeHtml(item.user_name || 'Kullanıcı');
+        let authorBadge = '';
+        
+        if (item.user_email === 'femememe1973@gmail.com' || item.user_name === 'Kadir Eymen Açıkoğlu') {
+            authorDisplay = 'Kadir Eymen Açıkoğlu';
+            authorBadge = ' ✔️ 🔨';
+        }
+
         return `
             <div class="dersverse-card">
                 <div>
@@ -86,7 +110,7 @@ function dersverseRenderContents(contents) {
                     </div>
                     <h3 class="dersverse-card-title">${escapeHtml(item.title)}</h3>
                     <p class="dersverse-card-desc">${escapeHtml(item.description)}</p>
-                    <p style="font-size: 0.8rem; color: var(--dersverse-text-muted); margin-bottom: 1rem;">Paylaşan: ${authorName}</p>
+                    <p style="font-size: 0.8rem; color: var(--dersverse-text-muted); margin-bottom: 1rem;">Paylaşan: ${authorDisplay} <span style="color: #6366f1;">${authorBadge}</span></p>
                 </div>
                 <a href="detay.html?id=${item.id}" class="dersverse-btn dersverse-btn-outline" style="text-align: center; text-decoration: none;">Detayları Gör & Yorum Yap</a>
             </div>
@@ -112,7 +136,7 @@ function dersverseFilterContents() {
     dersverseRenderContents(filtered);
 }
 
-// İçerik Ekleme (Dosya yüklenirse direkt onay, link ise pending)
+// İçerik Ekleme
 async function dersverseSubmitContent(e) {
     e.preventDefault();
     const { data: { user } } = await dersverseSupabase.auth.getUser();
@@ -167,7 +191,9 @@ async function dersverseSubmitContent(e) {
         contentStatus = 'approved'; 
     }
 
-    const userName = user.user_metadata?.full_name || user.email.split('@')[0];
+    // Otomatik isim ve e-posta kaydı
+    const userInfo = dersverseGetFormattedUser(user.email, user.user_metadata?.full_name);
+    const userName = userInfo.name;
     const isTeacher = user.user_metadata?.role === 'teacher' || false;
 
     const { error: dbError } = await dersverseSupabase.from('contents').insert([{
@@ -178,6 +204,7 @@ async function dersverseSubmitContent(e) {
         download_url: uploadUrlField,
         user_id: user.id,
         user_name: userName,
+        user_email: user.email,
         status: contentStatus,
         is_teacher: isTeacher
     }]);
