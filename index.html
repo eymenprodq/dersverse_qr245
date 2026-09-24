@@ -1,4 +1,4 @@
-,<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -187,6 +187,25 @@
             justify-content: space-between;
         }
 
+        .dersverse-card-tag {
+            font-size: 0.8rem;
+            color: var(--dersverse-primary);
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .dersverse-card-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dersverse-card-desc {
+            color: var(--dersverse-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
         .dersverse-modal {
             display: none;
             position: fixed;
@@ -236,11 +255,9 @@
 
         .dersverse-divider {
             text-align: center;
-            margin: 12px 0;
+            margin: 10px 0;
             color: var(--dersverse-text-muted);
-            font-size: 0.85rem;
-            border-top: 1px dashed var(--dersverse-border);
-            padding-top: 10px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -314,15 +331,16 @@
                     <input type="text" id="dersverse-embed-link" placeholder="https://online.fliphtml5.com/... veya iframe">
                 </div>
 
-                <div class="dersverse-divider">- VEYA STANDART DOSYA YÜKLE -</div>
-
-                <div class="dersverse-form-group">
-                    <label>Dosya Yükle</label>
-                    <input type="file" id="dersverse-file-upload" accept=".pdf,.html,.mp4,.mp3,.zip,.png,.jpg,.jpeg">
+                <!-- DOSYA YÜKLEME ALANI -->
+                <div class="dersverse-form-group" style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--dersverse-primary); margin-top: 10px;">
+                    <label style="color: white; font-weight: bold;">Dosya Yükle (Direkt Yayınlanır)</label>
+                    <input type="file" id="dersverse-file-upload" accept=".pdf,.html,.mp4,.mp3,.zip,.png,.jpg,.jpeg" style="border: none; padding: 0.5rem 0;">
                 </div>
+                
+                <div class="dersverse-divider">- VEYA DIŞ BAĞLANTI KULLAN (Onaya Gider) -</div>
 
                 <div class="dersverse-form-group">
-                    <label>Harici Bağlantı (Google Drive vb.)</label>
+                    <label>Bağlantı (Google Drive / Harici Link)</label>
                     <input type="url" id="dersverse-link" placeholder="https://...">
                 </div>
 
