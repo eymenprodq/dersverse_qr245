@@ -127,7 +127,7 @@ function dersverseFilterContents() {
     dersverseRenderContents(filtered);
 }
 
-// İçerik Ekleme (Dosya Yükleme veya Harici LGS/YKS vb. Link Desteğiyle)
+// İçerik Ekleme (FlipHTML5/Embed, Dosya Yükleme veya Harici Link Desteğiyle)
 async function dersverseSubmitContent(e) {
     e.preventDefault();
     const { data: { user } } = await dersverseSupabase.auth.getUser();
@@ -142,13 +142,18 @@ async function dersverseSubmitContent(e) {
     const category = document.getElementById('dersverse-category').value;
     const description = document.getElementById('dersverse-description').value;
     
+    const embedInput = document.getElementById('dersverse-embed-link');
+    const embedLink = embedInput ? embedInput.value.trim() : '';
+
     const fileInput = document.getElementById('dersverse-file-upload');
     const file = fileInput ? fileInput.files[0] : null;
-    let manualLink = document.getElementById('dersverse-link') ? document.getElementById('dersverse-link').value : '';
+
+    let manualLink = document.getElementById('dersverse-link') ? document.getElementById('dersverse-link').value.trim() : '';
     const submitBtn = document.getElementById('submit-content-btn');
 
-    if (!file && !manualLink) {
-        alert("Lütfen LGS veya diğer ders kaynakları için ya bir dosya yükleyin ya da Google Drive / Yandex gibi harici bir indirme bağlantısı (link) girin!");
+    // Hiçbir kaynak girilmemişse uyarı ver
+    if (!embedLink && !file && !manualLink) {
+        alert("Lütfen bir FlipHTML5/Embed bağlantısı ekleyin, dosya yükleyin ya da harici bir indirme bağlantısı girin!");
         return;
     }
 
@@ -156,7 +161,13 @@ async function dersverseSubmitContent(e) {
     let finalLink = manualLink;
     let uploadUrlField = null;
 
-    if (file) {
+    // 1. Öncelik: Embed / FlipHTML5 Bağlantısı (Doğrudan onaylı kabul edilir)
+    if (embedLink) {
+        finalLink = embedLink;
+        contentStatus = 'approved';
+    } 
+    // 2. Öncelik: Dosya Yükleme
+    else if (file) {
         if (submitBtn) {
             submitBtn.innerText = "Yükleniyor... Lütfen Bekleyin";
             submitBtn.disabled = true;
@@ -185,7 +196,9 @@ async function dersverseSubmitContent(e) {
         uploadUrlField = urlData.publicUrl;
         finalLink = urlData.publicUrl;
         contentStatus = 'approved'; 
-    } else {
+    } 
+    // 3. Öncelik: Harici Link (Onaya gider)
+    else {
         contentStatus = 'pending';
     }
 
@@ -214,9 +227,9 @@ async function dersverseSubmitContent(e) {
         }
     } else {
         if (contentStatus === 'approved') {
-            alert('Dosyanız başarıyla yüklendi ve doğrudan siteye eklendi!');
+            alert('İçeriğiniz/FlipHTML5 yayınınız başarıyla kaydedildi ve yayınlandı!');
         } else {
-            alert('İçerik/LGS bağlantınız başarıyla iletildi. Yönetici onayından sonra yayınlanacaktır.');
+            alert('İçerik bağlantınız başarıyla iletildi. Yönetici onayından sonra yayınlanacaktır.');
         }
         dersverseCloseModal();
         const form = document.getElementById('dersverse-content-form');
