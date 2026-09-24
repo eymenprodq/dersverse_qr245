@@ -98,7 +98,6 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* APK İndir Butonuna Özel Vurgu */
         .dersverse-btn-apk {
             background: linear-gradient(135deg, #10b981, #059669);
         }
@@ -129,7 +128,6 @@
             font-size: 1.1rem;
         }
 
-        /* Arama ve Filtre Kontrol Alanı */
         .dersverse-filter-container {
             display: flex;
             gap: 1rem;
@@ -173,7 +171,7 @@
 
         .dersverse-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 1.5rem;
         }
 
@@ -198,12 +196,23 @@
         .dersverse-card-title {
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
+            color: #fff;
         }
 
         .dersverse-card-desc {
             color: var(--dersverse-text-muted);
             font-size: 0.9rem;
             margin-bottom: 1rem;
+        }
+
+        /* Embed / Iframe Alanı Kart İçinde */
+        .dersverse-embed-box {
+            position: relative;
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            margin-top: 1rem;
         }
 
         .dersverse-modal {
@@ -226,7 +235,9 @@
             padding: 2rem;
             border-radius: 12px;
             width: 90%;
-            max-width: 500px;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .dersverse-form-group {
@@ -248,13 +259,20 @@
             border: 1px solid var(--dersverse-border);
             border-radius: 6px;
             color: white;
+            outline: none;
+        }
+
+        .dersverse-form-group input:focus, .dersverse-form-group textarea:focus {
+            border-color: var(--dersverse-primary);
         }
 
         .dersverse-divider {
             text-align: center;
-            margin: 10px 0;
+            margin: 15px 0;
             color: var(--dersverse-text-muted);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            border-top: 1px dashed var(--dersverse-border);
+            padding-top: 10px;
         }
     </style>
 </head>
@@ -263,7 +281,6 @@
     <header class="dersverse-header">
         <a href="#" class="dersverse-logo">DersVerse</a>
         <div class="dersverse-nav-actions">
-            <!-- APK İndir Butonu -->
             <a href="https://dersverse.vercel.app/DersVerse.apk" download class="dersverse-btn dersverse-btn-apk">
                 📱 APK İndir
             </a>
@@ -275,7 +292,7 @@
     <main class="dersverse-main">
         <section class="dersverse-hero">
             <h1>DersVerse Evrenine Hoş Geldiniz</h1>
-            <p>Tüm ders notları ve dijital eğitim materyalleri tek bir çatı altında!</p>
+            <p>Tüm ders notları, e-kitaplar ve interaktif materyaller tek bir çatı altında!</p>
         </section>
 
         <!-- Arama ve Filtreleme Alanı -->
@@ -293,18 +310,18 @@
         </div>
 
         <div class="dersverse-grid" id="dersverse-content-grid">
-            <!-- İçerikler Supabase'den Yüklenecek -->
+            <!-- İçerikler Supabase'den Dinamik Yüklenecek -->
         </div>
     </main>
 
-    <!-- DersVerse İçerik Paylaşım Modalı -->
+    <!-- DersVerse Akıllı İçerik Paylaşım Modalı -->
     <div class="dersverse-modal" id="dersverse-add-modal">
         <div class="dersverse-modal-content">
-            <h2 style="margin-bottom: 1rem;">Yeni İçerik Paylaş</h2>
+            <h2 style="margin-bottom: 1rem;">Yeni Materyal Paylaş</h2>
             <form id="dersverse-content-form" onsubmit="dersverseSubmitContent(event)">
                 <div class="dersverse-form-group">
                     <label>Başlık</label>
-                    <input type="text" id="dersverse-title" required placeholder="Örn: 7. Sınıf Matematik Notları">
+                    <input type="text" id="dersverse-title" required placeholder="Örn: 8. Sınıf Matematik Zirveye Adım Adım">
                 </div>
                 <div class="dersverse-form-group">
                     <label>Ders / Kategori</label>
@@ -318,45 +335,222 @@
                     </select>
                 </div>
                 <div class="dersverse-form-group">
-                    <label>Açıklama</label>
-                    <textarea id="dersverse-description" rows="3" required placeholder="İçerik detayları..."></textarea>
+                    <label>Açıklama / Notlar</label>
+                    <textarea id="dersverse-description" rows="2" required placeholder="Materyal hakkında kısa bilgi..."></textarea>
                 </div>
                 
-                <!-- DOSYA YÜKLEME ALANI -->
-                <div class="dersverse-form-group" style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--dersverse-primary);">
-                    <label style="color: white; font-weight: bold;">Dosya Yükle (Direkt Yayınlanır)</label>
-                    <input type="file" id="dersverse-file-upload" accept=".pdf,.html,.mp4,.mp3,.zip,.png,.jpg,.jpeg" style="border: none; padding: 0.5rem 0;">
+                <!-- AKILLI EMBED / LİNK GİRİŞ ALANI (FlipHTML5, YouTube, Iframe vb.) -->
+                <div class="dersverse-form-group" style="background: rgba(99, 102, 241, 0.1); padding: 12px; border-radius: 8px; border: 1px dashed var(--dersverse-primary);">
+                    <label style="color: white; font-weight: bold;">🔗 Akıllı Embed / FlipHTML5 / YouTube / Iframe Linki</label>
+                    <input type="text" id="dersverse-embed-input" placeholder="Örn: https://online.fliphtml5.com/muvvt/etqw/ veya iframe kodu yapıştır" style="margin-top: 5px;">
+                    <small style="color: var(--dersverse-text-muted); display: block; margin-top: 4px;">Buraya yapıştırdığınız bağlantı otomatik olarak e-kitap veya video oynatıcıya dönüştürülür!</small>
                 </div>
-                
-                <div class="dersverse-divider">- VEYA DIŞ BAĞLANTI KULLAN (Onaya Gider) -</div>
+
+                <div class="dersverse-divider">VEYA STANDART DOSYA YÜKLE</div>
 
                 <div class="dersverse-form-group">
-                    <label>Bağlantı (Google Drive / Harici Link)</label>
-                    <input type="url" id="dersverse-link" placeholder="https://...">
+                    <label>Dosya Seç (PDF vb.)</label>
+                    <input type="file" id="dersverse-file-upload" accept=".pdf,.html,.mp4,.zip">
                 </div>
 
                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 15px;">
                     <button type="button" class="dersverse-btn dersverse-btn-outline" onclick="dersverseCloseModal()">İptal</button>
-                    <button type="submit" id="submit-content-btn" class="dersverse-btn">Paylaş</button>
+                    <button type="submit" id="submit-content-btn" class="dersverse-btn">Paylaş ve Yayınla</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Tawk.to Canlı Destek Entegrasyonu -->
-    <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/6aaa9769d5bb1934472d59e2/1k2l5utmu';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
-    </script>
+    <!-- JavaScript Entegrasyon Mantığı -->
+    <script>
+        // Supabase Bağlantı Bilgilerinizi Buraya Ekleyin
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    <!-- Harici script.js Bağlantısı -->
-    <script src="script.js"></script>
+        let allContents = [];
+
+        // Sayfa Yüklendiğinde İçerikleri Çek
+        window.addEventListener('DOMContentLoaded', () => {
+            dersverseFetchContents();
+        });
+
+        function dersverseOpenModal() {
+            document.getElementById('dersverse-add-modal').style.display = 'flex';
+        }
+
+        function dersverseCloseModal() {
+            document.getElementById('dersverse-add-modal').style.display = 'none';
+        }
+
+        // Akıllı Link & Embed Ayrıştırma Fonksiyonu
+        function parseEmbedInput(rawInput) {
+            let embedUrl = null;
+            let postType = 'text';
+
+            if (!rawInput) return { embedUrl, postType };
+
+            // 1. Iframe kodu mu?
+            if (rawInput.includes('<iframe') && rawInput.includes('src=')) {
+                const srcMatch = rawInput.match(/src=["']([^"']+)["']/);
+                if (srcMatch && srcMatch[1]) {
+                    embedUrl = srcMatch[1];
+                    postType = 'embed';
+                }
+            } 
+            else {
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                const matches = rawInput.match(urlRegex);
+
+                if (matches && matches.length > 0) {
+                    const foundUrl = matches[0];
+                    
+                    // FlipHTML5
+                    if (foundUrl.includes('fliphtml5.com')) {
+                        embedUrl = foundUrl;
+                        postType = 'embed_flipbook';
+                    } 
+                    // YouTube
+                    else if (foundUrl.includes('youtube.com') || foundUrl.includes('youtu.be')) {
+                        let videoId = '';
+                        if (foundUrl.includes('youtu.be')) {
+                            videoId = foundUrl.split('/').pop().split('?')[0];
+                        } else {
+                            const urlParams = new URLSearchParams(foundUrl.split('?')[1]);
+                            videoId = urlParams.get('v');
+                        }
+                        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                        postType = 'embed_video';
+                    }
+                    // Diğer Harici Linkler / Embedler
+                    else {
+                        embedUrl = foundUrl;
+                        postType = 'embed';
+                    }
+                }
+            }
+            return { embedUrl, postType };
+        }
+
+        // İçerik Listeleme ve Supabase'den Çekme
+        async function dersverseFetchContents() {
+            try {
+                const { data, error } = await supabase
+                    .from('contents')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                allContents = data || [];
+                dersverseRenderContents(allContents);
+            } catch (err) {
+                console.error("Veri çekme hatası:", err.message);
+            }
+        }
+
+        // Grid Üzerinde Kartları Oluşturma
+        dersverseRenderContents(contentsList) {
+            const gridEl = document.getElementById('dersverse-content-grid');
+            gridEl.innerHTML = '';
+
+            if (contentsList.length === 0) {
+                gridEl.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--dersverse-text-muted);">Henüz içerik paylaşılmamış.</p>`;
+                return;
+            }
+
+            contentsList.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'dersverse-card';
+
+                let embedHtml = '';
+                if (item.embed_url) {
+                    if (item.post_type === 'embed_flipbook' || item.embed_url.includes('fliphtml5')) {
+                        // FlipHTML5 için reklamsız maskelenmiş yükseklik
+                        embedHtml = `
+                            <div class="dersverse-embed-box" style="height: 450px;">
+                                <iframe src="${item.embed_url}" style="width: 100%; height: 100%; border: none;" allowfullscreen="true" scrolling="no"></iframe>
+                            </div>
+                        `;
+                    } else if (item.post_type === 'embed_video' || item.embed_url.includes('youtube')) {
+                        // YouTube için 16:9 oran
+                        embedHtml = `
+                            <div class="dersverse-embed-box" style="position: relative; paddingTop: 56.25%;">
+                                <iframe src="${item.embed_url}" style="position: absolute; top:0; left:0; width:100%; height:100%; border:none;" allowfullscreen></iframe>
+                            </div>
+                        `;
+                    } else {
+                        // Genel Embed
+                        embedHtml = `
+                            <div class="dersverse-embed-box" style="height: 350px;">
+                                <iframe src="${item.embed_url}" style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+                            </div>
+                        `;
+                    }
+                }
+
+                card.innerHTML = `
+                    <div>
+                        <div class="dersverse-card-tag">${item.category || 'Genel'}</div>
+                        <h3 class="dersverse-card-title">${item.title}</h3>
+                        <p class="dersverse-card-desc">${item.description || ''}</p>
+                        ${embedHtml}
+                    </div>
+                    ${item.download_url ? `<a href="${item.download_url}" target="_blank" class="dersverse-btn" style="margin-top: 1rem; justify-content: center;">📥 Dosyayı İndir / Aç</a>` : ''}
+                `;
+                gridEl.appendChild(card);
+            });
+        }
+
+        // Yeni İçerik Kaydetme Form İşlemi
+        async function dersverseSubmitContent(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('dersverse-title').value;
+            const category = document.getElementById('dersverse-category').value;
+            const description = document.getElementById('dersverse-description').value;
+            const embedInputVal = document.getElementById('dersverse-embed-input').value;
+            
+            const { embedUrl, postType } = parseEmbedInput(embedInputVal);
+
+            const newContent = {
+                title,
+                category,
+                description,
+                embed_url: embedUrl,
+                post_type: postType,
+                download_url: null
+            };
+
+            try {
+                const { error } = await supabase.from('contents').insert([newContent]);
+                if (error) throw error;
+
+                alert("İçerik başarıyla paylaşıldı!");
+                dersverseCloseModal();
+                document.getElementById('dersverse-content-form').reset();
+                dersverseFetchContents();
+            } catch (err) {
+                alert("Paylaşım hatası: " + err.message);
+            }
+        }
+
+        // Arama ve Kategoriye Göre Filtreleme
+        function dersverseFilterContents() {
+            const query = document.getElementById('dersverse-search-input').value.toLowerCase();
+            const selectedCategory = document.getElementById('dersverse-category-filter').value;
+
+            const filtered = allContents.filter(item => {
+                const matchesSearch = item.title.toLowerCase().includes(query) || (item.description && item.description.toLowerCase().includes(query));
+                const matchesCategory = selectedCategory === 'Tümü' || item.category === selectedCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            dersverseRenderContents(filtered);
+        }
+
+        function dersverseHandleAuth() {
+            alert("Kayıt ol / Giriş yap sistemi yakında aktifleşecek!");
+        }
+    </script>
 </body>
 </html>
