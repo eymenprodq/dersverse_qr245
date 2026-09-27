@@ -8,19 +8,16 @@
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Supabase Bağlantı Yapılandırması ve Güvenli İstemci Başlatma
         const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
         const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
-        
         let dersverseSupabase;
         try {
             dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
         } catch (error) {
-            console.error('Supabase başlatılırken kritik hata oluştu:', error);
+            console.error('Supabase başlatılırken hata:', error);
         }
     </script>
 
-    <!-- Kapsamlı ve Profesyonel Tasarım / Tema Stilleri -->
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -63,14 +60,17 @@
             flex-direction: column;
         }
 
-        /* Profesyonel Header Yapısı */
         .dersverse-header {
             background-color: var(--bg-card);
             border-bottom: 1px solid var(--border-color);
             padding: 1rem 2rem;
             position: sticky;
             top: 0;
-.dersverse-container {
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .dersverse-container {
             max-width: 1280px;
             width: 100%;
             margin: 0 auto;
@@ -108,7 +108,6 @@
             gap: 6px;
         }
 
-        /* Buton Tasarımları */
         .dersverse-btn {
             background-color: var(--primary);
             color: white;
@@ -143,7 +142,6 @@
             border-color: var(--primary);
         }
 
-        /* Ana İçerik Alanı */
         main.dersverse-main-content {
             flex: 1;
             max-width: 1280px;
@@ -166,7 +164,6 @@
             font-size: 2.25rem;
             font-weight: 800;
             margin-bottom: 10px;
-            letter-spacing: -0.025em;
         }
 
         .shop-header-section p {
@@ -177,7 +174,6 @@
             line-height: 1.5;
         }
 
-        /* Ürün Izgarası (Grid) */
         .dersverse-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -203,9 +199,6 @@
             .dersverse-nav-right {
                 flex-wrap: wrap;
                 justify-content: center;
-            }
-            .shop-header-section h1 {
-                font-size: 1.75rem;
             }
         }
     </style>
@@ -247,7 +240,7 @@
         </div>
     </main>
 
-    <!-- script.js Dosya Bağlantısı (Eğer dosya adınız 'script (9).js' ise aşağıdakini kullanın veya dosyanın adını 'script.js' yapın) -->
+    <!-- Doğru Dosya Adı: script.js -->
     <script src="script.js"></script>
     <script>
         function dersverseToggleTheme() {
@@ -270,21 +263,35 @@
                 if (btn) btn.innerHTML = '🌙 Gece Modu';
             }
 
-            try {
-                if (typeof updateUserStats === 'function') updateUserStats();
-                if (typeof loadUserXP === 'function') await loadUserXP();
-                
-                if (typeof renderShop === 'function') {
-                    renderShop();
-                } else {
-                    const container = document.getElementById('shop-items-container');
-                    if (container) {
-                        container.innerHTML = '<div class="loading-container" style="color: #ef4444;">Mağaza render fonksiyonu (renderShop) script dosyasında bulunamadı.</div>';
+            setTimeout(() => {
+                try {
+                    if (typeof updateUserStats === 'function') updateUserStats();
+                    
+                    if (typeof renderShop === 'function') {
+                        renderShop();
+                    } else {
+                        const container = document.getElementById('shop-items-container');
+                        if (container && typeof shopItems !== 'undefined') {
+                            container.innerHTML = shopItems.map(item => `
+                                <div style="background: var(--bg-card); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+                                    <div>
+                                        <strong style="font-size: 1.05rem;">${item.name}</strong><br>
+                                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 6px;">${item.desc || ''}</p>
+                                    </div>
+                                    <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="color: var(--primary); font-weight: bold; font-size: 0.9rem;">${item.cost} XP</span>
+                                        <button class="dersverse-btn" style="padding: 6px 12px; font-size: 0.8rem;" onclick="buyShopItem('${item.id}', ${item.cost}, 1)">Satın Al</button>
+                                    </div>
+                                </div>
+                            `).join('');
+                        } else {
+                            container.innerHTML = '<div class="loading-container" style="color: #ef4444;">script.js dosyası başarıyla yüklendi ancak renderShop fonksiyonu veya ürün listesi bulunamadı.</div>';
+                        }
                     }
+                } catch (err) {
+                    console.error("Mağaza yükleme hatası:", err);
                 }
-            } catch (err) {
-                console.error("Mağaza yükleme hatası:", err);
-            }
+            }, 300);
         });
     </script>
 </body>
