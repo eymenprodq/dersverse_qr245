@@ -256,7 +256,7 @@
             margin-top: 1rem;
         }
 
-        .announcement-input, .ban-input {
+        .announcement-input, .ban-input, .xp-input {
             flex-grow: 1;
             padding: 0.7rem 1rem;
             background: rgba(255, 255, 255, 0.05);
@@ -266,12 +266,12 @@
             font-size: 0.95rem;
         }
 
-        .announcement-input:focus, .ban-input:focus {
+        .announcement-input:focus, .ban-input:focus, .xp-input:focus {
             outline: none;
             border-color: var(--dersverse-primary);
         }
 
-        /* Modal (Engelleme Penceresi) */
+        /* Modal (Engelleme ve XP Pencereleri) */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -300,7 +300,7 @@
             font-size: 1.25rem;
             font-weight: bold;
             margin-bottom: 1rem;
-            color: var(--dersverse-danger);
+            color: var(--dersverse-primary);
         }
 
         .modal-body {
@@ -493,7 +493,7 @@
     <!-- Engelleme Modalı -->
     <div id="ban-modal" class="modal-overlay">
         <div class="modal-box">
-            <div class="modal-header">⛔ Kullanıcıyı Engelle</div>
+            <div class="modal-header" style="color: var(--dersverse-danger);">⛔ Kullanıcıyı Engelle</div>
             <div class="modal-body">
                 <input type="hidden" id="ban-user-id">
                 <div>
@@ -508,6 +508,27 @@
             <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
                 <button class="btn btn-outline" onclick="closeBanModal()">İptal</button>
                 <button class="btn btn-danger" onclick="submitBanUser()">Engelle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- XP Ekleme / Düzenleme Modalı -->
+    <div id="xp-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">⚡ Kullanıcıya XP Verme</div>
+            <div class="modal-body">
+                <input type="hidden" id="xp-user-id">
+                <input type="hidden" id="xp-current-val">
+                <p id="xp-user-name" style="font-size: 0.9rem; font-weight: bold; color: #c084fc;"></p>
+                <div>
+                    <label>Eklenecek veya Ayarlanacak XP Miktarı:</label>
+                    <input type="number" id="xp-amount" class="xp-input" placeholder="Örn: 500" style="width: 100%; margin-top: 0.4rem;">
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button class="btn btn-outline" onclick="closeXpModal()">İptal</button>
+                <button class="btn btn-warning" onclick="submitAddXp(false)">Mevcut XP'ye Ekle</button>
+                <button class="btn btn-success" onclick="submitAddXp(true)">Doğrudan Bu XP Yap</button>
             </div>
         </div>
     </div>
@@ -615,7 +636,7 @@
             fetchNotifications();
         }
 
-        // 2. Kayıtlı Kullanıcıları Yönet & Engelleme
+        // 2. Kayıtlı Kullanıcıları Yönet & Engelleme & XP
         async function fetchUsers() {
             const tbody = document.getElementById('users-table-body');
             const { data, error } = await dersverseSupabase
@@ -637,14 +658,17 @@
                     ? `<span class="status-badge status-banned" title="${u.ban_reason || 'Neden belirtilmedi'}">Engelli (${new Date(u.ban_until).toLocaleString('tr-TR')}'e kadar)</span>` 
                     : `<span style="color: var(--dersverse-success);">Aktif</span>`;
 
+                const nameText = u.full_name || 'İsimsiz Kullanıcı';
+
                 return `
                 <tr>
-                    <td style="font-weight: 600;">${u.full_name || 'İsimsiz Kullanıcı'}</td>
+                    <td style="font-weight: 600;">${nameText}</td>
                     <td><span class="status-badge ${u.role === 'teacher' ? 'role-teacher' : 'role-student'}">${u.role === 'teacher' ? '👨‍🏫 Öğretmen' : '🎓 Öğrenci'}</span></td>
                     <td style="color: #f59e0b; font-weight: bold;">⚡ ${u.xp || 0} XP</td>
                     <td>${banText}</td>
                     <td>
                         <div class="action-btns">
+                            <button class="btn btn-warning" onclick="openXpModal('${u.id}', '${nameText.replace(/'/g, "\\'")}', ${u.xp || 0})">⚡ XP Ekle</button>
                             ${u.role !== 'teacher' ? `<button class="btn btn-success" onclick="updateUserRole('${u.id}', 'teacher')">Öğretmen Yap</button>` : `<button class="btn btn-outline" onclick="updateUserRole('${u.id}', 'student')">Öğrenci Yap</button>`}
                             ${isBanned 
                                 ? `<button class="btn btn-warning" onclick="unbanUser('${u.id}')">🔓 Engeli Kaldır</button>` 
@@ -655,6 +679,45 @@
                     </td>
                 </tr>
             `}).join('');
+        }
+
+        // XP Verme Modal İşlemleri
+        function openXpModal(userId, userName, currentXp) {
+            document.getElementById('xp-user-id').value = userId;
+            document.getElementById('xp-current-val').value = currentXp;
+            document.getElementById('xp-user-name').innerText = `Kullanıcı: ${userName} (Mevcut XP: ${currentXp})`;
+            document.getElementById('xp-amount').value = '';
+            document.getElementById('xp-modal').style.display = 'flex';
+        }
+
+        function closeXpModal() {
+            document.getElementById('xp-modal').style.display = 'none';
+        }
+
+        async function submitAddXp(isOverwrite) {
+            const userId = document.getElementById('xp-user-id').value;
+            const currentXp = parseInt(document.getElementById('xp-current-val').value) || 0;
+            const inputVal = parseInt(document.getElementById('xp-amount').value);
+
+            if (isNaN(inputVal)) {
+                alert('Lütfen geçerli bir sayı girin.');
+                return;
+            }
+
+            const newXp = isOverwrite ? inputVal : (currentXp + inputVal);
+
+            const { error } = await dersverseSupabase
+                .from('profiles')
+                .update({ xp: newXp })
+                .eq('id', userId);
+
+            if (error) {
+                alert("XP güncelleme hatası: " + error.message);
+            } else {
+                alert(`Kullanıcının XP puanı başarıyla ${newXp} olarak güncellendi!`);
+                closeXpModal();
+                fetchUsers();
+            }
         }
 
         function openBanModal(userId) {
