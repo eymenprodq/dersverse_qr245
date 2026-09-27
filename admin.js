@@ -1,42 +1,6 @@
 import { supabase } from './supabase.js'
 
-// Onay bekleyenleri çekme
-export async function bekleyenIcerikleriGetir() {
-  const { data, error } = await supabase
-    .from('contents')
-    .select('*')
-    .eq('status', 'pending');
-
-  return data;
-}
-
-// İçeriği onaylama
-export async function icerikOnayla(contentId) {
-  const { error } = await supabase
-    .from('contents')
-    .update({ status: 'approved' })
-    .eq('id', contentId);
-
-  if (!error) {
-    alert("İçerik onaylandı ve canlıya alındı!");
-    location.reload();
-  }
-}
-
-// İçeriği reddetme/silme
-export async function icerikSil(contentId) {
-  const { error } = await supabase
-    .from('contents')
-    .delete()
-    .eq('id', contentId);
-
-  if (!error) {
-    alert("İçerik veritabanından silindi.");
-    location.reload();
-  }
-}
-
-// Kullanıcıları ve XP bilgilerini getiren fonksiyon
+// Sayfa açıldığında kullanıcıları otomatik getiren ve tabloya basan ana fonksiyon
 export async function adminKullanicilariGetir() {
   const { data, error } = await supabase
     .from('profiles')
@@ -47,34 +11,64 @@ export async function adminKullanicilariGetir() {
     return [];
   }
 
+  // Kullanıcı listesini ekrandaki tabloya otomatik basıyoruz
+  const tabloGovdesi = document.getElementById('kullaniciTablosuBody');
+  if (tabloGovdesi) {
+    tabloGovdesi.innerHTML = '';
+    
+    data.forEach(kullanici => {
+      const satir = document.createElement('tr');
+      satir.innerHTML = `
+        <td>${kullanici.email || 'Belirtilmemiş'}</td>
+        <td>${kullanici.role || 'user'}</td>
+        <td>
+          <input type="number" id="xp-input-${kullanici.id}" value="${kullanici.xp || 0}" style="width: 80px; padding: 4px;">
+        </td>
+        <td>
+          <button onclick="kullaniciXpGuncelle('${kullanici.id}')" style="background: #4f46e5; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px;">
+            Güncelle
+          </button>
+        </td>
+      `;
+      tabloGovdesi.appendChild(satir);
+    });
+  }
+
   return data;
 }
 
 // Kullanıcının XP değerini güncelleyen fonksiyon
-export async function kullaniciXpGuncelle(userId, yeniXpDegeri) {
-  const xpMiktari = parseInt(yeniXpDegeri);
+export async function kullaniciXpGuncelle(userId) {
+  const inputElement = document.getElementById(`xp-input-${userId}`);
+  if (!inputElement) return;
 
-  if (isNaN(xpMiktari)) {
+  const yeniXp = parseInt(inputElement.value);
+
+  if (isNaN(yeniXp)) {
     alert("Lütfen geçerli bir sayı giriniz!");
     return;
   }
 
   const { error } = await supabase
     .from('profiles')
-    .update({ xp: xpMiktari })
+    .update({ xp: yeniXp })
     .eq('id', userId);
 
   if (error) {
     console.error("XP güncellenemedi:", error.message);
-    alert("XP güncellenirken bir hata oluştu: " + error.message);
-    return false;
+    alert("XP güncellenirken hata oluştu: " + error.message);
+    return;
   }
 
   alert("Kullanıcı XP'si başarıyla güncellendi!");
-  location.reload();
-  return true;
+  adminKullanicilariGetir(); // Listeyi yenile
 }
 
-// HTML içerisindeki butonların doğrudan görebilmesi için global window'a bağlıyoruz
+// Global window'a bağlayarak butonların direkt görmesini sağlıyoruz
 window.kullaniciXpGuncelle = kullaniciXpGuncelle;
 window.adminKullanicilariGetir = adminKullanicilariGetir;
+
+// Sayfa yüklendiği an otomatik çalıştır
+document.addEventListener('DOMContentLoaded', () => {
+  adminKullanicilariGetir();
+});
