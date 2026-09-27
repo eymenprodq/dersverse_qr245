@@ -416,7 +416,7 @@
             <div class="admin-tabs">
                 <button class="tab-btn active" onclick="filterContents('pending', this)">Bekleyenler</button>
                 <button class="tab-btn" onclick="filterContents('approved', this)">Yayınlananlar</button>
-                <button class="tab-btn" onclick="filterContents('rejected', this)">Reddedilenler</button>
+                <button class="tab-btn" onclick="filterContents('rejected', this)">Reddedilenlar</button>
                 <button class="tab-btn" onclick="filterContents('all', this)">Tümü</button>
             </div>
             <div class="table-responsive">
@@ -492,16 +492,14 @@
         </div>
     </div>
 
-    <script>
-        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
-        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
-        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+    <script type="module">
+        import { supabase } from './supabase.js';
+        import { kullaniciXpGuncelle } from './admin.js';
 
         let allContents = [];
         let currentContentFilter = 'pending';
 
         async function checkAdminAuth() {
-            // Direkt erişim izni verilmiştir, sorunsuz açılır
             document.getElementById('admin-main-screen').style.display = 'block';
             document.getElementById('unauthorized-screen').style.display = 'none';
             return true;
@@ -515,7 +513,7 @@
 
         async function fetchNotifications() {
             const tbody = document.getElementById('notifications-table-body');
-            const { data, error } = await dersverseSupabase
+            const { data, error } = await supabase
                 .from('notifications')
                 .select('*')
                 .order('id', { ascending: false });
@@ -541,14 +539,14 @@
             `).join('');
         }
 
-        async function deleteNotification(id) {
-            await dersverseSupabase.from('notifications').delete().eq('id', id);
+        window.deleteNotification = async function(id) {
+            await supabase.from('notifications').delete().eq('id', id);
             fetchNotifications();
         }
 
         async function fetchUsers() {
             const tbody = document.getElementById('users-table-body');
-            const { data, error } = await dersverseSupabase
+            const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -597,7 +595,7 @@
             `}).join('');
         }
 
-        function openXpModal(userId, userName, currentXp) {
+        window.openXpModal = function(userId, userName, currentXp) {
             document.getElementById('xp-user-id').value = userId;
             document.getElementById('xp-current-val').value = currentXp;
             document.getElementById('xp-user-name').innerText = `Kullanıcı: ${userName} (Mevcut XP: ${currentXp})`;
@@ -605,11 +603,11 @@
             document.getElementById('xp-modal').style.display = 'flex';
         }
 
-        function closeXpModal() {
+        window.closeXpModal = function() {
             document.getElementById('xp-modal').style.display = 'none';
         }
 
-        async function submitAddXp(isOverwrite) {
+        window.submitAddXp = async function(isOverwrite) {
             const userId = document.getElementById('xp-user-id').value;
             const currentXp = parseInt(document.getElementById('xp-current-val').value) || 0;
             const inputVal = parseInt(document.getElementById('xp-amount').value);
@@ -621,32 +619,27 @@
 
             const newXp = isOverwrite ? inputVal : (currentXp + inputVal);
 
-            const { error } = await dersverseSupabase
-                .from('profiles')
-                .update({ xp: newXp, updated_at: new Date().toISOString() })
-                .eq('id', userId);
+            // admin.js içerisindeki modüler fonksiyonu çağırıyoruz
+            const basarili = await kullaniciXpGuncelle(userId, newXp);
 
-            if (error) {
-                alert("XP güncelleme hatası: " + error.message);
-            } else {
-                alert(`Kullanıcının XP puanı başarıyla ${newXp} olarak güncellendi!`);
-                closeXpModal();
+            if (basarili) {
+                window.closeXpModal();
                 await fetchUsers();
             }
         }
 
-        function openBanModal(userId) {
+        window.openBanModal = function(userId) {
             document.getElementById('ban-user-id').value = userId;
             document.getElementById('ban-reason').value = '';
             document.getElementById('ban-until').value = '';
             document.getElementById('ban-modal').style.display = 'flex';
         }
 
-        function closeBanModal() {
+        window.closeBanModal = function() {
             document.getElementById('ban-modal').style.display = 'none';
         }
 
-        async function submitBanUser() {
+        window.submitBanUser = async function() {
             const userId = document.getElementById('ban-user-id').value;
             const reason = document.getElementById('ban-reason').value.trim();
             const until = document.getElementById('ban-until').value;
@@ -656,7 +649,7 @@
                 return;
             }
 
-            const { error } = await dersverseSupabase
+            const { error } = await supabase
                 .from('profiles')
                 .update({ 
                     is_banned: true, 
@@ -669,13 +662,13 @@
                 alert("Engelleme hatası: " + error.message);
             } else {
                 alert("Kullanıcı başarıyla engellendi!");
-                closeBanModal();
+                window.closeBanModal();
                 fetchUsers();
             }
         }
 
-        async function unbanUser(userId) {
-            const { error } = await dersverseSupabase
+        window.unbanUser = async function(userId) {
+            const { error } = await supabase
                 .from('profiles')
                 .update({ 
                     is_banned: false, 
@@ -691,8 +684,8 @@
             }
         }
 
-        async function updateUserRole(userId, newRole) {
-            const { error } = await dersverseSupabase
+        window.updateUserRole = async function(userId, newRole) {
+            const { error } = await supabase
                 .from('profiles')
                 .update({ role: newRole })
                 .eq('id', userId);
@@ -701,9 +694,9 @@
             else fetchUsers();
         }
 
-        async function deleteUser(userId) {
+        window.deleteUser = async function(userId) {
             if (!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) return;
-            const { error } = await dersverseSupabase
+            const { error } = await supabase
                 .from('profiles')
                 .delete()
                 .eq('id', userId);
@@ -713,7 +706,7 @@
         }
 
         async function fetchContents() {
-            const { data, error } = await dersverseSupabase
+            const { data, error } = await supabase
                 .from('contents')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -756,22 +749,22 @@
             `).join('');
         }
 
-        function filterContents(status, btn) {
+        window.filterContents = function(status, btn) {
             currentContentFilter = status;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             renderContentsTable();
         }
 
-        async function updateContentStatus(id, newStatus) {
-            const { error } = await dersverseSupabase.from('contents').update({ status: newStatus }).eq('id', id);
+        window.updateContentStatus = async function(id, newStatus) {
+            const { error } = await supabase.from('contents').update({ status: newStatus }).eq('id', id);
             if (error) alert('Hata: ' + error.message);
             else fetchContents();
         }
 
-        async function deleteContent(id) {
+        window.deleteContent = async function(id) {
             if (!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
-            const { error } = await dersverseSupabase.from('contents').delete().eq('id', id);
+            const { error } = await supabase.from('contents').delete().eq('id', id);
             if (error) alert('Hata: ' + error.message);
             else fetchContents();
         }
@@ -788,7 +781,7 @@
             return 'Bekliyor';
         }
 
-        function publishAnnouncement() {
+        window.publishAnnouncement = function() {
             const text = document.getElementById('announcement-input').value;
             if (!text.trim()) {
                 alert('Lütfen geçerli bir duyuru metni yazın.');
