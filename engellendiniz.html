@@ -5,74 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Erişim Engellendi - DersVerse</title>
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(239, 68, 68, 0.2);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-color: #ef4444;
+        }
+
         body {
-            margin: 0;
-            padding: 0;
-            background: #0f0f1a;
-            color: #f3f4f6;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            text-align: center;
+            margin: 0;
+            overflow: hidden;
         }
+
         .ban-container {
-            background: #12121f;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 3rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 40px 30px;
             border-radius: 16px;
-            max-width: 450px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
         }
+
+        .icon-box {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+
         h1 {
-            color: #ef4444;
-            margin-bottom: 1rem;
-            font-size: 2rem;
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
         }
+
         p {
-            color: #9ca3af;
+            color: var(--text-muted);
+            font-size: 0.95rem;
             line-height: 1.6;
-            margin-bottom: 2rem;
+            margin: 0;
         }
-        .btn-home {
-            background: #6366f1;
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: background 0.2s;
-            display: inline-block;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-home:hover {
-            background: #4f46e5;
+
+        .divider {
+            width: 50px;
+            height: 3px;
+            background-color: var(--accent-color);
+            margin: 20px auto;
+            border-radius: 2px;
         }
     </style>
 </head>
 <body>
 
     <div class="ban-container">
-        <h1>🚫 Erişim Engellendi</h1>
-        <p>Hesabınız site kurallarına aykırı hareketler nedeniyle DersVerse yönetim ekibi tarafından engellenmiştir.</p>
-        <button class="btn-home" onclick="handleExit()">Çıkış Yap / Ana Sayfa</button>
+        <div class="icon-box">🚫</div>
+        <h1>Erişim Engellendi</h1>
+        <div class="divider"></div>
+        <p>Platform kurallarına aykırı hareket edildiği veya güvenlik politikaları gereğince bu hesaba olan erişiminiz kalıcı olarak durdurulmuştur.</p>
     </div>
 
-    <!-- Supabase Kütüphanesi -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
-        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
-        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
-
-        async function handleExit() {
-            // Kullanıcının oturumunu kapat ve yerel verileri temizle
-            await dersverseSupabase.auth.signOut();
-            localStorage.clear();
-            window.location.href = 'index.html';
-        }
-    </script>
 </body>
 </html>
