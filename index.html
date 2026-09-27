@@ -24,6 +24,15 @@
             --dersverse-text-muted: #9ca3af;
         }
 
+        /* GÜNDÜZ MODU (LIGHT MODE) TEMA DEĞİŞKENLERİ */
+        body.light-theme {
+            --dersverse-bg: #f8fafc;
+            --dersverse-card-bg: #ffffff;
+            --dersverse-border: #e2e8f0;
+            --dersverse-text: #0f172a;
+            --dersverse-text-muted: #64748b;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -38,6 +47,58 @@
             display: flex;
             flex-direction: column;
             user-select: none;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* LGS ÜST GERİ SAYIM BARI */
+        .dersverse-top-bar {
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            color: #ffffff;
+            padding: 0.6rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .dersverse-lgs-timer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .dersverse-lgs-timer span {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .dersverse-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dersverse-btn-theme, .dersverse-btn-pomo {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .dersverse-btn-theme:hover, .dersverse-btn-pomo:hover {
+            background: rgba(255, 255, 255, 0.4);
         }
 
         header.dersverse-header {
@@ -51,6 +112,11 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: background 0.3s ease;
+        }
+
+        body.light-theme header.dersverse-header {
+            background: rgba(255, 255, 255, 0.85);
         }
 
         .dersverse-logo {
@@ -171,6 +237,11 @@
             color: var(--dersverse-text);
         }
 
+        body.light-theme .dersverse-category-select option {
+            background: #ffffff;
+            color: #0f172a;
+        }
+
         .dersverse-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -185,6 +256,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .dersverse-card-tag {
@@ -229,6 +301,12 @@
             max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
+            color: #ffffff;
+        }
+
+        body.light-theme .dersverse-modal-content {
+            background: #ffffff;
+            color: #0f172a;
         }
 
         .dersverse-form-group {
@@ -249,8 +327,14 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--dersverse-border);
             border-radius: 6px;
-            color: white;
+            color: inherit;
             outline: none;
+        }
+
+        body.light-theme .dersverse-form-group input,
+        body.light-theme .dersverse-form-group select,
+        body.light-theme .dersverse-form-group textarea {
+            background: #f1f5f9;
         }
 
         .dersverse-divider {
@@ -259,9 +343,36 @@
             color: var(--dersverse-text-muted);
             font-size: 0.9rem;
         }
+
+        /* POMODORO SAYAÇ STİLLERİ */
+        .pomodoro-display {
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #6366f1;
+            font-family: monospace;
+        }
+
+        .pomodoro-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
+
+    <!-- LGS Sınav Sayacı ve Tema/Kronometre Kontrol Barı -->
+    <div class="dersverse-top-bar">
+        <div class="dersverse-lgs-timer">
+            🎯 <strong>LGS 2027 Kalan Süre:</strong> <span id="lgs-countdown">Yükleniyor...</span>
+        </div>
+        <div class="dersverse-top-actions">
+            <button class="dersverse-btn-pomo" onclick="openPomodoroModal()">⏱️ Ders Kronometresi</button>
+            <button id="dersverse-theme-toggle" class="dersverse-btn-theme" onclick="dersverseToggleTheme()">☀️ Gündüz Modu</button>
+        </div>
+    </div>
 
     <header class="dersverse-header">
         <a href="#" class="dersverse-logo">DersVerse</a>
@@ -327,13 +438,13 @@
                 
                 <!-- AKILLI EMBED / FLIPHTML5 ALANI -->
                 <div class="dersverse-form-group" style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--dersverse-primary);">
-                    <label style="color: white; font-weight: bold;">🔗 Embed / FlipHTML5 / YouTube Linki</label>
+                    <label style="font-weight: bold;">🔗 Embed / FlipHTML5 / YouTube Linki</label>
                     <input type="text" id="dersverse-embed-link" placeholder="https://online.fliphtml5.com/... veya iframe">
                 </div>
 
                 <!-- DOSYA YÜKLEME ALANI -->
                 <div class="dersverse-form-group" style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--dersverse-primary); margin-top: 10px;">
-                    <label style="color: white; font-weight: bold;">Dosya Yükle (Direkt Yayınlanır)</label>
+                    <label style="font-weight: bold;">Dosya Yükle (Direkt Yayınlanır)</label>
                     <input type="file" id="dersverse-file-upload" accept=".pdf,.html,.mp4,.mp3,.zip,.png,.jpg,.jpeg" style="border: none; padding: 0.5rem 0;">
                 </div>
                 
@@ -351,6 +462,130 @@
             </form>
         </div>
     </div>
+
+    <!-- Ders & Test Çözme Kronometresi (Pomodoro) Modalı -->
+    <div class="dersverse-modal" id="dersverse-pomodoro-modal">
+        <div class="dersverse-modal-content" style="text-align: center;">
+            <h2>⏱️ Ders Çalışma Kronometresi</h2>
+            <p style="color: var(--dersverse-text-muted); margin-top: 5px;">Pomodoro Tekniği ile Odaklanarak Çalışın</p>
+            
+            <div class="pomodoro-display" id="pomodoro-timer-display">25:00</div>
+
+            <div class="pomodoro-controls">
+                <button class="dersverse-btn" id="pomo-start-btn" onclick="startPomodoro()">Başlat</button>
+                <button class="dersverse-btn dersverse-btn-outline" onclick="pausePomodoro()">Durdur</button>
+                <button class="dersverse-btn dersverse-btn-outline" onclick="resetPomodoro()">Sıfırla</button>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button class="dersverse-btn dersverse-btn-outline" onclick="closePomodoroModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bütünleşik Özellikler ve Temel Fonksiyonlar JS -->
+    <script>
+        // --- 1. LGS CANLI GERİ SAYIM SAYACI ---
+        function startLGSTimer() {
+            // LGS Tahmini Tarihi (6 Haziran 2027)
+            const lgsDate = new Date("June 6, 2027 09:30:00").getTime();
+
+            setInterval(function() {
+                const now = new Date().getTime();
+                const distance = lgsDate - now;
+
+                if (distance < 0) {
+                    document.getElementById("lgs-countdown").innerText = "Sınav Başladı!";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const el = document.getElementById("lgs-countdown");
+                if (el) {
+                    el.innerHTML = `${days}g ${hours}s ${minutes}d ${seconds}sn`;
+                }
+            }, 1000);
+        }
+
+        // --- 2. TEMA DEĞİŞTİRME (DARK / LIGHT MODE) ---
+        function dersverseToggleTheme() {
+            document.body.classList.toggle("light-theme");
+            const isLight = document.body.classList.contains("light-theme");
+            localStorage.setItem("dersverse_theme", isLight ? "light" : "dark");
+            
+            const btn = document.getElementById("dersverse-theme-toggle");
+            if (btn) {
+                btn.innerText = isLight ? "🌙 Gece Modu" : "☀️ Gündüz Modu";
+            }
+        }
+
+        function loadSavedTheme() {
+            const savedTheme = localStorage.getItem("dersverse_theme");
+            const btn = document.getElementById("dersverse-theme-toggle");
+            if (savedTheme === "light") {
+                document.body.classList.add("light-theme");
+                if (btn) btn.innerText = "🌙 Gece Modu";
+            } else {
+                if (btn) btn.innerText = "☀️ Gündüz Modu";
+            }
+        }
+
+        // --- 3. POMODORO KRONOMETRESİ MANTIĞI ---
+        let pomoInterval = null;
+        let pomoTimeLeft = 25 * 60; // 25 Dakika
+        let isPomoRunning = false;
+
+        function openPomodoroModal() {
+            document.getElementById("dersverse-pomodoro-modal").style.display = "flex";
+        }
+
+        function closePomodoroModal() {
+            document.getElementById("dersverse-pomodoro-modal").style.display = "none";
+        }
+
+        function updatePomoDisplay() {
+            const minutes = Math.floor(pomoTimeLeft / 60);
+            const seconds = pomoTimeLeft % 60;
+            const display = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            document.getElementById("pomodoro-timer-display").innerText = display;
+        }
+
+        function startPomodoro() {
+            if (isPomoRunning) return;
+            isPomoRunning = true;
+            pomoInterval = setInterval(() => {
+                if (pomoTimeLeft > 0) {
+                    pomoTimeLeft--;
+                    updatePomoDisplay();
+                } else {
+                    clearInterval(pomoInterval);
+                    isPomoRunning = false;
+                    alert("Süre doldu! Harika bir çalışma seansı geçirdiniz. 5 dakika mola verin.");
+                }
+            }, 1000);
+        }
+
+        function pausePomodoro() {
+            clearInterval(pomoInterval);
+            isPomoRunning = false;
+        }
+
+        function resetPomodoro() {
+            pausePomodoro();
+            pomoTimeLeft = 25 * 60;
+            updatePomoDisplay();
+        }
+
+        // Sayfa Yüklendiğinde Başlatılacak Olaylar
+        document.addEventListener("DOMContentLoaded", () => {
+            startLGSTimer();
+            loadSavedTheme();
+        });
+    </script>
 
     <!-- Tawk.to Canlı Destek Entegrasyonu -->
     <script type="text/javascript">
