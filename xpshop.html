@@ -250,12 +250,12 @@
         <!-- Ürünlerin ve Sandıkların Dinamik Basıldığı Alan (#shop-items-container) -->
         <div id="shop-items-container" class="dersverse-grid">
             <div class="loading-container">
-                <p>Mağaza ürünleri yükleniyor...</p>
+                <p>Mağaza ürünleri ve kullanıcı verileri senkronize ediliyor...</p>
             </div>
         </div>
     </main>
 
-    <!-- script.js Bağlantısı ve Oturum / Mağaza Başlatma Mantığı -->
+    <!-- script.js Bağlantısı -->
     <script src="script.js"></script>
     <script>
         // Tema Yönetimi
@@ -271,8 +271,8 @@
             }
         }
 
-        // Sayfa Yüklenme Anı Senkronizasyonu
-        window.addEventListener('DOMContentLoaded', async () => {
+        // Sayfa Tamamen Yüklendiğinde Mağazayı Güvenle Tetikle
+        window.addEventListener('load', async () => {
             const savedTheme = localStorage.getItem('dersverse_theme');
             if (savedTheme === 'light') {
                 document.documentElement.classList.add('light-theme');
@@ -280,25 +280,29 @@
                 if (btn) btn.innerHTML = '🌙 Gece Modu';
             }
 
-            // script.js içerisindeki fonksiyonları güvenle tetikle ve kullanıcı oturum/XP verilerini eşitle
-            setTimeout(async () => {
-                try {
-                    if (typeof updateUserStats === 'function') updateUserStats();
-                    if (typeof loadUserXP === 'function') await loadUserXP();
-                    
-                    // script.js içindeki asıl mağaza render fonksiyonunu doğrudan çalıştırır
-                    if (typeof renderShop === 'function') {
-                        renderShop();
-                    } else {
-                        const container = document.getElementById('shop-items-container');
-                        if (container) {
-                            container.innerHTML = '<div class="loading-container" style="color: #ef4444;">Mağaza öğeleri yüklenemedi. script.js yükleme sırasını kontrol edin.</div>';
+            try {
+                // script.js içerisindeki fonksiyonların yüklenmesini bekleyip çalıştırıyoruz
+                if (typeof updateUserStats === 'function') updateUserStats();
+                if (typeof loadUserXP === 'function') await loadUserXP();
+                
+                if (typeof renderShop === 'function') {
+                    renderShop();
+                } else {
+                    // Eğer fonksiyon hemen okunamazsa çok kısa bir gecikmeyle tekrar dene
+                    setTimeout(() => {
+                        if (typeof renderShop === 'function') {
+                            renderShop();
+                        } else {
+                            const container = document.getElementById('shop-items-container');
+                            if (container) {
+                                container.innerHTML = '<div class="loading-container" style="color: #ef4444;">Mağaza render edilemedi. Lütfen script.js dosyanızın konumunu kontrol edin.</div>';
+                            }
                         }
-                    }
-                } catch (err) {
-                    console.error("Mağaza başlatılırken hata oluştu:", err);
+                    }, 500);
                 }
-            }, 300);
+            } catch (err) {
+                console.error("Mağaza başlatma hatası:", err);
+            }
         });
     </script>
 </body>
