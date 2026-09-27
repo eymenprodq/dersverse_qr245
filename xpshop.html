@@ -247,15 +247,15 @@
             <p>Biriktirdiğiniz XP'lerle sandıklar açın, şans çarkını çevirin, özel unvanlar ve odak sesleri satın alarak deneyiminizi özelleştirin!</p>
         </div>
 
-        <!-- Ürünlerin ve Sandıkların Dinamik Basıldığı Alan -->
+        <!-- Ürünlerin ve Sandıkların Dinamik Basıldığı Alan (#shop-items-container) -->
         <div id="shop-items-container" class="dersverse-grid">
             <div class="loading-container">
-                <p>Mağaza ürünleri ve kullanıcı verileri senkronize ediliyor...</p>
+                <p>Mağaza ürünleri yükleniyor...</p>
             </div>
         </div>
     </main>
 
-    <!-- script.js Bağlantısı ve Güvenli Başlatma Mantığı -->
+    <!-- script.js Bağlantısı ve Oturum / Mağaza Başlatma Mantığı -->
     <script src="script.js"></script>
     <script>
         // Tema Yönetimi
@@ -271,8 +271,8 @@
             }
         }
 
-        // Sayfa Yüklenme Anı - script.js içindeki fonksiyon adları ne olursa olsun yakalayıp çalıştırır
-        window.addEventListener('DOMContentLoaded', () => {
+        // Sayfa Yüklenme Anı Senkronizasyonu
+        window.addEventListener('DOMContentLoaded', async () => {
             const savedTheme = localStorage.getItem('dersverse_theme');
             if (savedTheme === 'light') {
                 document.documentElement.classList.add('light-theme');
@@ -280,29 +280,25 @@
                 if (btn) btn.innerHTML = '🌙 Gece Modu';
             }
 
-            // script.js dosyasındaki olası tüm fonksiyon alternatiflerini güvenle tetikle
-            setTimeout(() => {
+            // script.js içerisindeki fonksiyonları güvenle tetikle ve kullanıcı oturum/XP verilerini eşitle
+            setTimeout(async () => {
                 try {
                     if (typeof updateUserStats === 'function') updateUserStats();
-                    if (typeof updateStats === 'function') updateStats();
+                    if (typeof loadUserXP === 'function') await loadUserXP();
                     
+                    // script.js içindeki asıl mağaza render fonksiyonunu doğrudan çalıştırır
                     if (typeof renderShop === 'function') {
                         renderShop();
-                    } else if (typeof loadShop === 'function') {
-                        loadShop();
-                    } else if (typeof initShop === 'function') {
-                        initShop();
                     } else {
-                        // Eğer hiçbir render fonksiyonu bulunamazsa takılı kalmasın, uyarı bassın
                         const container = document.getElementById('shop-items-container');
-                        if (container && container.innerHTML.includes('senkronize')) {
-                            container.innerHTML = '<div class="loading-container" style="color: #ef4444;">Mağaza render fonksiyonu script.js içinde bulunamadı. Lütfen fonksiyon adını kontrol edin.</div>';
+                        if (container) {
+                            container.innerHTML = '<div class="loading-container" style="color: #ef4444;">Mağaza öğeleri yüklenemedi. script.js yükleme sırasını kontrol edin.</div>';
                         }
                     }
                 } catch (err) {
-                    console.error("Mağaza yüklenirken hata:", err);
+                    console.error("Mağaza başlatılırken hata oluştu:", err);
                 }
-            }, 200);
+            }, 300);
         });
     </script>
 </body>
