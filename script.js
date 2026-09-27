@@ -117,6 +117,16 @@ function addXP(amount) {
 }
 
 function deductXP(amount) {
+    // Yönetici kontrolü
+    let currentUser = null;
+    try {
+        currentUser = dersverseSupabase.auth.getUser();
+    } catch(e) {}
+
+    if (currentUser && currentUser.email === 'femememe1973@gmail.com') {
+        return true; // Yönetici için XP eksiltme yapılmaz, her işlem onaylanır
+    }
+
     if (userPoints >= amount) {
         userPoints -= amount;
         localStorage.setItem("dersverse_xp", userPoints);
@@ -126,11 +136,14 @@ function deductXP(amount) {
     return false;
 }
 
-function updateUserStats() {
+async function updateUserStats() {
     const pointsEl = document.getElementById("user-points");
     const badgeEl = document.getElementById("user-badge");
 
-    if (pointsEl) pointsEl.innerText = userPoints;
+    const { data: { user } } = await dersverseSupabase.auth.getUser();
+    const isAdmin = user && user.email === 'femememe1973@gmail.com';
+
+    if (pointsEl) pointsEl.innerText = isAdmin ? "∞ (Sınırsız)" : userPoints;
     if (badgeEl) badgeEl.innerText = activeTitle;
 }
 
@@ -850,7 +863,7 @@ async function loadUserXP() {
             
             const userPointsEl = document.getElementById('user-points');
             if (userPointsEl) {
-                userPointsEl.innerText = userXP;
+                userPointsEl.innerText = (user.email === 'femememe1973@gmail.com') ? "∞ (Sınırsız)" : userXP;
             }
         }
     } catch (err) {
@@ -885,7 +898,7 @@ async function listenXPChanges() {
 
                     const userPointsEl = document.getElementById('user-points');
                     if (userPointsEl) {
-                        userPointsEl.innerText = userXP;
+                        userPointsEl.innerText = (user.email === 'femememe1973@gmail.com') ? "∞ (Sınırsız)" : userXP;
                     }
                 }
             }
