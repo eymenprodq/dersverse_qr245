@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-site-verification" content="7HO7fMJQkkZRbFemkvJ7JASrZmYOfqoAglMJqsvDW9o" />
     <title>Öğretmen Portalı - DersVerse</title>
-    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -138,10 +136,6 @@
             font-weight: 600;
         }
 
-        .dersverse-toggle-mode a:hover {
-            text-decoration: underline;
-        }
-
         .back-home {
             display: block;
             text-align: center;
@@ -149,10 +143,6 @@
             color: var(--dersverse-text-muted);
             text-decoration: none;
             font-size: 0.85rem;
-        }
-
-        .back-home:hover {
-            color: var(--dersverse-text);
         }
     </style>
 </head>
@@ -203,21 +193,7 @@
         <a href="index.html" class="back-home">← Ana Sayfaya Dön</a>
     </div>
 
-    <!-- Tawk.to Canlı Destek Entegrasyonu -->
-    <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/6aaa9769d5bb1934472d59e2/1k2l5utmu';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
-    </script>
-
     <script>
-        // DersVerse - Supabase Yapılandırması
         const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
         const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
         const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
@@ -268,8 +244,6 @@
                 const school = document.getElementById('dersverse-school').value;
                 const branch = document.getElementById('dersverse-branch').value;
 
-                // Kayıt olurken is_teacher: false (admin onaylayana kadar sahte giriş yapılmasın diye) 
-                // veya pending statusüyle metadata kaydediyoruz.
                 const { data, error } = await dersverseSupabase.auth.signUp({
                     email: email,
                     password: password,
@@ -278,8 +252,8 @@
                             full_name: fullName,
                             school: school,
                             branch: branch,
-                            role: 'teacher_pending', // Onay bekliyor
-                            is_teacher: false // Onaylanana kadar rozet yok
+                            role: 'teacher_pending',
+                            is_teacher: false
                         }
                     }
                 });
@@ -288,6 +262,18 @@
                     alert("Kayıt hatası: " + error.message);
                     submitBtn.disabled = false;
                 } else {
+                    // Admin Paneline Düşecek Bildirim Kaydı
+                    await dersverseSupabase
+                        .from('notifications')
+                        .insert([
+                            {
+                                title: 'Yeni Öğretmen Kaydı',
+                                message: `${fullName} (${branch} - ${school}) adlı öğretmen başvuru yaptı.`,
+                                user_email: email,
+                                is_read: false
+                            }
+                        ]);
+
                     alert("Öğretmen başvurunuz başarıyla alındı! Yönetici onayından sonra hesabınız aktifleşecektir.");
                     isRegisterMode = false;
                     document.getElementById('dersverse-teacher-auth-form').reset();
@@ -307,12 +293,10 @@
                 } else {
                     const user = data.user;
                     const role = user.user_metadata?.role;
-
-                    // Eğer admin ise (özel mailiniz) direkt geçiş izni verelim
                     const isAdmin = user.email === 'femememe1973@gmail.com';
 
                     if (!isAdmin && role === 'teacher_pending') {
-                        alert("Hesabınız henüz yönetici tarafından onaylanmamıştır. Lütfen onay sürecinin tamamlanmasını bekleyin.");
+                        alert("Hesabınız henüz yönetici tarafından onaylanmamıştır.");
                         await dersverseSupabase.auth.signOut();
                         submitBtn.disabled = false;
                         return;
