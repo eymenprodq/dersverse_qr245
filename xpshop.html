@@ -226,6 +226,7 @@
             
             <div class="dersverse-nav-right">
                 <span id="user-badge" class="dersverse-badge">Yükleniyor...</span>
+                <!-- Adminler için sınırsız XP ibaresi script.js tarafından buraya yansıtılır -->
                 <span class="dersverse-badge">💎 <span id="user-points">0</span> XP</span>
                 <button id="dersverse-theme-toggle" class="dersverse-btn dersverse-btn-outline" onclick="dersverseToggleTheme()">
                     ☀️ Gündüz Modu
@@ -255,10 +256,10 @@
         </div>
     </main>
 
-    <!-- script.js Bağlantısı ve Güvenli Başlatma Mantığı -->
+    <!-- script.js Bağlantısı ve Oturum Senkronizasyonu -->
     <script src="script.js"></script>
     <script>
-        // Tema Yönetimi ve Otomatik Durum Kontrolü
+        // Tema Yönetimi
         function dersverseToggleTheme() {
             const htmlElement = document.documentElement;
             htmlElement.classList.toggle('light-theme');
@@ -271,9 +272,9 @@
             }
         }
 
-        // Sayfa Yüklenme Anı Güvenlik Kontrolleri
+        // Sayfa Yüklenme Anı Senkronizasyon Kontrolleri
         window.addEventListener('DOMContentLoaded', () => {
-            // Kaydedilmiş tema tercihini uygula
+            // Tema tercihini yükle
             const savedTheme = localStorage.getItem('dersverse_theme');
             if (savedTheme === 'light') {
                 document.documentElement.classList.add('light-theme');
@@ -281,7 +282,7 @@
                 if (btn) btn.innerHTML = '🌙 Gece Modu';
             }
 
-            // script.js içindeki fonksiyonları hatasız tetikle
+            // script.js içerisindeki ana sayfa ile birebir aynı XP ve Admin yetki fonksiyonlarını tetikle
             try {
                 if (typeof updateUserStats === 'function') {
                     updateUserStats();
