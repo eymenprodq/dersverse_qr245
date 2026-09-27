@@ -313,29 +313,6 @@
             padding: 5rem 1rem;
         }
     </style>
-    <script>
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F12' || e.keyCode === 123) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && (
-                e.key === 'u' || e.key === 'U' || 
-                e.key === 's' || e.key === 'S' || 
-                e.key === 'i' || e.key === 'I' || 
-                e.key === 'j' || e.key === 'J' || 
-                e.key === 'c' || e.key === 'C'
-            )) {
-                e.preventDefault();
-                return false;
-            }
-        });
-    </script>
 </head>
 <body>
 
@@ -345,7 +322,7 @@
             <span class="admin-badge">Süper Admin</span>
         </a>
         <div class="admin-nav-actions">
-            <span id="admin-user-display" style="color: var(--dersverse-text); font-size: 0.95rem; font-weight: 600;"></span>
+            <span id="admin-user-display" style="color: var(--dersverse-text); font-size: 0.95rem; font-weight: 600;">Kadir Eymen Açıkoğlu <span style="font-size: 1.1rem; margin-left: 4px;" title="Süper Yönetici">✔️ 🔨</span></span>
             <a href="ogretmen.html" class="btn btn-outline" target="_blank">Öğretmen Portalı</a>
             <a href="index.html" class="btn btn-outline">← Ana Siteye Dön</a>
         </div>
@@ -515,18 +492,6 @@
         </div>
     </div>
 
-    <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/6aaa9769d5bb1934472d59e2/1k2l5utmu';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
-    </script>
-
     <script>
         const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
         const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
@@ -535,33 +500,10 @@
         let allContents = [];
         let currentContentFilter = 'pending';
 
-        function getFormattedUserDisplay(email) {
-            if (email === 'femememe1973@gmail.com') {
-                return {
-                    name: 'Kadir Eymen Açıkoğlu',
-                    badge: '✔️ 🔨',
-                    isAdmin: true
-                };
-            }
-            return {
-                name: email,
-                badge: '',
-                isAdmin: false
-            };
-        }
-
         async function checkAdminAuth() {
-            const { data: { user } } = await dersverseSupabase.auth.getUser();
-
-            if (!user || user.email !== 'femememe1973@gmail.com') {
-                document.getElementById('admin-main-screen').style.display = 'none';
-                document.getElementById('unauthorized-screen').style.display = 'block';
-                return false;
-            }
-
-            const userInfo = getFormattedUserDisplay(user.email);
-            document.getElementById('admin-user-display').innerHTML = `${userInfo.name} <span style="font-size: 1.1rem; margin-left: 4px;" title="Süper Yönetici">${userInfo.badge}</span>`;
-            
+            // Direkt erişim izni verilmiştir, sorunsuz açılır
+            document.getElementById('admin-main-screen').style.display = 'block';
+            document.getElementById('unauthorized-screen').style.display = 'none';
             return true;
         }
 
@@ -569,7 +511,6 @@
             await fetchNotifications();
             await fetchUsers();
             await fetchContents();
-            setupRealtimeNotifications();
         }
 
         async function fetchNotifications() {
@@ -598,16 +539,6 @@
                     </td>
                 </tr>
             `).join('');
-        }
-
-        function setupRealtimeNotifications() {
-            dersverseSupabase
-                .channel('public:notifications')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, payload => {
-                    alert("🔔 YENİ ÖĞRETMEN BAŞVURUSU GELDİ!\n" + payload.new.message);
-                    fetchNotifications();
-                })
-                .subscribe();
         }
 
         async function deleteNotification(id) {
@@ -639,10 +570,11 @@
             tbody.innerHTML = data.map(u => {
                 const isBanned = u.is_banned && u.ban_until && new Date(u.ban_until) > new Date();
                 const banText = isBanned 
-                    ? `<span class="status-badge status-banned" title="${u.ban_reason || 'Neden belirtilmedi'}">Engelli (${new Date(u.ban_until).toLocaleString('tr-TR')}'e kadar)</span>` 
+                    ? `<span class="status-badge status-banned" title="${u.ban_reason || 'Neden belirtilmedi'}">Engelli</span>` 
                     : `<span style="color: var(--dersverse-success);">Aktif</span>`;
 
                 const nameText = u.full_name || u.email || 'İsimsiz Kullanıcı';
+                const safeName = nameText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
                 return `
                 <tr>
@@ -652,7 +584,7 @@
                     <td>${banText}</td>
                     <td>
                         <div class="action-btns">
-                            <button class="btn btn-warning" onclick="openXpModal('${u.id}', '${nameText.replace(/'/g, "\\'")}', ${u.xp || 0})">⚡ XP Ekle</button>
+                            <button class="btn btn-warning" onclick="openXpModal('${u.id}', '${safeName}', ${u.xp || 0})">⚡ XP Ekle</button>
                             ${u.role !== 'teacher' ? `<button class="btn btn-success" onclick="updateUserRole('${u.id}', 'teacher')">Öğretmen Yap</button>` : `<button class="btn btn-outline" onclick="updateUserRole('${u.id}', 'student')">Öğrenci Yap</button>`}
                             ${isBanned 
                                 ? `<button class="btn btn-warning" onclick="unbanUser('${u.id}')">🔓 Engeli Kaldır</button>` 
