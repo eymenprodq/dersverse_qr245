@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DersVerse - XP Mağazası</title>
+    <title>DersVerse - XP Mağazası ve Şans Çarkı</title>
     
     <!-- PWA / Favicon -->
     <link rel="icon" type="image/png" href="dersverse-logo-512x512.png">
@@ -23,77 +23,33 @@
         <!-- Canlı Puan ve Rozet Alanı -->
         <div class="dersverse-user-stats">
             <span>⭐ Puanınız: <strong id="user-points">0</strong> XP</span>
-            <span class="dersverse-badge" id="user-badge">🔥 LGS Canavarı</span>
+            <span class="dersverse-badge" id="user-badge">🔥 Yükleniyor...</span>
         </div>
 
         <div class="dersverse-nav-actions">
+            <button id="dersverse-theme-toggle" class="dersverse-btn dersverse-btn-outline" onclick="dersverseToggleTheme()">☀️ Gündüz Modu</button>
             <a href="index.html" class="dersverse-btn dersverse-btn-outline">🏠 Ana Sayfaya Dön</a>
         </div>
     </header>
 
     <!-- Mağaza Ana İçeriği -->
-    <main class="dersverse-main">
-        <section class="dersverse-hero">
-            <h1>🛒 DersVerse XP Mağazası</h1>
-            <p>Ders çalışarak, soru çözerek ve içerik ekleyerek kazandığınız XP'lerle profilinizi özelleştirin!</p>
+    <main class="dersverse-main" style="padding: 20px; max-width: 900px; margin: 0 auto;">
+        <section class="dersverse-hero" style="text-align: center; margin-bottom: 20px;">
+            <h1>🛒 DersVerse XP Mağazası ve Şans Çarkı</h1>
+            <p>Sandıklar al, stokla, toplu satın al, şans çarkını çevir ve özel ayrıcalıklar kazan!</p>
         </section>
 
-        <!-- Mağaza Ürünleri Izgarası -->
-        <div class="dersverse-grid" id="shop-items-page-container">
-            <p style="text-align: center; grid-column: 1/-1;">Mağaza ürünleri yükleniyor...</p>
+        <!-- Mağaza Ürünleri Konteyneri (script.js içerisindeki renderShop fonksiyonu burayı otomatik doldurur) -->
+        <div id="shop-items-container" style="display: flex; flex-direction: column; gap: 10px;">
+            <p style="text-align: center; color: #888;">Mağaza ürünleri yükleniyor...</p>
         </div>
     </main>
 
+    <!-- Şans Çarkı / Kutu Açılım Animasyon Modali -->
+    <div id="dersverse-wheel-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 99999;">
+    </div>
+
     <!-- Harici JavaScript Dosyası -->
     <script src="script.js"></script>
-    <script>
-        // Sayfa yüklendiğinde mağaza ürünlerini çizdir
-        document.addEventListener('DOMContentLoaded', () => {
-            renderShopPage();
-        });
-
-        function renderShopPage() {
-            const container = document.getElementById('shop-items-page-container');
-            if (!container) return;
-
-            container.innerHTML = shopItems.map(item => {
-                const isOwned = userInventory.includes(item.id);
-                const isActive = activeTitle === item.value;
-
-                return `
-                    <div class="dersverse-card" style="text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div>
-                            <div class="dersverse-card-tag" style="display: inline-block;">${item.type === 'title' ? 'Unvan' : 'Ayrıcalık'}</div>
-                            <h2 class="dersverse-card-title" style="margin: 1rem 0; font-size: 1.4rem;">${escapeHtml(item.name)}</h2>
-                            <p class="dersverse-card-desc">${escapeHtml(item.desc)}</p>
-                            <div style="font-size: 1.25rem; font-weight: bold; color: #6366f1; margin: 1rem 0;">
-                                💰 ${item.cost} XP
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 1rem;">
-                            ${isOwned 
-                                ? (isActive 
-                                    ? `<button class="dersverse-btn" style="width:100%; background: #10b981; cursor: default;">✔ Kuşanıldı</button>`
-                                    : `<button class="dersverse-btn dersverse-btn-outline" style="width:100%;" onclick="equipTitleFromPage('${escapeHtml(item.value)}')">Kuşan</button>`)
-                                : `<button class="dersverse-btn" style="width:100%;" onclick="buyShopItemFromPage('${item.id}',${item.cost})">Satın Al</button>`
-                            }
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function buyShopItemFromPage(itemId, cost) {
-            if (buyShopItem(itemId, cost)) {
-                renderShopPage();
-            }
-        }
-
-        function equipTitleFromPage(titleValue) {
-            equipTitle(titleValue);
-            renderShopPage();
-        }
-    </script>
 </body>
 </html>
