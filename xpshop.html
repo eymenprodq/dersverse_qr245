@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DersVerse - XP Mağazası</title>
+    
+    <!-- PWA / Favicon -->
+    <link rel="icon" type="image/png" href="dersverse-logo-512x512.png">
+    
+    <!-- Harici CSS Tasarım Dosyası -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Üst Menü / Navigasyon Barı -->
+    <header class="dersverse-header">
+        <a href="index.html" class="dersverse-logo">DersVerse</a>
+        
+        <!-- Canlı Puan ve Rozet Alanı -->
+        <div class="dersverse-user-stats">
+            <span>⭐ Puanınız: <strong id="user-points">0</strong> XP</span>
+            <span class="dersverse-badge" id="user-badge">🔥 LGS Canavarı</span>
+        </div>
+
+        <div class="dersverse-nav-actions">
+            <a href="index.html" class="dersverse-btn dersverse-btn-outline">🏠 Ana Sayfaya Dön</a>
+        </div>
+    </header>
+
+    <!-- Mağaza Ana İçeriği -->
+    <main class="dersverse-main">
+        <section class="dersverse-hero">
+            <h1>🛒 DersVerse XP Mağazası</h1>
+            <p>Ders çalışarak, soru çözerek ve içerik ekleyerek kazandığınız XP'lerle profilinizi özelleştirin!</p>
+        </section>
+
+        <!-- Mağaza Ürünleri Izgarası -->
+        <div class="dersverse-grid" id="shop-items-page-container">
+            <p style="text-align: center; grid-column: 1/-1;">Mağaza ürünleri yükleniyor...</p>
+        </div>
+    </main>
+
+    <!-- Harici JavaScript Dosyası -->
+    <script src="script.js"></script>
+    <script>
+        // Sayfa yüklendiğinde mağaza ürünlerini çizdir
+        document.addEventListener('DOMContentLoaded', () => {
+            renderShopPage();
+        });
+
+        function renderShopPage() {
+            const container = document.getElementById('shop-items-page-container');
+            if (!container) return;
+
+            container.innerHTML = shopItems.map(item => {
+                const isOwned = userInventory.includes(item.id);
+                const isActive = activeTitle === item.value;
+
+                return `
+                    <div class="dersverse-card" style="text-align: center; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div class="dersverse-card-tag" style="display: inline-block;">${item.type === 'title' ? 'Unvan' : 'Ayrıcalık'}</div>
+                            <h2 class="dersverse-card-title" style="margin: 1rem 0; font-size: 1.4rem;">${escapeHtml(item.name)}</h2>
+                            <p class="dersverse-card-desc">${escapeHtml(item.desc)}</p>
+                            <div style="font-size: 1.25rem; font-weight: bold; color: #6366f1; margin: 1rem 0;">
+                                💰 ${item.cost} XP
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1rem;">
+                            ${isOwned 
+                                ? (isActive 
+                                    ? `<button class="dersverse-btn" style="width:100%; background: #10b981; cursor: default;">✔ Kuşanıldı</button>`
+                                    : `<button class="dersverse-btn dersverse-btn-outline" style="width:100%;" onclick="equipTitleFromPage('${escapeHtml(item.value)}')">Kuşan</button>`)
+                                : `<button class="dersverse-btn" style="width:100%;" onclick="buyShopItemFromPage('${item.id}',${item.cost})">Satın Al</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function buyShopItemFromPage(itemId, cost) {
+            if (buyShopItem(itemId, cost)) {
+                renderShopPage();
+            }
+        }
+
+        function equipTitleFromPage(titleValue) {
+            equipTitle(titleValue);
+            renderShopPage();
+        }
+    </script>
+</body>
+</html>
