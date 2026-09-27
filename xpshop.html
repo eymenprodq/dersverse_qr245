@@ -1,52 +1,296 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DersVerse XP Mağazası</title>
+    
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Supabase Bağlantı Yapılandırması ve Güvenli İstemci Başlatma
         const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
         const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
-        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+        
+        let dersverseSupabase;
+        try {
+            dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+        } catch (error) {
+            console.error('Supabase başlatılırken kritik hata oluştu:', error);
+        }
     </script>
-    <link rel="stylesheet" href="style.css">
+
+    <!-- Kapsamlı ve Profesyonel Tasarım / Tema Stilleri -->
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #111827;
+            --bg-card-hover: #1f2937;
+            --border-color: #1f2937;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent-glow: rgba(99, 102, 241, 0.25);
+            --transition-speed: 0.3s;
+        }
+
+        .light-theme {
+            --bg-main: #f3f4f6;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f9fafb;
+            --border-color: #e5e7eb;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --accent-glow: rgba(79, 70, 229, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Profesyonel Header Yapısı */
+        .dersverse-header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .dersverse-container {
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dersverse-logo {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dersverse-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dersverse-badge {
+            background: var(--accent-glow);
+            color: var(--primary);
+            padding: 7px 16px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Buton Tasarımları */
+        .dersverse-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px var(--accent-glow);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .dersverse-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .dersverse-btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            box-shadow: none;
+        }
+
+        .dersverse-btn-outline:hover {
+            background: var(--bg-card-hover);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Ana İçerik Alanı */
+        main.dersverse-main-content {
+            flex: 1;
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .shop-header-section {
+            margin-bottom: 35px;
+            text-align: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .shop-header-section h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.025em;
+        }
+
+        .shop-header-section p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* Ürün Izgarası (Grid) */
+        .dersverse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .loading-container {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Responsive Düzenlemeler */
+        @media (max-width: 768px) {
+            .dersverse-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .dersverse-nav-right {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .shop-header-section h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
+    <!-- Üst Bilgi Çubuğu ve Navigasyon -->
     <header class="dersverse-header">
-        <div class="dersverse-container dersverse-header-flex">
-            <a href="index.html" class="dersverse-logo">🚀 DersVerse XP Mağazası</a>
+        <div class="dersverse-container">
+            <a href="index.html" class="dersverse-logo">
+                🚀 DersVerse XP Mağazası
+            </a>
             
             <div class="dersverse-nav-right">
-                <!-- Statik değerler kaldırıldı, script.js burayı anlık güncelleyecek -->
                 <span id="user-badge" class="dersverse-badge">Yükleniyor...</span>
-                <span class="dersverse-badge">💎 <span id="user-points">--</span> XP</span>
-                <button id="dersverse-theme-toggle" class="dersverse-btn dersverse-btn-outline" onclick="dersverseToggleTheme()">☀️ Gündüz Modu</button>
+                <span class="dersverse-badge">💎 <span id="user-points">0</span> XP</span>
+                <button id="dersverse-theme-toggle" class="dersverse-btn dersverse-btn-outline" onclick="dersverseToggleTheme()">
+                    ☀️ Gündüz Modu
+                </button>
             </div>
         </div>
     </header>
 
-    <main class="dersverse-container" style="padding: 40px 20px;">
+    <!-- Mağaza Ana Gövdesi -->
+    <main class="dersverse-main-content">
         <div style="margin-bottom: 25px;">
-            <a href="index.html" class="dersverse-btn dersverse-btn-outline" style="text-decoration: none; display: inline-block; margin-bottom: 15px;">← Ana Sayfaya Dön</a>
-            <h1 style="font-size: 1.8rem; margin-bottom: 8px;">DersVerse XP Mağazası & Koleksiyon</h1>
-            <p style="color: var(--dersverse-text-muted);">Biriktirdiğiniz XP'lerle sandıklar açın, şans çarkını çevirin, özel unvanlar ve odak sesleri satın alın!</p>
+            <a href="index.html" class="dersverse-btn dersverse-btn-outline" style="text-decoration: none;">
+                ← Ana Sayfaya Dön
+            </a>
         </div>
 
+        <div class="shop-header-section">
+            <h1>Ultra XP Mağazası & Koleksiyon</h1>
+            <p>Biriktirdiğiniz XP'lerle sandıklar açın, şans çarkını çevirin, özel unvanlar ve odak sesleri satın alarak deneyiminizi özelleştirin!</p>
+        </div>
+
+        <!-- Ürünlerin ve Sandıkların Dinamik Basıldığı Alan -->
         <div id="shop-items-container" class="dersverse-grid">
-            <p style="color: var(--dersverse-text-muted);">Mağaza ürünleri yükleniyor...</p>
+            <div class="loading-container">
+                <p>Mağaza ürünleri ve kullanıcı verileri senkronize ediliyor...</p>
+            </div>
         </div>
     </main>
 
+    <!-- script.js Bağlantısı ve Güvenli Başlatma Mantığı -->
     <script src="script.js"></script>
     <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            if (typeof renderShop === 'function') {
-                renderShop();
+        // Tema Yönetimi ve Otomatik Durum Kontrolü
+        function dersverseToggleTheme() {
+            const htmlElement = document.documentElement;
+            htmlElement.classList.toggle('light-theme');
+            const isLight = htmlElement.classList.contains('light-theme');
+            localStorage.setItem('dersverse_theme', isLight ? 'light' : 'dark');
+            
+            const btn = document.getElementById('dersverse-theme-toggle');
+            if (btn) {
+                btn.innerHTML = isLight ? '🌙 Gece Modu' : '☀️ Gündüz Modu';
             }
-            if (typeof updateUserStats === 'function') {
-                updateUserStats();
+        }
+
+        // Sayfa Yüklenme Anı Güvenlik Kontrolleri
+        window.addEventListener('DOMContentLoaded', () => {
+            // Kaydedilmiş tema tercihini uygula
+            const savedTheme = localStorage.getItem('dersverse_theme');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.add('light-theme');
+                const btn = document.getElementById('dersverse-theme-toggle');
+                if (btn) btn.innerHTML = '🌙 Gece Modu';
+            }
+
+            // script.js içindeki fonksiyonları hatasız tetikle
+            try {
+                if (typeof updateUserStats === 'function') {
+                    updateUserStats();
+                }
+                if (typeof renderShop === 'function') {
+                    renderShop();
+                }
+            } catch (err) {
+                console.error("Modüller yüklenirken hata oluştu:", err);
             }
         });
     </script>
