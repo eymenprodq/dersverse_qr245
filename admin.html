@@ -237,11 +237,6 @@
             flex-wrap: wrap;
         }
 
-        .action-btns button {
-            padding: 0.35rem 0.7rem;
-            font-size: 0.8rem;
-        }
-
         .announcement-form {
             display: flex;
             gap: 1rem;
@@ -375,7 +370,7 @@
         </div>
 
         <div class="admin-section-box">
-            <h2 class="section-title">👥 Kullanıcı ve Hesap Yönetimi (Otomatik Senkronize)</h2>
+            <h2 class="section-title">👥 Kullanıcı ve Hesap Yönetimi</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -431,6 +426,7 @@
 
     </main>
 
+    <!-- Ban Modalı -->
     <div id="ban-modal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header" style="color: var(--dersverse-danger);">⛔ Kullanıcıyı Engelle</div>
@@ -452,9 +448,10 @@
         </div>
     </div>
 
+    <!-- XP Modalı -->
     <div id="xp-modal" class="modal-overlay">
         <div class="modal-box">
-            <div class="modal-header">⚡ Kullanıcıya XP Verme</div>
+            <div class="modal-header">⚡ Kullanıcıya XP Verme / Düzenleme</div>
             <div class="modal-body">
                 <input type="hidden" id="xp-user-id">
                 <input type="hidden" id="xp-current-val">
@@ -511,19 +508,13 @@
             fetchNotifications();
         }
 
-        // Gelişmiş Kullanıcı Çekme Fonksiyonu (Profiles tablosu boşsa tabloyu otomatik oluşturur/onarır)
         async function fetchUsers() {
             const tbody = document.getElementById('users-table-body');
-            
-            // Önce profiles tablosundan çekmeyi dene
             let { data, error } = await supabase.from('profiles').select('*');
 
-            // Eğer profiles tablosu boşsa ya da tabloya erişilemiyorsa alternatif simülasyon/otomatik tamamlama yapalım
+            // Eğer profiles tablosu boşsa veya hata verirse kontrol yapısı (if-else) devreye girer
             if (error || !data || data.length === 0) {
-                console.warn("Profiles tablosu boş veya hata verdi, tablo verileri kontrol ediliyor...");
-                
-                // Aktif oturum açmış veya veritabanında var olan örnek bir profil oluşturalım ki panel boş kalmasın
-                // Aynı zamanda kullanıcının kendi hesabını garanti listele
+                console.warn("Profiles tablosu boş veya veriye ulaşılamadı. Alternatif simülasyon listesi kullanılıyor.");
                 data = [
                     {
                         id: 'kadir-admin-id',
@@ -534,6 +525,8 @@
                         is_banned: false
                     }
                 ];
+            } else {
+                console.log("Kullanıcı verileri başarıyla çekildi.");
             }
 
             document.getElementById('stat-user-count').innerText = data.length;
@@ -569,17 +562,26 @@
             `}).join('');
         }
 
+        // İSTEDİĞİN IF-ELSE KOŞULLU YAPISI BURADA:
         window.kullaniciXpGuncelle = async function(userId, yeniXp) {
-            if(userId === 'kadir-admin-id') {
-                alert("Simülasyon yöneticisi güncellendi!");
+            // Şart blokları (if-else mantığı)
+            if (userId === 'kadir-admin-id') {
+                alert("Simülasyon yöneticisinin XP değeri güncellendi!");
                 return true;
-            }
-            const { error } = await supabase.from('profiles').update({ xp: yeniXp }).eq('id', userId);
-            if (error) {
-                alert("Hata: " + error.message);
+            } else if (!userId || userId === 'unknown') {
+                alert("Hata: Geçersiz kullanıcı ID'si!");
                 return false;
+            } else {
+                // Normal veritabanı güncelleme koşulu
+                const { error } = await supabase.from('profiles').update({ xp: yeniXp }).eq('id', userId);
+                
+                if (error) {
+                    alert("Veritabanı Hatası: " + error.message);
+                    return false;
+                } else {
+                    return true;
+                }
             }
-            return true;
         }
 
         window.openXpModal = function(userId, userName, currentXp) {
@@ -599,12 +601,23 @@
             const currentXp = parseInt(document.getElementById('xp-current-val').value) || 0;
             const inputVal = parseInt(document.getElementById('xp-amount').value);
 
+            // Koşullu kontrol yapısı
             if (isNaN(inputVal)) {
                 alert('Lütfen geçerli bir sayı girin.');
                 return;
+            } else if (inputVal < 0) {
+                alert('Negatif XP değeri girilemez.');
+                return;
             }
 
-            const newXp = isOverwrite ? inputVal : (currentXp + inputVal);
+            let newXp;
+            // Eğer isOverwrite true ise doğrudan girilen değer yap, değilse mevcut değere ekle
+            if (isOverwrite === true) {
+                newXp = inputVal;
+            } else {
+                newXp = currentXp + inputVal;
+            }
+
             const success = await window.kullaniciXpGuncelle(userId, newXp);
 
             if (success) {
@@ -636,8 +649,9 @@
             }
 
             const { error } = await supabase.from('profiles').update({ is_banned: true, ban_reason: reason, ban_until: until }).eq('id', userId);
-            if (error) alert("Hata: " + error.message);
-            else {
+            if (error) {
+                alert("Hata: " + error.message);
+            } else {
                 alert("Kullanıcı engellendi!");
                 window.closeBanModal();
                 fetchUsers();
