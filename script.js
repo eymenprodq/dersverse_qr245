@@ -813,6 +813,91 @@ window.onload = () => {
     loadSavedTheme();
     updateUserStats();
     dersverseCheckUser();
+
+    // ==========================================
+// SUPABASE XP ÇEKME VE CANLI DİNLEME SİSTEMİ
+// ==========================================
+
+// 1. Giriş yapmış kullanıcının profilindeki XP verisini Supabase'den çekme
+async function loadUserXP() {
+    if (!supabase) return;
+
+    try {
+        // Oturum açmış aktif kullanıcıyı al
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user) {
+            console.log("Kullanıcı oturum açmamış veya oturum bilgisi alınamadı.");
+            return;
+        }
+
+        // Profiles tablosundan kullanıcının XP değerini sorgula
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('xp')
+            .eq('id', user.id)
+            .single();
+
+        if (error) {
+            console.error("XP çekilirken hata oluştu:", error.message);
+            return;
+        }
+
+        if (data) {
+            // LocalStorage belleğini ve arayüzü güncelle
+            userXP = data.xp || 0;
+            localStorage.setItem("user_xp", userXP);
+            
+            const userPointsEl = document.getElementById('user-points');
+            if (userPointsEl) {
+                userPointsEl.innerText = userXP;
+            }
+        }
+    } catch (err) {
+        console.error("loadUserXP çalışırken beklenmeyen hata:", err);
+    }
+}
+
+// 2. Supabase Realtime ile profiles tablosunu canlı dinleme
+async function listenXPChanges() {
+    if (!supabase) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    supabase
+        .channel('public:profiles:' + user.id)
+        .on(
+            'postgres_changes',
+            {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'profiles',
+                filter: `id=eq.${user.id}` // Sadece oturum açan bu kullanıcının değişimi
+            },
+            (payload) => {
+                if (payload.new && typeof payload.new.xp !== 'undefined') {
+                    console.log("Canlı XP Güncellendi:", payload.new.xp);
+                    
+                    // Hem belleği hem de arayüzü eşzamanlı güncelle
+                    userXP = payload.new.xp;
+                    localStorage.setItem("user_xp", userXP);
+
+                    const userPointsEl = document.getElementById('user-points');
+                    if (userPointsEl) {
+                        userPointsEl.innerText = userXP;
+                    }
+                }
+            }
+        )
+        .subscribe();
+}
+
+// DOM Yüklendiğinde Dinleyicileri ve Yüklemeyi Başlat
+document.addEventListener('DOMContentLoaded', () => {
+    loadUserXP();
+    listenXPChanges();
+});
     dersverseLoadContents();
     checkUserBannedStatus();
 };
