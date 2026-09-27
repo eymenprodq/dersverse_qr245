@@ -206,9 +206,9 @@ function closeShopModal() {
     if (modal) modal.style.display = "none";
 }
 
-// Sınırları Zorlayan Zenginleştirilmiş Mağaza Ürünleri Kataloğu
+// Zenginleştirilmiş Mağaza Ürünleri Kataloğu
 const shopItems = [
-    // Şans Sandıkları (Stoklanabilir)
+    // Şans Sandıkları (Stoklanabilir ve Toplu Alınabilir)
     { id: 'chest_1', name: '🎁 Bronz Şans Sandığı', cost: 100, type: 'chest', value: 'bronz', desc: 'İçinden 50-300 arası XP çıkar! Stoklanabilir.' },
     { id: 'chest_2', name: '🎁 Gümüş Şans Sandığı', cost: 250, type: 'chest', value: 'gumus', desc: 'İçinden 150-600 arası XP çıkar! Stoklanabilir.' },
     { id: 'chest_3', name: '🎁 Altın Şans Sandığı', cost: 500, type: 'chest', value: 'altin', desc: 'İçinden 400-1200 arası XP çıkar! Stoklanabilir.' },
@@ -254,54 +254,70 @@ function renderShop() {
                            (item.type === 'effect' && activeThemeEffect === item.value) ||
                            (item.type === 'audio' && activeAudioTheme === item.value);
 
-        let buttonText = isUserAdmin() ? "Ücretsiz Al" : "Satın Al";
-        let buttonAction = `buyShopItem('${item.id}', ${item.cost})`;
-
         let stockInfoHtml = '';
         if (item.type === 'chest') {
             stockInfoHtml = `<br><small style="color: #10b981; font-weight: bold;">Envanterdeki Stok: ${stockCount} Adet</small>`;
         }
 
-        let actionArea = `<button class="dersverse-btn" onclick="${buttonAction}">${buttonText}</button>`;
+        let actionButtons = '';
 
-        if (item.type === 'chest' && stockCount > 0) {
-            actionArea = `
-                <div style="display: flex; gap: 5px;">
-                    <button class="dersverse-btn" onclick="${buttonAction}">Stokla</button>
-                    <button class="dersverse-btn dersverse-btn-outline" style="background: #10b981; color: white;" onclick="triggerWheelAnimation('${item.value}', '${item.id}')">🎡 Çevir (${stockCount})</button>
+        if (item.type === 'chest') {
+            actionButtons = `
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                    <div style="display: flex; gap: 4px;">
+                        <button class="dersverse-btn" style="padding: 5px 10px; font-size: 0.75rem;" onclick="buyShopItem('${item.id}', ${item.cost}, 1)">Satın Al</button>
+                        <button class="dersverse-btn dersverse-btn-outline" style="padding: 5px 10px; font-size: 0.75rem;" onclick="buyBulkPrompt('${item.id}', ${item.cost})">Toplu Al</button>
+                    </div>
+                    ${stockCount > 0 ? `<button class="dersverse-btn" style="background: #10b981; color: white; width: 100%; padding: 5px; font-size: 0.75rem;" onclick="triggerWheelAnimation('${item.value}', '${item.id}')">🎡 Çevir (${stockCount})</button>` : ''}
                 </div>
             `;
-        } else if (isOwned && item.type !== 'chest') {
-            if (item.type === 'booster' || item.type === 'perk') {
-                actionArea = `<button class="dersverse-btn dersverse-btn-outline" onclick="usePerk('${item.id}', '${item.value}')">⚡ Kullan</button>`;
-            } else if (isEquipped) {
-                actionArea = `<span style="color:#10b981; font-weight:bold;">Aktif</span>`;
+        } else if (item.type === 'booster' || item.type === 'perk') {
+            actionButtons = `
+                <div style="display: flex; gap: 4px;">
+                    ${!isOwned ? `<button class="dersverse-btn" style="padding: 5px 10px; font-size: 0.75rem;" onclick="buyShopItem('${item.id}',${item.cost}, 1)">Satın Al</button>` : ''}
+                    <button class="dersverse-btn dersverse-btn-outline" style="padding: 5px 10px; font-size: 0.75rem; background: #6366f1; color: white;" onclick="usePerk('${item.id}', '${item.value}')">⚡ Kullan</button>
+                </div>
+            `;
+        } else {
+            // Unvan, Ses veya Efekt (Kuşanılabilir öğeler)
+            if (isOwned) {
+                if (isEquipped) {
+                    actionButtons = `<span style="color:#10b981; font-weight:bold; font-size: 0.85rem;">Aktif / Kuşanıldı</span>`;
+                } else {
+                    actionButtons = `<button class="dersverse-btn dersverse-btn-outline" style="padding: 5px 10px; font-size: 0.75rem;" onclick="equipItem('${item.type}', '${item.value}')">Kuşan</button>`;
+                }
             } else {
-                actionArea = `<button class="dersverse-btn dersverse-btn-outline" onclick="equipItem('${item.type}', '${item.value}')">Kuşan</button>`;
+                actionButtons = `
+                    <div style="display: flex; gap: 4px;">
+                        <button class="dersverse-btn" style="padding: 5px 10px; font-size: 0.75rem;" onclick="buyShopItem('${item.id}', ${item.cost}, 1)">Satın Al</button>
+                        <button class="dersverse-btn dersverse-btn-outline" style="padding: 5px 10px; font-size: 0.75rem;" onclick="equipItem('${item.type}', '${item.value}')">Kuşan</button>
+                    </div>
+                `;
             }
         }
 
         return `
             <div style="background: rgba(255,255,255,0.05); padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--dersverse-border, #333);">
-                <div>
+                <div style="max-width: 60%;">
                     <strong>${item.name}</strong><br>
-                    <small style="color: #aaa;">${item.desc || ''}</small>${stockInfoHtml}<br>
-                    <small style="color: #6366f1; font-weight: bold;">Maliyet: ${isUserAdmin() ? 'Ücretsiz (Admin)' : item.cost + ' XP'}</small>
+                    <small style="color: #aaa; font-size: 0.8rem;">${item.desc || ''}</small>${stockInfoHtml}<br>
+                    <small style="color: #6366f1; font-weight: bold; font-size: 0.8rem;">Maliyet: ${isUserAdmin() ? 'Ücretsiz (Admin)' : item.cost + ' XP'}</small>
                 </div>
                 <div>
-                    ${actionArea}
+                    ${actionButtons}
                 </div>
             </div>
         `;
     }).join('');
 }
 
-function buyShopItem(itemId, cost) {
+function buyShopItem(itemId, cost, quantity = 1) {
     const item = shopItems.find(i => i.id === itemId);
+    const totalCost = isUserAdmin() ? 0 : cost * quantity;
 
-    if (deductXP(cost)) {
+    if (isUserAdmin() || deductXP(totalCost)) {
         if (item.type === 'chest') {
-            userChestStock[itemId] = (userChestStock[itemId] || 0) + 1;
+            userChestStock[itemId] = (userChestStock[itemId] || 0) + quantity;
             localStorage.setItem("dersverse_chest_stock", JSON.stringify(userChestStock));
         } else {
             if (!userInventory.includes(itemId)) {
@@ -312,12 +328,22 @@ function buyShopItem(itemId, cost) {
             if (item.type === 'effect') equipItem('effect', item.value);
         }
         
-        // Konfeti patlat ve mesajsız arka planda listeyi güncelle (ard arda alınabilir)
         triggerConfetti();
         renderShop();
     } else {
         alert("Yetersiz XP! Pomodoro tamamlayarak veya soru ekleyerek XP kazanabilirsiniz.");
     }
+}
+
+function buyBulkPrompt(itemId, cost) {
+    const qtyInput = prompt("Kaç adet satın almak istiyorsunuz?", "5");
+    if (!qtyInput) return;
+    const qty = parseInt(qtyInput);
+    if (isNaN(qty) || qty <= 0) {
+        alert("Lütfen geçerli bir sayı girin.");
+        return;
+    }
+    buyShopItem(itemId, cost, qty);
 }
 
 // --- 6. ŞANS ÇARKI VE KUTU AÇILIM ANİMASYONU ---
@@ -405,16 +431,18 @@ function equipItem(type, value) {
 }
 
 function usePerk(itemId, perkValue) {
+    if (!userInventory.includes(itemId)) {
+        userInventory.push(itemId);
+        localStorage.setItem("dersverse_inventory", JSON.stringify(userInventory));
+    }
     if (perkValue === 'xp_double') {
         localStorage.setItem("dersverse_xp_booster", "true");
-        triggerConfetti();
-    } else if (perkValue === 'streak_shield') {
-        triggerConfetti();
-    } else if (perkValue === 'pin_question') {
-        triggerConfetti();
-    } else if (perkValue === 'time_bender') {
-        triggerConfetti();
+        alert("⚡ 2x XP Katlayıcı İksir etkinleştirildi!");
+    } else {
+        alert("Perk başarıyla kullanıldı!");
     }
+    triggerConfetti();
+    renderShop();
 }
 
 function applyThemeEffect(effectClass) {
