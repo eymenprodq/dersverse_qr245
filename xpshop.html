@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DersVerse XP Mağazası</title>
+    
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase Bağlantı Yapılandırması ve Güvenli İstemci Başlatma
+        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
+        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
+        
+        let dersverseSupabase;
+        try {
+            dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+        } catch (error) {
+            console.error('Supabase başlatılırken kritik hata oluştu:', error);
+        }
+    </script>
 
     <!-- Kapsamlı ve Profesyonel Tasarım / Tema Stilleri -->
     <style>
@@ -211,7 +226,6 @@
             
             <div class="dersverse-nav-right">
                 <span id="user-badge" class="dersverse-badge">Yükleniyor...</span>
-                <!-- Adminler için sınırsız XP ibaresi script.js tarafından buraya yansıtılır -->
                 <span class="dersverse-badge">💎 <span id="user-points">0</span> XP</span>
                 <button id="dersverse-theme-toggle" class="dersverse-btn dersverse-btn-outline" onclick="dersverseToggleTheme()">
                     ☀️ Gündüz Modu
@@ -241,7 +255,7 @@
         </div>
     </main>
 
-    <!-- script.js Bağlantısı ve Oturum Senkronizasyonu -->
+    <!-- script.js Bağlantısı ve Güvenli Başlatma Mantığı -->
     <script src="script.js"></script>
     <script>
         // Tema Yönetimi
@@ -257,9 +271,8 @@
             }
         }
 
-        // Sayfa Yüklenme Anı Senkronizasyon Kontrolleri
+        // Sayfa Yüklenme Anı - script.js içindeki fonksiyon adları ne olursa olsun yakalayıp çalıştırır
         window.addEventListener('DOMContentLoaded', () => {
-            // Tema tercihini yükle
             const savedTheme = localStorage.getItem('dersverse_theme');
             if (savedTheme === 'light') {
                 document.documentElement.classList.add('light-theme');
@@ -267,17 +280,29 @@
                 if (btn) btn.innerHTML = '🌙 Gece Modu';
             }
 
-            // script.js içerisindeki ana sayfa ile birebir aynı XP ve Admin yetki fonksiyonlarını tetikle
-            try {
-                if (typeof updateUserStats === 'function') {
-                    updateUserStats();
+            // script.js dosyasındaki olası tüm fonksiyon alternatiflerini güvenle tetikle
+            setTimeout(() => {
+                try {
+                    if (typeof updateUserStats === 'function') updateUserStats();
+                    if (typeof updateStats === 'function') updateStats();
+                    
+                    if (typeof renderShop === 'function') {
+                        renderShop();
+                    } else if (typeof loadShop === 'function') {
+                        loadShop();
+                    } else if (typeof initShop === 'function') {
+                        initShop();
+                    } else {
+                        // Eğer hiçbir render fonksiyonu bulunamazsa takılı kalmasın, uyarı bassın
+                        const container = document.getElementById('shop-items-container');
+                        if (container && container.innerHTML.includes('senkronize')) {
+                            container.innerHTML = '<div class="loading-container" style="color: #ef4444;">Mağaza render fonksiyonu script.js içinde bulunamadı. Lütfen fonksiyon adını kontrol edin.</div>';
+                        }
+                    }
+                } catch (err) {
+                    console.error("Mağaza yüklenirken hata:", err);
                 }
-                if (typeof renderShop === 'function') {
-                    renderShop();
-                }
-            } catch (err) {
-                console.error("Modüller yüklenirken hata oluştu:", err);
-            }
+            }, 200);
         });
     </script>
 </body>
