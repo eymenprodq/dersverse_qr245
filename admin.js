@@ -10,7 +10,7 @@ export async function bekleyenIcerikleriGetir() {
   return data;
 }
 
-// İçeriği onaylama (Durumu approved yapar)
+// İçeriği onaylama
 export async function icerikOnayla(contentId) {
   const { error } = await supabase
     .from('contents')
@@ -19,6 +19,7 @@ export async function icerikOnayla(contentId) {
 
   if (!error) {
     alert("İçerik onaylandı ve canlıya alındı!");
+    location.reload();
   }
 }
 
@@ -31,6 +32,7 @@ export async function icerikSil(contentId) {
 
   if (!error) {
     alert("İçerik veritabanından silindi.");
+    location.reload();
   }
 }
 
@@ -38,29 +40,41 @@ export async function icerikSil(contentId) {
 export async function adminKullanicilariGetir() {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, email, full_name, role, xp'); // Özellikle 'xp' sütununu çektiğimizden emin oluyoruz
+    .select('id, email, full_name, role, xp');
 
   if (error) {
-    console.error("Kullanıcılar çekilemedi:", error);
+    console.error("Kullanıcılar çekilemedi:", error.message);
     return [];
   }
 
   return data;
 }
 
-// Kullanıcının XP değerini güncelleyen fonksiyon (Eksik olan ve hataya sebep olan fonksiyon buydu)
-export async function kullaniciXpGuncelle(userId, yeniXp) {
-  const { data, error } = await supabase
+// Kullanıcının XP değerini güncelleyen fonksiyon
+export async function kullaniciXpGuncelle(userId, yeniXpDegeri) {
+  const xpMiktari = parseInt(yeniXpDegeri);
+
+  if (isNaN(xpMiktari)) {
+    alert("Lütfen geçerli bir sayı giriniz!");
+    return;
+  }
+
+  const { error } = await supabase
     .from('profiles')
-    .update({ xp: yeniXp })
+    .update({ xp: xpMiktari })
     .eq('id', userId);
 
   if (error) {
     console.error("XP güncellenemedi:", error.message);
-    alert("XP güncellenirken bir hata oluştu!");
+    alert("XP güncellenirken bir hata oluştu: " + error.message);
     return false;
   }
 
   alert("Kullanıcı XP'si başarıyla güncellendi!");
+  location.reload();
   return true;
 }
+
+// HTML içerisindeki butonların doğrudan görebilmesi için global window'a bağlıyoruz
+window.kullaniciXpGuncelle = kullaniciXpGuncelle;
+window.adminKullanicilariGetir = adminKullanicilariGetir;
