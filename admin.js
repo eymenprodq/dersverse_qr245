@@ -34,40 +34,18 @@ export async function icerikSil(contentId) {
   }
 }
 
-// Kullanıcı XP Güncelleme Fonksiyonu (Hataysız ve Güvenli)
+// Doğrudan SQL fonksiyonunu tetikleyen XP Güncelleme
 export async function kullaniciXpGuncelle(userId, yeniXpDegeri) {
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ xp: yeniXpDegeri })
-      .eq('id', userId)
-      .select();
+  const { error } = await supabase.rpc('update_user_xp', {
+    target_user_id: userId,
+    new_xp: yeniXpDegeri
+  });
 
-    if (error) {
-      console.error("Supabase XP Güncelleme Hatası:", error);
-      alert("XP güncellenirken veritabanı hatası oluştu: " + error.message);
-      return false;
-    }
-
-    if (!data || data.length === 0) {
-      // Eğer 'id' sütunu eşleşmediyse 'user_id' ile tekrar deneme güvenliği
-      const { data: retryData, error: retryError } = await supabase
-        .from('profiles')
-        .update({ xp: yeniXpDegeri })
-        .eq('user_id', userId)
-        .select();
-
-      if (retryError || !retryData || retryData.length === 0) {
-        alert("Kullanıcı profili veritabanında bulunamadı veya güncellenemedi.");
-        return false;
-      }
-    }
-
+  if (error) {
+    alert("XP güncellenirken hata oluştu: " + error.message);
+    return false;
+  } else {
     alert("Kullanıcının XP puanı başarıyla güncellendi!");
     return true;
-  } catch (err) {
-    console.error("Beklenmeyen hata:", err);
-    alert("Bir hata oluştu. Lütfen konsolu kontrol edin.");
-    return false;
   }
 }
