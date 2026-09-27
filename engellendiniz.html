@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erişim Engellendi - DersVerse</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0f0f1a;
+            color: #f3f4f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .ban-container {
+            background: #12121f;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 3rem;
+            border-radius: 16px;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #ef4444;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        p {
+            color: #9ca3af;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        .btn-home {
+            background: #6366f1;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-home:hover {
+            background: #4f46e5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ban-container">
+        <h1>🚫 Erişim Engellendi</h1>
+        <p>Hesabınız site kurallarına aykırı hareketler nedeniyle DersVerse yönetim ekibi tarafından engellenmiştir.</p>
+        <button class="btn-home" onclick="handleExit()">Çıkış Yap / Ana Sayfa</button>
+    </div>
+
+    <!-- Supabase Kütüphanesi -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
+        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
+        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+
+        async function handleExit() {
+            // Kullanıcının oturumunu kapat ve yerel verileri temizle
+            await dersverseSupabase.auth.signOut();
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
