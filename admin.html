@@ -494,7 +494,6 @@
 
     <script type="module">
         import { supabase } from './supabase.js';
-        import { kullaniciXpGuncelle } from './admin.js';
 
         let allContents = [];
         let currentContentFilter = 'pending';
@@ -607,6 +606,7 @@
             document.getElementById('xp-modal').style.display = 'none';
         }
 
+        // XP GÜNCELLEME İŞLEMİ DOĞRUDAN SUPABASE'E BAĞLANDI (HATA ÇÖZÜLDÜ)
         window.submitAddXp = async function(isOverwrite) {
             const userId = document.getElementById('xp-user-id').value;
             const currentXp = parseInt(document.getElementById('xp-current-val').value) || 0;
@@ -619,10 +619,15 @@
 
             const newXp = isOverwrite ? inputVal : (currentXp + inputVal);
 
-            // admin.js içerisindeki modüler fonksiyonu çağırıyoruz
-            const basarili = await kullaniciXpGuncelle(userId, newXp);
+            const { error } = await supabase
+                .from('profiles')
+                .update({ xp: newXp })
+                .eq('id', userId);
 
-            if (basarili) {
+            if (error) {
+                alert('XP Güncellenirken Hata Oluştu: ' + error.message);
+            } else {
+                alert('XP Başarıyla Güncellendi!');
                 window.closeXpModal();
                 await fetchUsers();
             }
