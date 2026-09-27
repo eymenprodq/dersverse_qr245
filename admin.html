@@ -36,7 +36,6 @@
             flex-direction: column;
         }
 
-        /* Üst Menü */
         header.admin-header {
             background: rgba(10, 10, 18, 0.9);
             backdrop-filter: blur(12px);
@@ -108,7 +107,6 @@
         }
         .btn-outline:hover { background: rgba(255, 255, 255, 0.1); }
 
-        /* Ana Gövde */
         main.admin-container {
             max-width: 1300px;
             margin: 2rem auto;
@@ -116,7 +114,6 @@
             width: 100%;
         }
 
-        /* İstatistik Kartları */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -151,7 +148,6 @@
             opacity: 0.8;
         }
 
-        /* Bölüm Başlıkları ve Kartlar */
         .admin-section-box {
             background: var(--dersverse-card-bg);
             border: 1px solid var(--dersverse-border);
@@ -170,7 +166,6 @@
             gap: 0.5rem;
         }
 
-        /* Sekmeler */
         .admin-tabs {
             display: flex;
             gap: 1rem;
@@ -195,7 +190,6 @@
             border-bottom-color: var(--dersverse-primary);
         }
 
-        /* Tablolar */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -249,7 +243,6 @@
             font-size: 0.8rem;
         }
 
-        /* Duyuru Form Alanı */
         .announcement-form {
             display: flex;
             gap: 1rem;
@@ -271,7 +264,6 @@
             border-color: var(--dersverse-primary);
         }
 
-        /* Modal (Engelleme ve XP Pencereleri) */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -315,7 +307,6 @@
             color: var(--dersverse-text-muted);
         }
 
-        /* Yetkisiz Erişim Ekranı */
         #unauthorized-screen {
             display: none;
             text-align: center;
@@ -360,17 +351,14 @@
         </div>
     </header>
 
-    <!-- Yetkisiz Erişim Engeli -->
     <div id="unauthorized-screen">
         <h1 style="font-size: 3rem; color: var(--dersverse-danger); margin-bottom: 1rem;">403 - Erişim Engellendi</h1>
         <p style="color: var(--dersverse-text-muted); font-size: 1.2rem; margin-bottom: 2rem;">Bu yönetim paneline yalnızca yetkili yönetici erişebilir.</p>
         <a href="index.html" class="btn">Ana Sayfaya Dön</a>
     </div>
 
-    <!-- Admin Yönetim Ekranı -->
     <main class="admin-container" id="admin-main-screen">
 
-        <!-- İstatistik Bölümü -->
         <section class="stats-grid">
             <div class="stat-card">
                 <div class="stat-info">
@@ -402,7 +390,6 @@
             </div>
         </section>
 
-        <!-- Bölüm 1: Gelen Bildirimler ve Öğretmen Başvuruları -->
         <div class="admin-section-box">
             <h2 class="section-title">🔔 Gelen Başvurular ve Bildirimler (Canlı)</h2>
             <div class="table-responsive">
@@ -425,14 +412,13 @@
             </div>
         </div>
 
-        <!-- Bölüm 2: Giriş Yapan ve Kayıtlı Kullanıcıların Yönetimi -->
         <div class="admin-section-box">
             <h2 class="section-title">👥 Kullanıcı ve Hesap Yönetimi</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>Ad Soyad</th>
+                            <th>Ad Soyad / E-Posta</th>
                             <th>Rol</th>
                             <th>XP Puanı</th>
                             <th>Engel Durumu</th>
@@ -448,7 +434,6 @@
             </div>
         </div>
 
-        <!-- Bölüm 3: Paylaşılan İçerikler Yönetimi -->
         <div class="admin-section-box">
             <h2 class="section-title">📚 Site İçerik ve Materyal Yönetimi</h2>
             <div class="admin-tabs">
@@ -478,7 +463,6 @@
             </div>
         </div>
 
-        <!-- Bölüm 4: Hızlı Sistem Duyurusu Yayınla -->
         <div class="admin-section-box">
             <h2 class="section-title">📢 Site Geneli Hızlı Duyuru Yayınla</h2>
             <p style="color: var(--dersverse-text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Bu alandan yazacağınız duyuru anında sisteme kaydedilir ve site genelinde duyuru alanında gösterilir.</p>
@@ -490,7 +474,6 @@
 
     </main>
 
-    <!-- Engelleme Modalı -->
     <div id="ban-modal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header" style="color: var(--dersverse-danger);">⛔ Kullanıcıyı Engelle</div>
@@ -512,7 +495,6 @@
         </div>
     </div>
 
-    <!-- XP Ekleme / Düzenleme Modalı -->
     <div id="xp-modal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">⚡ Kullanıcıya XP Verme</div>
@@ -533,7 +515,6 @@
         </div>
     </div>
 
-    <!-- Tawk.to Canlı Destek -->
     <script type="text/javascript">
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
     (function(){
@@ -547,7 +528,6 @@
     </script>
 
     <script>
-        // Supabase Bağlantısı
         const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
         const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
         const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
@@ -592,7 +572,6 @@
             setupRealtimeNotifications();
         }
 
-        // 1. Canlı Bildirimleri Çek
         async function fetchNotifications() {
             const tbody = document.getElementById('notifications-table-body');
             const { data, error } = await dersverseSupabase
@@ -636,15 +615,20 @@
             fetchNotifications();
         }
 
-        // 2. Kayıtlı Kullanıcıları Yönet & Engelleme & XP
         async function fetchUsers() {
             const tbody = document.getElementById('users-table-body');
             const { data, error } = await dersverseSupabase
                 .from('profiles')
                 .select('*')
-                .order('updated_at', { ascending: false });
+                .order('created_at', { ascending: false });
 
-            if (error || !data || data.length === 0) {
+            if (error) {
+                console.error("Kullanıcılar çekilirken hata:", error);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--dersverse-danger); padding: 1.5rem;">Veri yükleme hatası: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Kullanıcı bulunamadı.</td></tr>`;
                 document.getElementById('stat-user-count').innerText = "0";
                 return;
@@ -653,18 +637,18 @@
             document.getElementById('stat-user-count').innerText = data.length;
 
             tbody.innerHTML = data.map(u => {
-                const isBanned = u.is_banned && new Date(u.ban_until) > new Date();
+                const isBanned = u.is_banned && u.ban_until && new Date(u.ban_until) > new Date();
                 const banText = isBanned 
                     ? `<span class="status-badge status-banned" title="${u.ban_reason || 'Neden belirtilmedi'}">Engelli (${new Date(u.ban_until).toLocaleString('tr-TR')}'e kadar)</span>` 
                     : `<span style="color: var(--dersverse-success);">Aktif</span>`;
 
-                const nameText = u.full_name || 'İsimsiz Kullanıcı';
+                const nameText = u.full_name || u.email || 'İsimsiz Kullanıcı';
 
                 return `
                 <tr>
-                    <td style="font-weight: 600;">${nameText}</td>
+                    <td style="font-weight: 600;">${nameText} ${u.email ? `<br><small style="color: var(--dersverse-text-muted); font-weight: normal;">${u.email}</small>` : ''}</td>
                     <td><span class="status-badge ${u.role === 'teacher' ? 'role-teacher' : 'role-student'}">${u.role === 'teacher' ? '👨‍🏫 Öğretmen' : '🎓 Öğrenci'}</span></td>
-                    <td style="color: #f59e0b; font-weight: bold;">⚡ ${u.xp || 0} XP</td>
+                    <td style="color: #f59e0b; font-weight: bold; font-size: 1rem;">⚡ ${u.xp || 0} XP</td>
                     <td>${banText}</td>
                     <td>
                         <div class="action-btns">
@@ -681,7 +665,6 @@
             `}).join('');
         }
 
-        // XP Verme Modal İşlemleri
         function openXpModal(userId, userName, currentXp) {
             document.getElementById('xp-user-id').value = userId;
             document.getElementById('xp-current-val').value = currentXp;
@@ -708,7 +691,7 @@
 
             const { error } = await dersverseSupabase
                 .from('profiles')
-                .update({ xp: newXp })
+                .update({ xp: newXp, updated_at: new Date().toISOString() })
                 .eq('id', userId);
 
             if (error) {
@@ -716,7 +699,7 @@
             } else {
                 alert(`Kullanıcının XP puanı başarıyla ${newXp} olarak güncellendi!`);
                 closeXpModal();
-                fetchUsers();
+                await fetchUsers();
             }
         }
 
@@ -797,7 +780,6 @@
             else fetchUsers();
         }
 
-        // 3. İçerik Yönetimi
         async function fetchContents() {
             const { data, error } = await dersverseSupabase
                 .from('contents')
