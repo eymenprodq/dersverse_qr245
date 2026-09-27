@@ -128,12 +128,6 @@
             justify-content: space-between;
             align-items: center;
         }
-
-        /* Çeşitli Özel Efekt Sınıfları */
-        .neon-border { border: 2px solid #6366f1 !important; box-shadow: 0 0 15px rgba(99,102,241,0.5); }
-        .fire-aura { border: 2px solid #ef4444 !important; box-shadow: 0 0 15px rgba(239,68,68,0.5); }
-        .galaxy-bg { background: linear-gradient(135deg, #111827, #312e81) !important; }
-        .lightning-aura { border: 2px solid #f59e0b !important; box-shadow: 0 0 15px rgba(245,158,11,0.5); }
     </style>
 </head>
 <body>
@@ -154,16 +148,25 @@
 
         <div style="margin-bottom: 25px; display: flex; gap: 10px;">
             <a href="index.html" class="dersverse-btn dersverse-btn-outline" style="text-decoration: none; display: inline-flex; align-items: center;">← Ana Sayfaya Dön</a>
-            <button class="dersverse-btn" onclick="openShopModal()">🛒 Mağazayı Yenile / Aç</button>
         </div>
 
         <!-- MAĞAZA ÜRÜNLERİNİN script.js TARAFINDAN OTOMATİK YÜKLENDİĞİ KRİTİK ALAN -->
         <div id="shop-items-container" class="shop-grid">
-            <!-- script.js içerisindeki renderShop() burayı dolduracak -->
+            <!-- script.js içerisindeki renderShop() burayı otomatik dolduracak -->
         </div>
     </div>
 
-    <!-- Bağlı Olan script.js Dosyası -->
+    <!-- Bağlı Olan script.js Dosyası ve Otomatik Tetikleyici -->
     <script src="script.js"></script>
+    <script>
+        // Sayfa yüklendiği an mağazanın ekrana basılmasını zorunlu kılan tetikleyici
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderShop === 'function') {
+                renderShop();
+            } else {
+                console.error("renderShop fonksiyonu script.js içinde bulunamadı!");
+            }
+        });
+    </script>
 </body>
 </html>
