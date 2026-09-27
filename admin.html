@@ -404,7 +404,7 @@
                     </thead>
                     <tbody id="users-table-body">
                         <tr>
-                            <td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Kullanıcılar yükleniyor...</td>
+                            <td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Kullanıcılar otomatik yükleniyor...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -416,7 +416,7 @@
             <div class="admin-tabs">
                 <button class="tab-btn active" onclick="filterContents('pending', this)">Bekleyenler</button>
                 <button class="tab-btn" onclick="filterContents('approved', this)">Yayınlananlar</button>
-                <button class="tab-btn" onclick="filterContents('rejected', this)">Reddedilenlar</button>
+                <button class="tab-btn" onclick="filterContents('rejected', this)">Reddedilenler</button>
                 <button class="tab-btn" onclick="filterContents('all', this)">Tümü</button>
             </div>
             <div class="table-responsive">
@@ -494,7 +494,6 @@
 
     <script type="module">
         import { supabase } from './supabase.js';
-        import { kullaniciXpGuncelle } from './admin.js';
 
         let allContents = [];
         let currentContentFilter = 'pending';
@@ -544,6 +543,7 @@
             fetchNotifications();
         }
 
+        // Tüm kullanıcıları otomatik çeken ana fonksiyon
         async function fetchUsers() {
             const tbody = document.getElementById('users-table-body');
             const { data, error } = await supabase
@@ -595,6 +595,21 @@
             `}).join('');
         }
 
+        // Modüler XP güncelleme fonksiyonu (Doğrudan veritabanına yazar)
+        window.kullaniciXpGuncelle = async function(userId, yeniXp) {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ xp: yeniXp })
+                .eq('id', userId);
+
+            if (error) {
+                console.error("XP güncellenemedi:", error.message);
+                alert("XP güncellenirken hata oluştu: " + error.message);
+                return false;
+            }
+            return true;
+        }
+
         window.openXpModal = function(userId, userName, currentXp) {
             document.getElementById('xp-user-id').value = userId;
             document.getElementById('xp-current-val').value = currentXp;
@@ -619,10 +634,10 @@
 
             const newXp = isOverwrite ? inputVal : (currentXp + inputVal);
 
-            // admin.js içerisindeki modüler fonksiyonu çağırıyoruz
-            const basarili = await kullaniciXpGuncelle(userId, newXp);
+            const basarili = await window.kullaniciXpGuncelle(userId, newXp);
 
             if (basarili) {
+                alert("Kullanıcı XP'si başarıyla güncellendi!");
                 window.closeXpModal();
                 await fetchUsers();
             }
