@@ -10,7 +10,13 @@
         // Supabase Bağlantı Yapılandırması
         const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
         const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
-        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+        
+        let dersverseSupabase;
+        try {
+            dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+        } catch (e) {
+            console.error("Supabase başlatılamadı:", e);
+        }
     </script>
     <style>
         :root {
@@ -152,6 +158,15 @@
             color: var(--dersverse-primary);
         }
 
+        /* Yükleniyor Durumu İçin Tasarım */
+        .loading-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--dersverse-text-muted);
+            font-size: 1.1rem;
+        }
+
         /* Özel Efekt Sınıfları */
         .neon-border { box-shadow: inset 0 0 15px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.4); }
         .fire-aura { box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); }
@@ -182,18 +197,27 @@
 
         <!-- Mağaza Ürünlerinin Dinamik Olarak Basıldığı Alan -->
         <div id="shop-items-container" class="shop-grid">
-            <!-- JavaScript ile doldurulacak -->
+            <div class="loading-state">Mağaza ürünleri yükleniyor, lütfen bekleyin...</div>
         </div>
     </main>
 
-    <!-- script (8.js) Dosyasını Bağlıyoruz -->
+    <!-- script.js Dosyasını Doğru Adıyla Bağlıyoruz -->
     <script src="script.js"></script>
     <script>
-        // Sayfa açıldığında mağazayı doğrudan çizdir
+        // Sayfa yüklendiğinde takılmaları önlemek için güvenlik kontrolü
         window.addEventListener('DOMContentLoaded', () => {
-            if (typeof renderShop === 'function') {
-                renderShop();
-            }
+            setTimeout(() => {
+                const container = document.getElementById('shop-items-container');
+                // Eğer script.js içindeki render fonksiyonu çalışmadıysa veya içerik hâlâ yükleniyorda kaldıysa
+                if (container && container.innerHTML.includes('yükleniyor')) {
+                    if (typeof renderShop === 'function') {
+                        renderShop();
+                    } else {
+                        container.innerHTML = '<div class="loading-state" style="color: #ef4444;">Mağaza verileri yüklenirken bir sorun oluştu. Lütfen script.js dosyanızı kontrol edin.</div>';
+                    }
+                }
+            }, 1000);
+
             if (typeof updateUserStats === 'function') {
                 updateUserStats();
             }
