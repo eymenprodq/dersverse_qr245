@@ -183,6 +183,10 @@
         <!-- Normal Giriş / Kayıt Formu -->
         <form id="loginForm" onsubmit="handleEmailAuth(event)">
             <div class="form-group">
+                <label>Ad Soyad</label>
+                <input type="text" id="fullName" placeholder="Örn: Kadir Eymen Açıkoğlu">
+            </div>
+            <div class="form-group">
                 <label>E-Posta Adresi</label>
                 <input type="email" id="email" required placeholder="ornek@mail.com">
             </div>
@@ -266,23 +270,45 @@
         // E-Posta / Şifre Giriş veya Otomatik Kayıt İşlemi
         async function handleEmailAuth(e) {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
 
+            // Önce Giriş Yapmayı Dene
             const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password
             });
 
             if (error) {
+                // Giriş başarısızsa Kayıt Olma Moduna Geç
+                if (!fullName) {
+                    alert("Yeni bir hesap oluşturuluyor. Lütfen 'Ad Soyad' alanını doldurunuz.");
+                    return;
+                }
+
                 const { data: signUpData, error: signUpError } = await supabaseClient.auth.signUp({
                     email: email,
-                    password: password
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: fullName
+                        }
+                    }
                 });
 
                 if (signUpError) {
                     alert("Hata: " + signUpError.message);
                 } else {
+                    // Kayıt Başarılıysa Profiles Tablosuna İşle
+                    if (signUpData.user) {
+                        await supabaseClient.from('profiles').upsert({
+                            id: signUpData.user.id,
+                            full_name: fullName,
+                            xp: 120,
+                            updated_at: new Date()
+                        });
+                    }
                     alert("Hesap oluşturuldu! Ana sayfaya yönlendiriliyorsunuz.");
                     window.location.href = "index.html";
                 }
