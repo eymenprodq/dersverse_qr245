@@ -1,51 +1,45 @@
 import { supabase } from './supabase.js'
 
-// Onay bekleyenleri çekme
 export async function bekleyenIcerikleriGetir() {
   const { data, error } = await supabase
     .from('contents')
     .select('*')
     .eq('status', 'pending');
-
   return data;
 }
 
-// İçeriği onaylama (Durumu approved yapar)
 export async function icerikOnayla(contentId) {
   const { error } = await supabase
     .from('contents')
     .update({ status: 'approved' })
     .eq('id', contentId);
 
-  if (!error) {
-    alert("İçerik onaylandı ve canlıya alındı!");
-  }
+  if (!error) alert("İçerik onaylandı ve canlıya alındı!");
 }
 
-// İçeriği reddetme/silme
 export async function icerikSil(contentId) {
   const { error } = await supabase
     .from('contents')
     .delete()
     .eq('id', contentId);
 
-  if (!error) {
-    alert("İçerik veritabanından silindi.");
-  }
+  if (!error) alert("İçerik veritabanından silindi.");
 }
 
-// Güvenli ve yetki engeline takılmayan XP Güncelleme
+// Doğrudan Supabase update komutu (Fonksiyonsuz, saf JS)
 export async function kullaniciXpGuncelle(userId, yeniXpDegeri) {
-  const { error } = await supabase.rpc('update_user_xp', {
-    target_user_id: userId,
-    new_xp: yeniXpDegeri
-  });
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ xp: yeniXpDegeri })
+    .eq('id', userId)
+    .select();
 
   if (error) {
-    alert("XP güncellenirken hata oluştu: " + error.message);
+    alert("XP Güncelleme Hatası: " + error.message);
+    console.error("Supabase Error:", error);
     return false;
-  } else {
-    alert("Kullanıcının XP puanı başarıyla güncellendi!");
-    return true;
   }
+
+  alert("Kullanıcının XP puanı başarıyla güncellendi!");
+  return true;
 }
