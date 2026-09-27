@@ -33,3 +33,19 @@ export async function icerikSil(contentId) {
     alert("İçerik veritabanından silindi.");
   }
 }
+
+// Kullanıcıya XP ekleme / güncelleme fonksiyonu
+export async function kullaniciXpGuncelle(userId, yeniXpDegeri) {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ xp: yeniXpDegeri, updated_at: new Date().toISOString() })
+    .eq('id', userId);
+
+  if (error) {
+    alert("XP güncellenirken hata oluştu: " + error.message);
+    return false;
+  } else {
+    alert("Kullanıcının XP puanı başarıyla güncellendi!");
+    return true;
+  }
+}
