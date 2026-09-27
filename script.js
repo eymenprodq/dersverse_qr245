@@ -4,6 +4,7 @@ const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd';
 const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
 
 let dersverseAllContents = [];
+let currentLoggedInUser = null;
 
 // --- 1. LGS CANLI GERİ SAYIM SAYACI ---
 function startLGSTimer() {
@@ -89,12 +90,11 @@ function startPomodoro() {
             clearInterval(pomoInterval);
             isPomoRunning = false;
             
-            // Eğer XP Katlayıcı Aktifse Çift XP Kazan
             const boosterActive = localStorage.getItem("dersverse_xp_booster") === "true";
             const earnedXP = boosterActive ? 100 : 50;
             
             addXP(earnedXP);
-            alert(`Tebrikler! Pomodoro seansını tamamladınız ve +${earnedXP} XP kazandınız!${boosterActive ? ' (XP Katlayıcı Aktif!)' : ''}`);
+            triggerConfetti();
         }
     }, 1000);
 }
@@ -110,12 +110,59 @@ function resetPomodoro() {
     updatePomoDisplay();
 }
 
-// --- 4. GELİŞMİŞ GAMIFICATION / İŞLEVSEL ULTRA MAĞAZA ---
+// --- 4. DİNAMİK KONFETİ ANİMASYONU ---
+function triggerConfetti() {
+    const confettiCount = 50;
+    const container = document.body;
+
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'dersverse-confetti';
+        
+        const size = Math.floor(Math.random() * 8) + 6;
+        const color = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#3b82f6', '#8b5cf6'][Math.floor(Math.random() * 7)];
+        
+        confetti.style.cssText = `
+            position: fixed;
+            width: ${size}px;
+            height: ${size}px;
+            background-color: ${color};
+            top: -10px;
+            left: ${Math.random() * 100}vw;
+            opacity: 1;
+            border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+            z-index: 999999;
+            pointer-events: none;
+            transition: transform 1.5s ease-out, top 1.5s ease-in, opacity 1.5s ease-in;
+        `;
+        
+        container.appendChild(confetti);
+
+        const fallDuration = Math.random() * 1000 + 1000;
+        const horizontalMovement = (Math.random() - 0.5) * 200;
+
+        setTimeout(() => {
+            confetti.style.transform = `translate(${horizontalMovement}px, ${window.innerHeight + 50}px) rotate(${Math.random() * 360}deg)`;
+            confetti.style.opacity = '0';
+        }, 50);
+
+        setTimeout(() => {
+            confetti.remove();
+        }, fallDuration + 100);
+    }
+}
+
+// --- 5. GAMIFICATION / STOKLAMALI ULTRA MAĞAZA VE ŞANS ÇARKI ---
 let userPoints = parseInt(localStorage.getItem("dersverse_xp") || "100");
 let userInventory = JSON.parse(localStorage.getItem("dersverse_inventory") || "[]");
+let userChestStock = JSON.parse(localStorage.getItem("dersverse_chest_stock") || "{}");
 let activeTitle = localStorage.getItem("dersverse_active_title") || "🔥 LGS Canavarı";
 let activeThemeEffect = localStorage.getItem("dersverse_active_effect") || "none";
 let activeAudioTheme = localStorage.getItem("dersverse_active_audio") || "none";
+
+function isUserAdmin() {
+    return currentLoggedInUser && currentLoggedInUser.email === 'femememe1973@gmail.com';
+}
 
 function addXP(amount) {
     userPoints += amount;
@@ -124,6 +171,9 @@ function addXP(amount) {
 }
 
 function deductXP(amount) {
+    if (isUserAdmin()) {
+        return true; 
+    }
     if (userPoints >= amount) {
         userPoints -= amount;
         localStorage.setItem("dersverse_xp", userPoints);
@@ -137,7 +187,9 @@ function updateUserStats() {
     const pointsEl = document.getElementById("user-points");
     const badgeEl = document.getElementById("user-badge");
 
-    if (pointsEl) pointsEl.innerText = userPoints;
+    if (pointsEl) {
+        pointsEl.innerText = isUserAdmin() ? "♾️ Sınırsız XP" : userPoints;
+    }
     if (badgeEl) badgeEl.innerText = activeTitle;
 }
 
@@ -154,40 +206,41 @@ function closeShopModal() {
     if (modal) modal.style.display = "none";
 }
 
-// İşlevsel ve Çeşitlendirilmiş Mağaza Ögeleri
+// Sınırları Zorlayan Zenginleştirilmiş Mağaza Ürünleri Kataloğu
 const shopItems = [
-    // --- BÖLÜM 1: ÇALIŞAN ŞANS SANDIKLARI (GİZEMLİ KUTULAR) ---
-    { id: 'chest_1', name: '🎁 Bronz Şans Sandığı', cost: 100, type: 'chest', value: 'bronz', desc: 'İçinden 50-300 arası XP veya rastgele Unvan çıkar!' },
-    { id: 'chest_2', name: '🎁 Gümüş Şans Sandığı', cost: 250, type: 'chest', value: 'gumus', desc: 'İçinden 150-600 arası XP veya Ses Paketi çıkar!' },
-    { id: 'chest_3', name: '🎁 Altın Şans Sandığı', cost: 500, type: 'chest', value: 'altin', desc: 'İçinden 400-1200 arası XP veya Özel Efekt çıkar!' },
-    { id: 'chest_4', name: '👑 Efsanevi Krallık Sandığı', cost: 1000, type: 'chest', value: 'efsanevi', desc: 'Çok yüksek XP ve Garantili Efsanevi Perk içerir!' },
+    // Şans Sandıkları (Stoklanabilir)
+    { id: 'chest_1', name: '🎁 Bronz Şans Sandığı', cost: 100, type: 'chest', value: 'bronz', desc: 'İçinden 50-300 arası XP çıkar! Stoklanabilir.' },
+    { id: 'chest_2', name: '🎁 Gümüş Şans Sandığı', cost: 250, type: 'chest', value: 'gumus', desc: 'İçinden 150-600 arası XP çıkar! Stoklanabilir.' },
+    { id: 'chest_3', name: '🎁 Altın Şans Sandığı', cost: 500, type: 'chest', value: 'altin', desc: 'İçinden 400-1200 arası XP çıkar! Stoklanabilir.' },
+    { id: 'chest_4', name: '👑 Efsanevi Krallık Sandığı', cost: 1000, type: 'chest', value: 'efsanevi', desc: 'İçinden 800-2500 arası XP çıkar! Stoklanabilir.' },
+    { id: 'chest_5', name: '🌌 Kozmik Gizem Sandığı', cost: 1800, type: 'chest', value: 'kozmik', desc: 'İçinden 1500-5000 XP ve ultra nadir ödüller çıkar!' },
+    
+    // Güçlendiriciler ve Özel Perkler
+    { id: 'boost_1', name: '⚡ 2x XP Katlayıcı İksir', cost: 300, type: 'booster', value: 'xp_double', desc: 'XP kazançlarını 2 katına çıkarır.' },
+    { id: 'boost_2', name: '🛡️ Seri Koruma Kalkanı', cost: 200, type: 'booster', value: 'streak_shield', desc: 'Giremediğin günlerde serini korur.' },
+    { id: 'boost_3', name: '📌 Soru Öne Çıkarma Bileti', cost: 150, type: 'perk', value: 'pin_question', desc: 'Sorunu üst sıraya taşır.' },
+    { id: 'boost_4', name: '💎 Süper XP Mıknatısı', cost: 450, type: 'booster', value: 'xp_magnet', desc: 'Her etkinlikten ekstra %50 bonus XP kazandırır.' },
+    { id: 'boost_5', name: '⏳ Zaman Bükücü Kum Saati', cost: 350, type: 'perk', value: 'time_bender', desc: 'Pomodoro seanslarında ekstra mola hakkı tanır.' },
 
-    // --- BÖLÜM 2: GÜÇLENDİRİCİLER & PERKLER (BOOSTERS) ---
-    { id: 'boost_1', name: '⚡ 2x XP Katlayıcı İksir', cost: 300, type: 'booster', value: 'xp_double', desc: 'Pomodoro ve soru ekleme kazançlarını 2 katına çıkarır.' },
-    { id: 'boost_2', name: '🛡️ Seri Koruma Kalkanı', cost: 200, type: 'booster', value: 'streak_shield', desc: 'Giremediğin günlerde çalışma serini korur.' },
-    { id: 'boost_3', name: '📌 Soru Öne Çıkarma Biletı', cost: 150, type: 'perk', value: 'pin_question', desc: 'Kumbaradaki sorunu ana sayfada üst sıraya taşır.' },
+    // Ses ve Müzik Ambiyansları
+    { id: 'audio_1', name: '🌧️ Gece Yağmuru Sesi', cost: 180, type: 'audio', value: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_4a0e10b2df.mp3', desc: 'Dinlendirici yağmur ambiansı.' },
+    { id: 'audio_2', name: '☕ Lofi Kütüphane Ambiyansı', cost: 220, type: 'audio', value: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3', desc: 'Arka plan Lofi çalışma sesleri.' },
+    { id: 'audio_3', name: '🔥 Orman Kamp Ateşi Çatırtısı', cost: 200, type: 'audio', value: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3', desc: 'Huzur veren kamp ateşi ses efekti.' },
+    { id: 'audio_4', name: '🌊 Dalga Sesleri Eşliğinde Çalışma', cost: 250, type: 'audio', value: 'https://cdn.pixabay.com/download/audio/2022/04/29/audio_321e10264b.mp3', desc: 'Sahil kenarında odaklanma dalgaları.' },
 
-    // --- BÖLÜM 3: ÇALIŞMA SES PAKETLERİ (AMBİYANS) ---
-    { id: 'audio_1', name: '🌧️ Gece Yağmuru Odaklanma Sesi', cost: 180, type: 'audio', value: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_4a0e10b2df.mp3', desc: 'Arka planda dinlendirici yağmur sesi çalar.' },
-    { id: 'audio_2', name: '☕ Lofi Kütüphane Ambiyansı', cost: 220, type: 'audio', value: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3', desc: 'Çalışırken dinlenebilecek Lofi çalışma sesleri.' },
-    { id: 'audio_3', name: '🔥 Şömine Ateşi Çatırtısı', cost: 150, type: 'audio', value: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3', desc: 'Odaklanmayı artıran sıcak şömine sesi.' },
+    // Profil Görsel Efektleri ve Auralar
+    { id: 'effect_1', name: '✨ Neon Işıklı Profil Aurası', cost: 350, type: 'effect', value: 'neon-border', desc: 'Profiline neon ışık efekti verir.' },
+    { id: 'effect_2', name: '🔥 Alevli İsim Çerçevesi', cost: 400, type: 'effect', value: 'fire-aura', desc: 'İsmin arkasında alev efekti çıkarır.' },
+    { id: 'effect_3', name: '🌌 Galaksi Arka Plan Parıltısı', cost: 600, type: 'effect', value: 'galaxy-bg', desc: 'Profil kartına uzay temalı galaksi aurası ekler.' },
+    { id: 'effect_4', name: '⚡ Yıldırım Çarpması Çerçevesi', cost: 750, type: 'effect', value: 'lightning-aura', desc: 'Dinamik elektrik ve şimşek efekti.' },
 
-    // --- BÖLÜM 4: GÖRSEL EFEKTLER & TEMALAR ---
-    { id: 'effect_1', name: '✨ Neon Işıklı Profil Aurası', cost: 350, type: 'effect', value: 'neon-border', desc: 'Profil çerçevene neon ışık efekti verir.' },
-    { id: 'effect_2', name: '🔥 Alevli İsim Çerçevesi', cost: 400, type: 'effect', value: 'fire-aura', desc: 'Kullanıcı adının arkasında alev efektleri çıkartır.' },
-    { id: 'effect_3', name: '🌌 Galaksi Yıldız Arka Planı', cost: 450, type: 'effect', value: 'galaxy-bg', desc: 'Arayüze galaksi temalı arka plan kazandırır.' },
-
-    // --- BÖLÜM 5: HAUS UNVANLARI ---
-    { id: 'title_1', name: '🧠 LGS Dahisi', cost: 150, type: 'title', value: '🧠 LGS Dahisi', desc: 'Unvan olarak profilinde görünür.' },
-    { id: 'title_2', name: '⚡ Ders Efsanesi', cost: 300, type: 'title', value: '⚡ Ders Efsanesi', desc: 'Unvan olarak profilinde görünür.' },
-    { id: 'title_3', name: '👑 LGS Birincisi', cost: 500, type: 'title', value: '👑 LGS Birincisi', desc: 'Unvan olarak profilinde görünür.' },
-    { id: 'title_4', name: '🚀 Matematik Canavarı', cost: 200, type: 'title', value: '🚀 Matematik Canavarı', desc: 'Unvan olarak profilinde görünür.' },
-    { id: 'title_5', name: '🧪 Fen Kurdu', cost: 200, type: 'title', value: '🧪 Fen Kurdu', desc: 'Unvan olarak profilinde görünür.' },
-    { id: 'title_6', name: '💡 Paragraf Kralı', cost: 220, type: 'title', value: '💡 Paragraf Kralı', desc: 'Unvan olarak profilinde görünür.' },
-    { id: 'title_7', name: '🎯 Hedef 500 Puan', cost: 600, type: 'title', value: '🎯 Hedef 500 Puan', desc: 'Unvan olarak profilinde görünür.' },
-    { id: 'title_8', name: '🦾 Sayborg Beyin', cost: 450, type: 'title', value: '🦾 Sayborg Beyin', desc: 'Unvan olarak profilinde görünür.' },
-    { id: 'title_9', name: '🐉 Ejderha Zihni', cost: 750, type: 'title', value: '🐉 Ejderha Zihni', desc: 'Unvan olarak profilinde görünür.' },
-    { id: 'title_10', name: '🏔️ Zirvedeki Tek', cost: 1000, type: 'title', value: '🏔️ Zirvedeki Tek', desc: 'Unvan olarak profilinde görünür.' }
+    // Özel Unvanlar (Rütbeler)
+    { id: 'title_1', name: '🧠 LGS Dahisi', cost: 150, type: 'title', value: '🧠 LGS Dahisi', desc: 'Seçkin profil unvanı.' },
+    { id: 'title_2', name: '⚡ Ders Efsanesi', cost: 300, type: 'title', value: '⚡ Ders Efsanesi', desc: 'Seçkin profil unvanı.' },
+    { id: 'title_3', name: '👑 LGS Birincisi', cost: 500, type: 'title', value: '👑 LGS Birincisi', desc: 'Seçkin profil unvanı.' },
+    { id: 'title_4', name: '🏆 Kodlama Üstadı', cost: 650, type: 'title', value: '🏆 Kodlama Üstadı', desc: 'Teknoloji ve yazılım rütbesi.' },
+    { id: 'title_5', name: '🚀 Hedef Fen Lisesi', cost: 800, type: 'title', value: '🚀 Hedef Fen Lisesi', desc: 'Prestijli LGS hedef unvanı.' },
+    { id: 'title_6', name: '👑 Evrenin Hakimi', cost: 1500, type: 'title', value: '👑 Evrenin Hakimi', desc: 'En üst düzey nadide unvan.' }
 ];
 
 function renderShop() {
@@ -196,26 +249,35 @@ function renderShop() {
 
     shopList.innerHTML = shopItems.map(item => {
         const isOwned = userInventory.includes(item.id);
+        const stockCount = userChestStock[item.id] || 0;
         const isEquipped = (item.type === 'title' && activeTitle === item.value) || 
                            (item.type === 'effect' && activeThemeEffect === item.value) ||
                            (item.type === 'audio' && activeAudioTheme === item.value);
 
-        let buttonText = "Satın Al";
+        let buttonText = isUserAdmin() ? "Ücretsiz Al" : "Satın Al";
         let buttonAction = `buyShopItem('${item.id}', ${item.cost})`;
 
-        if (isOwned) {
-            if (item.type === 'chest') {
-                buttonText = "📦 Aç";
-                buttonAction = `openChest('${item.value}')`;
-            } else if (item.type === 'booster' || item.type === 'perk') {
-                buttonText = "⚡ Kullan";
-                buttonAction = `usePerk('${item.id}', '${item.value}')`;
+        let stockInfoHtml = '';
+        if (item.type === 'chest') {
+            stockInfoHtml = `<br><small style="color: #10b981; font-weight: bold;">Envanterdeki Stok: ${stockCount} Adet</small>`;
+        }
+
+        let actionArea = `<button class="dersverse-btn" onclick="${buttonAction}">${buttonText}</button>`;
+
+        if (item.type === 'chest' && stockCount > 0) {
+            actionArea = `
+                <div style="display: flex; gap: 5px;">
+                    <button class="dersverse-btn" onclick="${buttonAction}">Stokla</button>
+                    <button class="dersverse-btn dersverse-btn-outline" style="background: #10b981; color: white;" onclick="triggerWheelAnimation('${item.value}', '${item.id}')">🎡 Çevir (${stockCount})</button>
+                </div>
+            `;
+        } else if (isOwned && item.type !== 'chest') {
+            if (item.type === 'booster' || item.type === 'perk') {
+                actionArea = `<button class="dersverse-btn dersverse-btn-outline" onclick="usePerk('${item.id}', '${item.value}')">⚡ Kullan</button>`;
             } else if (isEquipped) {
-                buttonText = "Kullanılıyor";
-                buttonAction = "";
+                actionArea = `<span style="color:#10b981; font-weight:bold;">Aktif</span>`;
             } else {
-                buttonText = "Kuşan / Aktif Et";
-                buttonAction = `equipItem('${item.type}', '${item.value}')`;
+                actionArea = `<button class="dersverse-btn dersverse-btn-outline" onclick="equipItem('${item.type}', '${item.value}')">Kuşan</button>`;
             }
         }
 
@@ -223,14 +285,11 @@ function renderShop() {
             <div style="background: rgba(255,255,255,0.05); padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--dersverse-border, #333);">
                 <div>
                     <strong>${item.name}</strong><br>
-                    <small style="color: #aaa;">${item.desc || ''}</small><br>
-                    <small style="color: #6366f1; font-weight: bold;">Maliyet: ${item.cost} XP</small>
+                    <small style="color: #aaa;">${item.desc || ''}</small>${stockInfoHtml}<br>
+                    <small style="color: #6366f1; font-weight: bold;">Maliyet: ${isUserAdmin() ? 'Ücretsiz (Admin)' : item.cost + ' XP'}</small>
                 </div>
                 <div>
-                    ${isEquipped 
-                        ? `<span style="color:#10b981; font-weight:bold;">Aktif</span>`
-                        : `<button class="dersverse-btn ${isOwned ? 'dersverse-btn-outline' : ''}" onclick="${buttonAction}">${buttonText}</button>`
-                    }
+                    ${actionArea}
                 </div>
             </div>
         `;
@@ -238,29 +297,96 @@ function renderShop() {
 }
 
 function buyShopItem(itemId, cost) {
-    if (userInventory.includes(itemId)) {
-        alert("Bu eşyaya zaten sahipsiniz!");
-        return;
-    }
+    const item = shopItems.find(i => i.id === itemId);
 
     if (deductXP(cost)) {
-        userInventory.push(itemId);
-        localStorage.setItem("dersverse_inventory", JSON.stringify(userInventory));
-        
-        const item = shopItems.find(i => i.id === itemId);
-        if (item) {
+        if (item.type === 'chest') {
+            userChestStock[itemId] = (userChestStock[itemId] || 0) + 1;
+            localStorage.setItem("dersverse_chest_stock", JSON.stringify(userChestStock));
+        } else {
+            if (!userInventory.includes(itemId)) {
+                userInventory.push(itemId);
+                localStorage.setItem("dersverse_inventory", JSON.stringify(userInventory));
+            }
             if (item.type === 'title') equipItem('title', item.value);
             if (item.type === 'effect') equipItem('effect', item.value);
         }
         
-        alert("Satın alma başarılı! Ürün çantanıza eklendi.");
+        // Konfeti patlat ve mesajsız arka planda listeyi güncelle (ard arda alınabilir)
+        triggerConfetti();
         renderShop();
     } else {
         alert("Yetersiz XP! Pomodoro tamamlayarak veya soru ekleyerek XP kazanabilirsiniz.");
     }
 }
 
-// Öğe Kuşanma / Aktif Etme Mantığı
+// --- 6. ŞANS ÇARKI VE KUTU AÇILIM ANİMASYONU ---
+function triggerWheelAnimation(chestType, itemId) {
+    if (!userChestStock[itemId] || userChestStock[itemId] <= 0) {
+        return;
+    }
+
+    userChestStock[itemId]--;
+    localStorage.setItem("dersverse_chest_stock", JSON.stringify(userChestStock));
+
+    let wheelModal = document.getElementById("dersverse-wheel-modal");
+    if (!wheelModal) {
+        wheelModal = document.createElement("div");
+        wheelModal.id = "dersverse-wheel-modal";
+        wheelModal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center; z-index:99999;";
+        document.body.appendChild(wheelModal);
+    }
+
+    wheelModal.innerHTML = `
+        <div style="background: #111827; padding: 30px; border-radius: 16px; border: 2px solid #6366f1; text-align: center; max-width: 360px; width: 90%; color: white; position: relative;">
+            <h3 style="margin-top:0;">🎡 Şans Çarkı Dönüyor...</h3>
+            <p style="font-size:0.85rem; color:#aaa;">Kutunuz açılıyor, lütfen bekleyin!</p>
+            <div id="wheel-spinner-container" style="margin: 20px auto; width: 140px; height: 140px; border-radius: 50%; border: 8px solid #312e81; border-top: 8px solid #ef4444; animation: spinWheel 0.6s linear infinite;"></div>
+            <div id="wheel-result-text" style="font-size: 1.2rem; font-weight: bold; margin-top: 15px; color: #f59e0b; min-height: 30px;">...</div>
+        </div>
+        <style>
+            @keyframes spinWheel {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+    `;
+    wheelModal.style.display = "flex";
+
+    let rewardXP = 0;
+    if (chestType === 'bronz') rewardXP = Math.floor(Math.random() * 250) + 50;
+    if (chestType === 'gumus') rewardXP = Math.floor(Math.random() * 450) + 150;
+    if (chestType === 'altin') rewardXP = Math.floor(Math.random() * 800) + 400;
+    if (chestType === 'efsanevi') rewardXP = Math.floor(Math.random() * 1700) + 800;
+    if (chestType === 'kozmik') rewardXP = Math.floor(Math.random() * 3500) + 1500;
+
+    setTimeout(() => {
+        const spinner = document.getElementById("wheel-spinner-container");
+        const resultText = document.getElementById("wheel-result-text");
+
+        if (spinner) {
+            spinner.style.animation = "none";
+            spinner.style.border = "8px solid #10b981";
+            spinner.innerText = "🎉";
+            spinner.style.fontSize = "60px";
+            spinner.style.lineHeight = "125px";
+        }
+
+        if (resultText) {
+            resultText.innerText = `TEBRİKLER!\n+${rewardXP} XP Kazandınız!`;
+        }
+
+        addXP(rewardXP);
+        triggerConfetti();
+        renderShop();
+
+        setTimeout(() => {
+            wheelModal.style.display = "none";
+        }, 2000);
+
+    }, 2500);
+}
+
 function equipItem(type, value) {
     if (type === 'title') {
         activeTitle = value;
@@ -278,40 +404,26 @@ function equipItem(type, value) {
     renderShop();
 }
 
-// Şans Sandığı Açma Sistemi
-function openChest(chestType) {
-    let rewardXP = 0;
-    if (chestType === 'bronz') rewardXP = Math.floor(Math.random() * 250) + 50;
-    if (chestType === 'gumus') rewardXP = Math.floor(Math.random() * 450) + 150;
-    if (chestType === 'altin') rewardXP = Math.floor(Math.random() * 800) + 400;
-    if (chestType === 'efsanevi') rewardXP = Math.floor(Math.random() * 1500) + 800;
-
-    addXP(rewardXP);
-    alert(`🎉 TEBRİKLER! Sandıktan +${rewardXP} XP Çıktı!`);
-    renderShop();
-}
-
-// Perk / Güçlendirici Kullanma
 function usePerk(itemId, perkValue) {
     if (perkValue === 'xp_double') {
         localStorage.setItem("dersverse_xp_booster", "true");
-        alert("⚡ 2x XP Katlayıcı Aktif Edildi! Artık kazandığınız XP'ler 2 katına çıkacak.");
+        triggerConfetti();
     } else if (perkValue === 'streak_shield') {
-        alert("🛡️ Seri Koruma Kalkanı Aktif! Çalışma seriniz güvende.");
+        triggerConfetti();
     } else if (perkValue === 'pin_question') {
-        alert("📌 Soru Öne Çıkarma Bileti Kullanıldı! Bir sonraki eklediğiniz soru öne çıkarılacak.");
+        triggerConfetti();
+    } else if (perkValue === 'time_bender') {
+        triggerConfetti();
     }
 }
 
-// Temaya Görsel Efekt Uygulama Mantığı
 function applyThemeEffect(effectClass) {
-    document.body.classList.remove('neon-border', 'fire-aura', 'galaxy-bg');
+    document.body.classList.remove('neon-border', 'fire-aura', 'galaxy-bg', 'lightning-aura');
     if (effectClass && effectClass !== 'none') {
         document.body.classList.add(effectClass);
     }
 }
 
-// Arka Plan Ses Ambiyansı Oynatıcı
 let currentAudioPlayer = null;
 function playAudioTheme(audioUrl) {
     if (currentAudioPlayer) {
@@ -322,11 +434,10 @@ function playAudioTheme(audioUrl) {
         currentAudioPlayer.loop = true;
         currentAudioPlayer.volume = 0.3;
         currentAudioPlayer.play().catch(e => console.log("Oynatma engellendi:", e));
-        alert("🎵 Odaklanma ses paketi aktif edildi!");
     }
 }
 
-// --- 5. SANAL SORU KUMBARASI ---
+// --- 7. SANAL SORU KUMBARASI ---
 function openKumbaraModal() {
     const modal = document.getElementById("dersverse-kumbara-modal");
     if (modal) {
@@ -364,7 +475,7 @@ function addQuestionToKumbara() {
 
     addXP(earnedXP);
     renderKumbara();
-    alert(`Soru kaydedildi! (+${earnedXP} XP Kazandınız)${boosterActive ? ' (XP Katlayıcı Aktif!)' : ''}`);
+    triggerConfetti();
 }
 
 function renderKumbara() {
@@ -391,7 +502,7 @@ function renderKumbara() {
     });
 }
 
-// --- 6. KULLANICI ENGELLEME KONTROLÜ ---
+// --- 8. KULLANICI ENGELLEME VE OTURUM KONTROLÜ ---
 async function checkUserBannedStatus() {
     try {
         const { data: { user } } = await dersverseSupabase.auth.getUser();
@@ -413,9 +524,9 @@ async function checkUserBannedStatus() {
     }
 }
 
-// Kullanıcı Oturum Kontrolü ve Rozet Desteği
 async function dersverseCheckUser() {
     const { data: { user } } = await dersverseSupabase.auth.getUser();
+    currentLoggedInUser = user;
     const authBtn = document.getElementById('dersverse-auth-btn');
     if (authBtn) {
         if (user) {
@@ -430,10 +541,10 @@ async function dersverseCheckUser() {
             authBtn.innerText = 'Kayıt Ol / Giriş Yap';
         }
     }
+    updateUserStats();
     dersverseSetupProtection(user);
 }
 
-// Geliştirici Kısıtlamaları (Admin Hariç Koruma)
 function dersverseSetupProtection(user) {
     const isAdmin = user && user.email === 'femememe1973@gmail.com';
     if (isAdmin) return;
@@ -449,7 +560,6 @@ function dersverseSetupProtection(user) {
     });
 }
 
-// Giriş/Çıkış Yönlendirme Mantığı
 async function dersverseHandleAuth() {
     const { data: { user } } = await dersverseSupabase.auth.getUser();
     if (user) {
@@ -470,7 +580,6 @@ function dersverseCloseModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// Onaylanmış İçerikleri Yükleme
 async function dersverseLoadContents() {
     const grid = document.getElementById('dersverse-content-grid');
     if (!grid) return;
@@ -483,7 +592,6 @@ async function dersverseLoadContents() {
         .eq('status', 'approved');
 
     if (error) {
-        console.error("Veri yüklenirken hata:", error);
         grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ef4444;">Yükleme sırasında hata oluştu.</p>';
         return;
     }
@@ -492,7 +600,6 @@ async function dersverseLoadContents() {
     dersverseRenderContents(dersverseAllContents);
 }
 
-// İçerik Kartlarını Ekrana Basma
 function dersverseRenderContents(contents) {
     const grid = document.getElementById('dersverse-content-grid');
     if (!grid) return;
@@ -534,7 +641,6 @@ function dersverseRenderContents(contents) {
     }).join('');
 }
 
-// Arama ve Kategori Filtreleme Mantığı
 function dersverseFilterContents() {
     const searchInput = document.getElementById('dersverse-search-input');
     const categoryFilter = document.getElementById('dersverse-category-filter');
@@ -546,7 +652,6 @@ function dersverseFilterContents() {
         const titleMatch = item.title && item.title.toLowerCase().includes(searchVal);
         const descMatch = item.description && item.description.toLowerCase().includes(searchVal);
         const matchesSearch = titleMatch || descMatch;
-
         const matchesCategory = categoryVal === 'Tümü' || item.category === categoryVal;
 
         return matchesSearch && matchesCategory;
@@ -555,13 +660,11 @@ function dersverseFilterContents() {
     dersverseRenderContents(filtered);
 }
 
-// İçerik Ekleme
 async function dersverseSubmitContent(e) {
     e.preventDefault();
     const { data: { user } } = await dersverseSupabase.auth.getUser();
 
     if (!user) {
-        alert('İçerik paylaşabilmek için lütfen giriş yapınız.');
         window.location.href = "login.html";
         return;
     }
@@ -580,7 +683,6 @@ async function dersverseSubmitContent(e) {
     const submitBtn = document.getElementById('submit-content-btn');
 
     if (!embedLink && !file && !manualLink) {
-        alert("Lütfen bir FlipHTML5/Embed bağlantısı ekleyin, dosya yükleyin ya da harici bir indirme bağlantısı girin!");
         return;
     }
 
@@ -594,7 +696,7 @@ async function dersverseSubmitContent(e) {
     } 
     else if (file) {
         if (submitBtn) {
-            submitBtn.innerText = "Yükleniyor... Lütfen Bekleyin";
+            submitBtn.innerText = "Yükleniyor...";
             submitBtn.disabled = true;
         }
 
@@ -606,7 +708,6 @@ async function dersverseSubmitContent(e) {
             .upload(filePath, file);
 
         if (uploadError) {
-            alert("Dosya yükleme hatası: " + uploadError.message);
             if (submitBtn) {
                 submitBtn.innerText = "Paylaş";
                 submitBtn.disabled = false;
@@ -621,9 +722,6 @@ async function dersverseSubmitContent(e) {
         uploadUrlField = urlData.publicUrl;
         finalLink = urlData.publicUrl;
         contentStatus = 'approved'; 
-    } 
-    else {
-        contentStatus = 'pending';
     }
 
     let userName = user.user_metadata?.full_name || user.email.split('@')[0];
@@ -643,30 +741,21 @@ async function dersverseSubmitContent(e) {
         status: contentStatus
     }]);
 
-    if (dbError) {
-        alert('Hata: ' + dbError.message);
-        if (submitBtn) {
-            submitBtn.innerText = "Paylaş";
-            submitBtn.disabled = false;
-        }
-    } else {
+    if (!dbError) {
         const boosterActive = localStorage.getItem("dersverse_xp_booster") === "true";
         const earnedXP = boosterActive ? 40 : 20;
 
         addXP(earnedXP);
-        if (contentStatus === 'approved') {
-            alert(`İçeriğiniz başarıyla yayınlandı! (+${earnedXP} XP)${boosterActive ? ' (XP Katlayıcı Aktif!)' : ''}`);
-        } else {
-            alert(`İçerik bağlantınız iletildi. Onaylandıktan sonra yayınlanacaktır. (+${earnedXP} XP)`);
-        }
+        triggerConfetti();
         dersverseCloseModal();
         const form = document.getElementById('dersverse-content-form');
         if (form) form.reset();
-        if (submitBtn) {
-            submitBtn.innerText = "Paylaş";
-            submitBtn.disabled = false;
-        }
         dersverseLoadContents(); 
+    }
+
+    if (submitBtn) {
+        submitBtn.innerText = "Paylaş";
+        submitBtn.disabled = false;
     }
 }
 
@@ -675,7 +764,6 @@ function escapeHtml(str) {
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// --- SUPABASE XP ÇEKME VE CANLI DİNLEME SİSTEMİ ---
 async function loadUserXP() {
     if (!dersverseSupabase) return;
 
@@ -690,18 +778,15 @@ async function loadUserXP() {
             .eq('id', user.id)
             .single();
 
-        if (error) {
-            console.error("XP çekilirken hata oluştu:", error.message);
-            return;
-        }
+        if (error) return;
 
-        if (data) {
+        if (data && !isUserAdmin()) {
             userPoints = data.xp || 0;
             localStorage.setItem("dersverse_xp", userPoints);
             updateUserStats();
         }
     } catch (err) {
-        console.error("loadUserXP çalışırken beklenmeyen hata:", err);
+        console.error("loadUserXP hatası:", err);
     }
 }
 
@@ -722,8 +807,7 @@ async function listenXPChanges() {
                 filter: `id=eq.${user.id}`
             },
             (payload) => {
-                if (payload.new && typeof payload.new.xp !== 'undefined') {
-                    console.log("Canlı XP Güncellendi:", payload.new.xp);
+                if (payload.new && typeof payload.new.xp !== 'undefined' && !isUserAdmin()) {
                     userPoints = payload.new.xp;
                     localStorage.setItem("dersverse_xp", userPoints);
                     updateUserStats();
@@ -737,7 +821,6 @@ async function listenXPChanges() {
 window.onload = () => {
     startLGSTimer();
     loadSavedTheme();
-    updateUserStats();
     dersverseCheckUser();
     loadUserXP();
     listenXPChanges();
