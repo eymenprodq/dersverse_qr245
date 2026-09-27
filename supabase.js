@@ -1,7 +1,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 const SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co'
-// Supabase panelinizden Project Settings > API kısmındaki 'anon' key'i buraya yapıştırın
-const SUPABASE_ANON_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'
+// Güvenli olan 'anon' anahtarını buraya yapıştırıyoruz:
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5eGdoZ3pxdXZzbmdlaGpqdmNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MDIxOTAsImV4cCI6MjEwNTQ3ODE5MH0.8MPZiIwOar7BIPJ9q2-t6oLxjCr2Kl03oh24xBEkwFs'
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
