@@ -116,16 +116,14 @@ function addXP(amount) {
     updateUserStats();
 }
 
-function deductXP(amount) {
+async function deductXP(amount) {
     // Yönetici kontrolü
-    let currentUser = null;
     try {
-        currentUser = dersverseSupabase.auth.getUser();
+        const { data: { user } } = await dersverseSupabase.auth.getUser();
+        if (user && user.email === 'femememe1973@gmail.com') {
+            return true; // Yönetici için XP düşülmez, her işlem onaylanır
+        }
     } catch(e) {}
-
-    if (currentUser && currentUser.email === 'femememe1973@gmail.com') {
-        return true; // Yönetici için XP eksiltme yapılmaz, her işlem onaylanır
-    }
 
     if (userPoints >= amount) {
         userPoints -= amount;
@@ -160,7 +158,7 @@ function closeShopModal() {
     if (modal) modal.style.display = "none";
 }
 
-// Sınırları Zorlayan 250+ Öğelik Ultra Mağaza Listesi
+// 250+ Öğelik Mağaza Listesi
 const shopItems = [
     // --- UNVANLAR (1-100) ---
     { id: 'item_1', name: '🧠 LGS Dahisi Unvanı', cost: 150, type: 'title', value: '🧠 LGS Dahisi' },
@@ -231,38 +229,38 @@ const shopItems = [
     { id: 'item_66', name: '🧭 Pusula Rehberi', cost: 180, type: 'title', value: '🧭 Pusula Rehberi' },
     { id: 'item_67', name: '⚓ Sağlam Temel', cost: 200, type: 'title', value: '⚓ Sağlam Temel' },
     { id: 'item_68', name: '🛠️ Tamirci Ruhlu', cost: 220, type: 'title', value: '🛠️ Tamirci Ruhlu' },
-    { id: 'item_69', name: '🔮 Falcı Değil Bilici', cost: 250, type: 'title', value: '🔮 Bilici' },
+    { id: 'item_69', name: '🔮 Bilici', cost: 250, type: 'title', value: '🔮 Bilici' },
     { id: 'item_70', name: '🧬 Genetik Dahi', cost: 490, type: 'title', value: '🧬 Genetik Dahi' },
-    { id: 'item_71', name: '🏷️ Süper Öğrenci', cost: 210, type: 'title', value: '🎒 Süper Öğrenci' },
-    { id: 'item_72', name: '🏷️ Maraton Koşucusu', cost: 310, type: 'title', value: '🏃 Maraton Koşucusu' },
-    { id: 'item_73', name: '🏷️ Zihin Okuyucu', cost: 420, type: 'title', value: '🧠 Zihin Okuyucu' },
-    { id: 'item_74', name: '🏷️ Kod Mimarı', cost: 380, type: 'title', value: '🏗️ Kod Mimarı' },
-    { id: 'item_75', name: '🏷️ Veri Tabanı Uzmanı', cost: 360, type: 'title', value: '💾 Veri Tabanı Uzmanı' },
-    { id: 'item_76', name: '🏷️ Arayüz Tasarımcısı', cost: 340, type: 'title', value: '📱 Arayüz Tasarımcısı' },
-    { id: 'item_77', name: '🏷️ Sistem Yöneticisi', cost: 500, type: 'title', value: '⚙️ Sistem Yöneticisi' },
-    { id: 'item_78', name: '🏷️ Hata Ayıklayıcı', cost: 290, type: 'title', value: '🐞 Hata Ayıklayıcı' },
-    { id: 'item_79', name: '🏷️ Komut Bloğu Üstadı', cost: 450, type: 'title', value: '🟩 Komut Bloğu Üstadı' },
-    { id: 'item_80', name: '🏷️ Sunucu Sahibi', cost: 480, type: 'title', value: '🌐 Sunucu Sahibi' },
-    { id: 'item_81', name: '🏷️ LGS Uzmanı', cost: 300, type: 'title', value: '📝 LGS Uzmanı' },
-    { id: 'item_82', name: '🏷️ Soru Avcısı', cost: 270, type: 'title', value: '🎯 Soru Avcısı' },
-    { id: 'item_83', name: '🏷️ Deneme Canavarı', cost: 330, type: 'title', value: '📈 Deneme Canavarı' },
-    { id: 'item_84', name: '🏷️ Puan Kolik', cost: 250, type: 'title', value: '💰 Puan Kolik' },
-    { id: 'item_85', name: '🏷️ XP Lordu', cost: 600, type: 'title', value: '⭐ XP Lordu' },
-    { id: 'item_86', name: '🏷️ XP Kralı', cost: 750, type: 'title', value: '👑 XP Kralı' },
-    { id: 'item_87', name: '🏷️ Seviye Atlatan', cost: 400, type: 'title', value: '🆙 Seviye Atlatan' },
-    { id: 'item_88', name: '🏷️ Görev Adamı', cost: 220, type: 'title', value: '📋 Görev Adamı' },
-    { id: 'item_89', name: '🏷️ Pratik Zeka', cost: 280, type: 'title', value: '⚡ Pratik Zeka' },
-    { id: 'item_90', name: '🏷️ Şimşek Beyin', cost: 390, type: 'title', value: '⚡ Şimşek Beyin' },
-    { id: 'item_91', name: '🏷️ Kararlı Adımlar', cost: 200, type: 'title', value: '👣 Kararlı Adımlar' },
-    { id: 'item_92', name: '🏷️ Zirvedeki Tek', cost: 1000, type: 'title', value: '🏔️ Zirvedeki Tek' },
-    { id: 'item_93', name: '🏷️ Efsane Geri Döndü', cost: 850, type: 'title', value: '🔄 Efsane Geri Döndü' },
-    { id: 'item_94', name: '🏷️ Gizli Güç', cost: 550, type: 'title', value: '👁️ Gizli Güç' },
-    { id: 'item_95', name: '🏷️ Sakin Güç', cost: 300, type: 'title', value: '🧘 Sakin Güç' },
-    { id: 'item_96', name: '🏷️ Hiperaktif Çalışkan', cost: 350, type: 'title', value: '🚀 Hiperaktif Çalışkan' },
-    { id: 'item_97', name: '🏷️ Odak Modu Açık', cost: 260, type: 'title', value: '🎯 Odak Modu Açık' },
-    { id: 'item_98', name: '🏷️ Sınav Tayfa', cost: 190, type: 'title', value: '🤝 Sınav Tayfa' },
-    { id: 'item_99', name: '🏷️ Dershane Kralı', cost: 340, type: 'title', value: '🏫 Dershane Kralı' },
-    { id: 'item_100', name: '🏷️ Son Sınav Bükücü', cost: 999, type: 'title', value: '🌀 Son Sınav Bükücü' },
+    { id: 'item_71', name: '🎒 Süper Öğrenci', cost: 210, type: 'title', value: '🎒 Süper Öğrenci' },
+    { id: 'item_72', name: '🏃 Maraton Koşucusu', cost: 310, type: 'title', value: '🏃 Maraton Koşucusu' },
+    { id: 'item_73', name: '🧠 Zihin Okuyucu', cost: 420, type: 'title', value: '🧠 Zihin Okuyucu' },
+    { id: 'item_74', name: '🏗️ Kod Mimarı', cost: 380, type: 'title', value: '🏗️ Kod Mimarı' },
+    { id: 'item_75', name: '💾 Veri Tabanı Uzmanı', cost: 360, type: 'title', value: '💾 Veri Tabanı Uzmanı' },
+    { id: 'item_76', name: '📱 Arayüz Tasarımcısı', cost: 340, type: 'title', value: '📱 Arayüz Tasarımcısı' },
+    { id: 'item_77', name: '⚙️ Sistem Yöneticisi', cost: 500, type: 'title', value: '⚙️ Sistem Yöneticisi' },
+    { id: 'item_78', name: '🐞 Hata Ayıklayıcı', cost: 290, type: 'title', value: '🐞 Hata Ayıklayıcı' },
+    { id: 'item_79', name: '🟩 Komut Bloğu Üstadı', cost: 450, type: 'title', value: '🟩 Komut Bloğu Üstadı' },
+    { id: 'item_80', name: '🌐 Sunucu Sahibi', cost: 480, type: 'title', value: '🌐 Sunucu Sahibi' },
+    { id: 'item_81', name: '📝 LGS Uzmanı', cost: 300, type: 'title', value: '📝 LGS Uzmanı' },
+    { id: 'item_82', name: '🎯 Soru Avcısı', cost: 270, type: 'title', value: '🎯 Soru Avcısı' },
+    { id: 'item_83', name: '📈 Deneme Canavarı', cost: 330, type: 'title', value: '📈 Deneme Canavarı' },
+    { id: 'item_84', name: '💰 Puan Kolik', cost: 250, type: 'title', value: '💰 Puan Kolik' },
+    { id: 'item_85', name: '⭐ XP Lordu', cost: 600, type: 'title', value: '⭐ XP Lordu' },
+    { id: 'item_86', name: '👑 XP Kralı', cost: 750, type: 'title', value: '👑 XP Kralı' },
+    { id: 'item_87', name: '🆙 Seviye Atlatan', cost: 400, type: 'title', value: '🆙 Seviye Atlatan' },
+    { id: 'item_88', name: '📋 Görev Adamı', cost: 220, type: 'title', value: '📋 Görev Adamı' },
+    { id: 'item_89', name: '⚡ Pratik Zeka', cost: 280, type: 'title', value: '⚡ Pratik Zeka' },
+    { id: 'item_90', name: '⚡ Şimşek Beyin', cost: 390, type: 'title', value: '⚡ Şimşek Beyin' },
+    { id: 'item_91', name: '👣 Kararlı Adımlar', cost: 200, type: 'title', value: '👣 Kararlı Adımlar' },
+    { id: 'item_92', name: '🏔️ Zirvedeki Tek', cost: 1000, type: 'title', value: '🏔️ Zirvedeki Tek' },
+    { id: 'item_93', name: '🔄 Efsane Geri Döndü', cost: 850, type: 'title', value: '🔄 Efsane Geri Döndü' },
+    { id: 'item_94', name: '👁️ Gizli Güç', cost: 550, type: 'title', value: '👁️ Gizli Güç' },
+    { id: 'item_95', name: '🧘 Sakin Güç', cost: 300, type: 'title', value: '🧘 Sakin Güç' },
+    { id: 'item_96', name: '🚀 Hiperaktif Çalışkan', cost: 350, type: 'title', value: '🚀 Hiperaktif Çalışkan' },
+    { id: 'item_97', name: '🎯 Odak Modu Açık', cost: 260, type: 'title', value: '🎯 Odak Modu Açık' },
+    { id: 'item_98', name: '🤝 Sınav Tayfa', cost: 190, type: 'title', value: '🤝 Sınav Tayfa' },
+    { id: 'item_99', name: '🏫 Dershane Kralı', cost: 340, type: 'title', value: '🏫 Dershane Kralı' },
+    { id: 'item_100', name: '🌀 Son Sınav Bükücü', cost: 999, type: 'title', value: '🌀 Son Sınav Bükücü' },
 
     // --- ROZETLER VE ÇERÇEVELER (101-160) ---
     { id: 'item_101', name: '✨ Altın Çerçeve Rozeti', cost: 250, type: 'badge', value: '✨' },
@@ -348,7 +346,7 @@ const shopItems = [
     { id: 'item_179', name: '💛 Parlak Sarı İsim', cost: 210, type: 'color', value: 'yellow' },
     { id: 'item_180', name: '🖤 Karanlık Siyah İsim', cost: 280, type: 'color', value: 'black' },
     { id: 'item_181', name: '🤍 Saf Beyaz İsim', cost: 260, type: 'color', value: 'white' },
-    { id: 'item_182', name: ' Turquoise Turkuaz İsim', cost: 230, type: 'color', value: 'turquoise' },
+    { id: 'item_182', name: 'Turkuaz İsim', cost: 230, type: 'color', value: 'turquoise' },
     { id: 'item_183', name: '🍇 Magenta Mor İsim', cost: 240, type: 'color', value: 'magenta' },
     { id: 'item_184', name: '🍋 Limon Yeşili İsim', cost: 220, type: 'color', value: 'lime' },
     { id: 'item_185', name: '🪸 Mercan Rengi İsim', cost: 210, type: 'color', value: 'coral' },
@@ -448,13 +446,24 @@ function renderShop() {
     }).join('');
 }
 
-function buyShopItem(itemId, cost) {
+async function buyShopItem(itemId, cost) {
     if (userInventory.includes(itemId)) {
         alert("Bu eşyaya zaten sahipsiniz!");
         return;
     }
 
-    if (deductXP(cost)) {
+    // YÖNETİCİ KONTROLÜ: E-posta femememe1973@gmail.com ise doğrudan onay ver
+    let isAdmin = false;
+    try {
+        const { data: { user } } = await dersverseSupabase.auth.getUser();
+        if (user && user.email === 'femememe1973@gmail.com') {
+            isAdmin = true;
+        }
+    } catch (e) {}
+
+    const canPurchase = isAdmin || (await deductXP(cost));
+
+    if (canPurchase) {
         userInventory.push(itemId);
         localStorage.setItem("dersverse_inventory", JSON.stringify(userInventory));
         
@@ -561,7 +570,7 @@ async function checkUserBannedStatus() {
     }
 }
 
-// Kullanıcı Oturum Kontrolü ve Rozet Desteği
+// Kullanıcı Oturum Kontrolü
 async function dersverseCheckUser() {
     const { data: { user } } = await dersverseSupabase.auth.getUser();
     const authBtn = document.getElementById('dersverse-auth-btn');
@@ -597,7 +606,7 @@ function dersverseSetupProtection(user) {
     });
 }
 
-// Giriş/Çıkış Yönlendirme Mantığı
+// Giriş/Çıkış
 async function dersverseHandleAuth() {
     const { data: { user } } = await dersverseSupabase.auth.getUser();
     if (user) {
@@ -640,7 +649,7 @@ async function dersverseLoadContents() {
     dersverseRenderContents(dersverseAllContents);
 }
 
-// İçerik Kartlarını Ekrana Basma (Çift Butonlu ve Yorum Destekli)
+// İçerik Kartlarını Ekrana Basma
 function dersverseRenderContents(contents) {
     const grid = document.getElementById('dersverse-content-grid');
     if (!grid) return;
@@ -682,7 +691,7 @@ function dersverseRenderContents(contents) {
     }).join('');
 }
 
-// Arama ve Kategori Filtreleme Mantığı
+// Arama ve Filtreleme
 function dersverseFilterContents() {
     const searchInput = document.getElementById('dersverse-search-input');
     const categoryFilter = document.getElementById('dersverse-category-filter');
@@ -827,90 +836,62 @@ window.onload = () => {
     updateUserStats();
     dersverseCheckUser();
 
-    // ==========================================
-// SUPABASE XP ÇEKME VE CANLI DİNLEME SİSTEMİ
-// ==========================================
+    // Supabase XP Çekme ve Canlı Dinleme
+    async function loadUserXP() {
+        if (!dersverseSupabase) return;
 
-// 1. Giriş yapmış kullanıcının profilindeki XP verisini Supabase'den çekme
-async function loadUserXP() {
-    if (!supabase) return;
+        try {
+            const { data: { user }, error: authError } = await dersverseSupabase.auth.getUser();
 
-    try {
-        // Oturum açmış aktif kullanıcıyı al
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError || !user) return;
 
-        if (authError || !user) {
-            console.log("Kullanıcı oturum açmamış veya oturum bilgisi alınamadı.");
-            return;
-        }
+            const { data, error } = await dersverseSupabase
+                .from('profiles')
+                .select('xp')
+                .eq('id', user.id)
+                .single();
 
-        // Profiles tablosundan kullanıcının XP değerini sorgula
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('xp')
-            .eq('id', user.id)
-            .single();
+            if (error) return;
 
-        if (error) {
-            console.error("XP çekilirken hata oluştu:", error.message);
-            return;
-        }
-
-        if (data) {
-            // LocalStorage belleğini ve arayüzü güncelle
-            userXP = data.xp || 0;
-            localStorage.setItem("user_xp", userXP);
-            
-            const userPointsEl = document.getElementById('user-points');
-            if (userPointsEl) {
-                userPointsEl.innerText = (user.email === 'femememe1973@gmail.com') ? "∞ (Sınırsız)" : userXP;
+            if (data) {
+                userPoints = data.xp || 0;
+                localStorage.setItem("dersverse_xp", userPoints);
+                updateUserStats();
             }
+        } catch (err) {
+            console.error("loadUserXP hatası:", err);
         }
-    } catch (err) {
-        console.error("loadUserXP çalışırken beklenmeyen hata:", err);
     }
-}
 
-// 2. Supabase Realtime ile profiles tablosunu canlı dinleme
-async function listenXPChanges() {
-    if (!supabase) return;
+    async function listenXPChanges() {
+        if (!dersverseSupabase) return;
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+        const { data: { user } } = await dersverseSupabase.auth.getUser();
+        if (!user) return;
 
-    supabase
-        .channel('public:profiles:' + user.id)
-        .on(
-            'postgres_changes',
-            {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'profiles',
-                filter: `id=eq.${user.id}` // Sadece oturum açan bu kullanıcının değişimi
-            },
-            (payload) => {
-                if (payload.new && typeof payload.new.xp !== 'undefined') {
-                    console.log("Canlı XP Güncellendi:", payload.new.xp);
-                    
-                    // Hem belleği hem de arayüzü eşzamanlı güncelle
-                    userXP = payload.new.xp;
-                    localStorage.setItem("user_xp", userXP);
-
-                    const userPointsEl = document.getElementById('user-points');
-                    if (userPointsEl) {
-                        userPointsEl.innerText = (user.email === 'femememe1973@gmail.com') ? "∞ (Sınırsız)" : userXP;
+        dersverseSupabase
+            .channel('public:profiles:' + user.id)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'profiles',
+                    filter: `id=eq.${user.id}`
+                },
+                (payload) => {
+                    if (payload.new && typeof payload.new.xp !== 'undefined') {
+                        userPoints = payload.new.xp;
+                        localStorage.setItem("dersverse_xp", userPoints);
+                        updateUserStats();
                     }
                 }
-            }
-        )
-        .subscribe();
-}
+            )
+            .subscribe();
+    }
 
-// DOM Yüklendiğinde Dinleyicileri ve Yüklemeyi Başlat
-document.addEventListener('DOMContentLoaded', () => {
     loadUserXP();
     listenXPChanges();
-});
     dersverseLoadContents();
     checkUserBannedStatus();
 };
