@@ -18,11 +18,157 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
+        :root {
+            --dersverse-bg: #0a0a12;
+            --dersverse-card-bg: rgba(255, 255, 255, 0.05);
+            --dersverse-border: rgba(255, 255, 255, 0.1);
+            --dersverse-primary: #6366f1;
+            --dersverse-primary-hover: #4f46e5;
+            --dersverse-text: #f3f4f6;
+            --dersverse-text-muted: #9ca3af;
+            --dersverse-warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dersverse-bg);
+            color: var(--dersverse-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        /* Top Bar & LGS Sayaç Stilleri */
+        .dersverse-top-bar {
+            background: rgba(15, 15, 26, 0.9);
+            border-bottom: 1px solid var(--dersverse-border);
+            padding: 0.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .dersverse-top-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dersverse-btn-kumbara, .dersverse-btn-pomo, .dersverse-btn-theme {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--dersverse-border);
+            color: var(--dersverse-text);
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+
+        .dersverse-btn-kumbara:hover, .dersverse-btn-pomo:hover, .dersverse-btn-theme:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        header.dersverse-header {
+            background: rgba(10, 10, 18, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--dersverse-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .dersverse-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .dersverse-user-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            font-size: 0.85rem;
+        }
+
+        .dersverse-badge {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .dersverse-nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .dersverse-btn {
+            background: var(--dersverse-primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dersverse-btn:hover {
+            background: var(--dersverse-primary-hover);
+        }
+
+        .dersverse-btn-outline {
+            background: transparent;
+            border: 1px solid var(--dersverse-border);
+            color: var(--dersverse-text);
+        }
+
+        .dersverse-btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dersverse-btn-apk {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .dersverse-btn-apk:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
         /* Doğrulama Bildirim Bannerı */
         .verification-alert {
             display: none;
             background: rgba(245, 158, 11, 0.15);
-            border: 1px solid var(--dersverse-warning, #f59e0b);
+            border: 1px solid var(--dersverse-warning);
             color: #fbbf24;
             padding: 0.8rem 1.2rem;
             border-radius: 8px;
@@ -37,11 +183,183 @@
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        main.dersverse-main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+
+        .dersverse-hero {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .dersverse-hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .dersverse-hero p {
+            color: var(--dersverse-text-muted);
+            font-size: 1.1rem;
+        }
+
+        .dersverse-filter-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .dersverse-search-input {
+            flex: 2;
+            min-width: 220px;
+            padding: 0.75rem 1rem;
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 8px;
+            color: var(--dersverse-text);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .dersverse-search-input:focus {
+            border-color: var(--dersverse-primary);
+        }
+
+        .dersverse-category-select {
+            flex: 1;
+            min-width: 160px;
+            padding: 0.75rem 1rem;
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 8px;
+            color: var(--dersverse-text);
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .dersverse-category-select option {
+            background: #12121f;
+            color: var(--dersverse-text);
+        }
+
+        .dersverse-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .dersverse-card {
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .teacher-recommended {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #10b981;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .dersverse-card-tag {
+            font-size: 0.8rem;
+            color: var(--dersverse-primary);
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .dersverse-card-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dersverse-card-desc {
+            color: var(--dersverse-text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .dersverse-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .dersverse-modal-content {
+            background: #12121f;
+            border: 1px solid var(--dersverse-border);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .pomodoro-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--dersverse-primary);
+            margin: 1.5rem 0;
+        }
+
+        .dersverse-form-group {
+            margin-bottom: 1rem;
+        }
+
+        .dersverse-form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--dersverse-text-muted);
+        }
+
+        .dersverse-form-group input, 
+        .dersverse-form-group select, 
+        .dersverse-form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 6px;
+            color: white;
+            outline: none;
+        }
+
+        .dersverse-divider {
+            text-align: center;
+            margin: 10px 0;
+            color: var(--dersverse-text-muted);
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
 
-    <!-- LGS Sınav Sayacı ve Kontrol Barı -->
+    <!-- LGS Sayacı ve Araçlar Çubuğu -->
     <div class="dersverse-top-bar">
         <div class="dersverse-lgs-timer">
             🎯 <strong>LGS 2027 Kalan Süre:</strong> <span id="lgs-countdown">Yükleniyor...</span>
@@ -69,13 +387,13 @@
             </a>
             <button class="dersverse-btn dersverse-btn-outline" onclick="dersverseOpenModal()">İçerik Paylaş</button>
             
-            <!-- Kullanıcı Oturum / Profil Alanı -->
+            <!-- Profil Bilgisi & Giriş Butonu -->
             <div id="nav-user-profile" style="display: none; align-items: center; gap: 0.8rem;"></div>
             <button class="dersverse-btn" id="dersverse-auth-btn" onclick="dersverseHandleAuth()">Kayıt Ol / Giriş Yap</button>
         </div>
     </header>
 
-    <!-- E-posta Doğrulama Bildirimi -->
+    <!-- E-posta Doğrulama Bildirimi Bannerı -->
     <div id="verification-notice" class="verification-alert">
         📩 <strong>Aramıza Hoş Geldin!</strong> Doğrulama e-postası gönderildi. Lütfen e-posta kutunuzu kontrol edin ve gelen bağlantıya tıklayın.
     </div>
@@ -101,22 +419,21 @@
             </select>
         </div>
 
-        <!-- Kartların Dinamik Yüklendiği Izgara Alanı -->
+        <!-- Kartların Yüklendiği Izgara Alanı -->
         <div class="dersverse-grid" id="dersverse-content-grid">
-            <!-- Örnek Öğretmen Onaylı Kart -->
             <div class="dersverse-card">
                 <div class="teacher-recommended">✔ Öğretmen Onaylı</div>
                 <div>
                     <div class="dersverse-card-tag">Matematik</div>
                     <div class="dersverse-card-title">8. Sınıf LGS Yeni Nesil Matematik</div>
-                    <div class="dersverse-card-desc">Öğretmenlerimiz tarafından tavsiye edilen, aşamalı soru bankası dijital notları.</div>
+                    <div class="dersverse-card-desc">Öğretmenlerimizin tavsiye ettiği, yeni nesil soru bankası dijital notları.</div>
                 </div>
                 <button class="dersverse-btn" onclick="addXP(10)">📖 İncele (+10 XP)</button>
             </div>
         </div>
     </main>
 
-    <!-- 1. İçerik Paylaşım Modalı -->
+    <!-- Modal 1: İçerik Paylaşım -->
     <div class="dersverse-modal" id="dersverse-add-modal">
         <div class="dersverse-modal-content">
             <h2 style="margin-bottom: 1rem;">Yeni İçerik Paylaş</h2>
@@ -142,12 +459,12 @@
                 </div>
                 
                 <div class="dersverse-form-group" style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--dersverse-primary);">
-                    <label style="font-weight: bold;">🔗 Embed / FlipHTML5 / YouTube Linki</label>
+                    <label style="font-weight: bold; color: white;">🔗 Embed / FlipHTML5 / YouTube Linki</label>
                     <input type="text" id="dersverse-embed-link" placeholder="https://online.fliphtml5.com/... veya iframe">
                 </div>
 
                 <div class="dersverse-form-group" style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--dersverse-primary); margin-top: 10px;">
-                    <label style="font-weight: bold;">Dosya Yükle (Direkt Yayınlanır)</label>
+                    <label style="font-weight: bold; color: white;">Dosya Yükle (Direkt Yayınlanır)</label>
                     <input type="file" id="dersverse-file-upload" accept=".pdf,.html,.mp4,.mp3,.zip,.png,.jpg,.jpeg" style="border: none; padding: 0.5rem 0;">
                 </div>
                 
@@ -166,7 +483,7 @@
         </div>
     </div>
 
-    <!-- 2. Pomodoro Ders Çalışma Kronometresi Modalı -->
+    <!-- Modal 2: Pomodoro Ders Kronometresi -->
     <div class="dersverse-modal" id="dersverse-pomodoro-modal">
         <div class="dersverse-modal-content" style="text-align: center;">
             <h2>⏱️ Ders Çalışma Kronometresi</h2>
@@ -174,7 +491,7 @@
             
             <div class="pomodoro-display" id="pomodoro-timer-display">25:00</div>
 
-            <div class="pomodoro-controls">
+            <div class="pomodoro-controls" style="display: flex; gap: 10px; justify-content: center;">
                 <button class="dersverse-btn" id="pomo-start-btn" onclick="startPomodoro()">Başlat</button>
                 <button class="dersverse-btn dersverse-btn-outline" onclick="pausePomodoro()">Durdur</button>
                 <button class="dersverse-btn dersverse-btn-outline" onclick="resetPomodoro()">Sıfırla</button>
@@ -186,23 +503,21 @@
         </div>
     </div>
 
-    <!-- 3. Sanal Soru Kumbarası Modalı -->
+    <!-- Modal 3: Sanal Soru Kumbarası -->
     <div class="dersverse-modal" id="dersverse-kumbara-modal">
         <div class="dersverse-modal-content">
             <h2>📌 Sanal Soru Kumbarası</h2>
-            <p style="color: var(--dersverse-text-muted); margin-bottom: 15px; font-size: 0.85rem;">Yapamadığınız veya tekrar bakmak istediğiniz soruları buraya kaydedin.</p>
+            <p style="color: var(--dersverse-text-muted); margin-bottom: 15px; font-size: 0.85rem;">Yapamadığınız veya tekrar bakmak istediğiniz soruları kaydedin.</p>
 
             <div class="dersverse-form-group">
-                <input type="text" id="kumbara-note" placeholder="Soru notu veya başlığı (Örn: Fen Kalıtım Çaprazlama Sorusu)">
+                <input type="text" id="kumbara-note" placeholder="Soru notu (Örn: Fen Kalıtım Sorusu)">
             </div>
             <div class="dersverse-form-group">
-                <input type="text" id="kumbara-link" placeholder="Soru Görseli / Drive Linki">
+                <input type="text" id="kumbara-link" placeholder="Soru Görseli / Linki">
             </div>
-            <button class="dersverse-btn" style="width: 100%; margin-bottom: 15px;" onclick="addQuestionToKumbara()">Soruyu Kumbaraya Ekle (+15 XP)</button>
+            <button class="dersverse-btn" style="width: 100%; margin-bottom: 15px;" onclick="addQuestionToKumbara()">Kumbaraya Ekle (+15 XP)</button>
 
-            <div id="kumbara-list">
-                <!-- Soru kartları JavaScript tarafında buraya yerleşecek -->
-            </div>
+            <div id="kumbara-list"></div>
 
             <div style="text-align: right; margin-top: 15px;">
                 <button class="dersverse-btn dersverse-btn-outline" onclick="closeKumbaraModal()">Kapat</button>
@@ -210,7 +525,7 @@
         </div>
     </div>
 
-    <!-- Tawk.to Canlı Destek Entegrasyonu -->
+    <!-- Tawk.to Canlı Destek -->
     <script type="text/javascript">
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
     (function(){
@@ -223,12 +538,13 @@
     })();
     </script>
 
-    <!-- Supabase Doğrulama, Oturum ve Engelleme Yönetim Scripti -->
+    <!-- Supabase & Arayüz Mantık Scripti -->
     <script>
         const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
         const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
         const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
 
+        // Bildirim Kutusu Yönetimi
         function showVerificationNotice(msg) {
             const noticeBox = document.getElementById('verification-notice');
             if (noticeBox) {
@@ -242,6 +558,7 @@
             if (noticeBox) noticeBox.style.display = 'none';
         }
 
+        // Oturum ve Kullanıcı Yönetimi
         async function processUserSession(session) {
             const loginBtn = document.getElementById('dersverse-auth-btn');
             const userProfileArea = document.getElementById('nav-user-profile');
@@ -249,14 +566,12 @@
             if (session && session.user) {
                 const user = session.user;
 
-                // E-posta henüz doğrulanmadıysa uyarı ver
                 if (user.confirmed_at === null && user.email_confirmed_at === null) {
-                    showVerificationNotice('📩 <strong>E-posta Doğrulaması Bekleniyor:</strong> Lütfen e-posta adresinize (<strong>' + user.email + '</strong>) gönderilen doğrulama bağlantısına tıklayın.');
+                    showVerificationNotice('📩 <strong>E-posta Doğrulaması Bekleniyor:</strong> Lütfen e-posta adresinize (<strong>' + user.email + '</strong>) gönderilen bağlantıya tıklayın.');
                 } else {
                     hideVerificationNotice();
                 }
 
-                // 1. Profil Verisini Çek veya Oluştur
                 let { data: profile } = await dersverseSupabase
                     .from('profiles')
                     .select('*')
@@ -273,16 +588,14 @@
                     profile = newProfile;
                 }
 
-                // 2. Engelleme Kontrolü
                 if (profile && profile.is_banned && new Date(profile.ban_until) > new Date()) {
                     const banDate = new Date(profile.ban_until).toLocaleString('tr-TR');
-                    alert(`Erişiminiz Engellendi!\nNeden: ${profile.ban_reason || 'Belirtilmedi'}\nEngelin Bitiş Tarihi: ${banDate}`);
+                    alert(`Erişiminiz Engellendi!\nNeden: ${profile.ban_reason || 'Belirtilmedi'}\nBitiş: ${banDate}`);
                     await dersverseSupabase.auth.signOut();
                     window.location.reload();
                     return;
                 }
 
-                // 3. Arayüzü Güncelle
                 if (loginBtn) loginBtn.style.display = 'none';
                 if (userProfileArea) {
                     userProfileArea.style.display = 'flex';
@@ -313,7 +626,6 @@
             window.location.reload();
         }
 
-        // Supabase Auth Değişiklik Dinleyicisi
         dersverseSupabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                 await processUserSession(session);
@@ -321,14 +633,47 @@
                 hideVerificationNotice();
                 processUserSession(null);
             } else if (event === 'USER_UPDATED') {
-                showVerificationNotice('📩 Doğrulama e-postası gönderildi, lütfen e-posta kutunuzu kontrol edin!');
+                showVerificationNotice('📩 Doğrulama e-postası gönderildi, lütfen kutunuzu kontrol edin!');
             }
         });
 
-        document.addEventListener('DOMContentLoaded', checkUserAuth);
+        // LGS Geri Sayım Mantığı
+        function updateLGSCountdown() {
+            const lgsDate = new Date('June 1, 2027 09:30:00').getTime();
+            const now = new Date().getTime();
+            const diff = lgsDate - now;
+
+            if (diff <= 0) {
+                document.getElementById('lgs-countdown').innerText = 'LGS Başladı!';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            const countdownEl = document.getElementById('lgs-countdown');
+            if (countdownEl) {
+                countdownEl.innerText = `${days} Gün ${hours} Saat ${minutes} Dakika`;
+            }
+        }
+
+        // Modal Yönetimleri
+        function openPomodoroModal() { document.getElementById('dersverse-pomodoro-modal').style.display = 'flex'; }
+        function closePomodoroModal() { document.getElementById('dersverse-pomodoro-modal').style.display = 'none'; }
+        function openKumbaraModal() { document.getElementById('dersverse-kumbara-modal').style.display = 'flex'; }
+        function closeKumbaraModal() { document.getElementById('dersverse-kumbara-modal').style.display = 'none'; }
+        function dersverseOpenModal() { document.getElementById('dersverse-add-modal').style.display = 'flex'; }
+        function dersverseCloseModal() { document.getElementById('dersverse-add-modal').style.display = 'none'; }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUserAuth();
+            updateLGSCountdown();
+            setInterval(updateLGSCountdown, 60000);
+        });
     </script>
 
-    <!-- Harici JavaScript Kod Dosyası -->
+    <!-- Harici script.js Bağlantısı -->
     <script src="script.js"></script>
 </body>
 </html>
