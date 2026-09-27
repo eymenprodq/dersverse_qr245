@@ -3,53 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DersVerse - XP Mağazası ve Şans Çarkı</title>
-    
-    <!-- PWA / Favicon -->
-    <link rel="icon" type="image/png" href="dersverse-logo-512x512.png">
-    
-    <!-- Harici CSS Tasarım Dosyası -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Supabase JS Client -->
+    <title>DersVerse - XP Mağazası ve Sandıklar</title>
+    <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase Bağlantı Yapılandırması
+        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
+        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
+        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+    </script>
+    <style>
+        :root {
+            --dersverse-bg: #0b0f19;
+            --dersverse-card-bg: #111827;
+            --dersverse-border: #1f2937;
+            --dersverse-text: #f3f4f6;
+            --dersverse-text-muted: #9ca3af;
+            --dersverse-primary: #6366f1;
+            --dersverse-primary-hover: #4f46e5;
+        }
+
+        .light-theme {
+            --dersverse-bg: #f3f4f6;
+            --dersverse-card-bg: #ffffff;
+            --dersverse-border: #e5e7eb;
+            --dersverse-text: #1f2937;
+            --dersverse-text-muted: #6b7280;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--dersverse-bg);
+            color: var(--dersverse-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--dersverse-card-bg);
+            border-bottom: 1px solid var(--dersverse-border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--dersverse-primary);
+            text-decoration: none;
+        }
+
+        .user-stats-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-badge {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--dersverse-primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        main {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .shop-header {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .shop-header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .shop-header p {
+            color: var(--dersverse-text-muted);
+            font-size: 0.95rem;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .dersverse-btn {
+            background-color: var(--dersverse-primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .dersverse-btn:hover {
+            background-color: var(--dersverse-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .dersverse-btn-outline {
+            background: transparent;
+            border: 1px solid var(--dersverse-border);
+            color: var(--dersverse-text);
+        }
+
+        .dersverse-btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--dersverse-text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            color: var(--dersverse-primary);
+        }
+
+        /* Özel Efekt Sınıfları */
+        .neon-border { box-shadow: inset 0 0 15px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.4); }
+        .fire-aura { box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); }
+        .galaxy-bg { background: linear-gradient(135deg, #111827 0%, #312e81 100%); }
+        .lightning-aura { box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); }
+    </style>
 </head>
 <body>
 
-    <!-- Üst Menü / Navigasyon Barı -->
-    <header class="dersverse-header">
-        <a href="index.html" class="dersverse-logo">DersVerse</a>
-        
-        <!-- Canlı Puan ve Rozet Alanı -->
-        <div class="dersverse-user-stats">
-            <span>⭐ Puanınız: <strong id="user-points">0</strong> XP</span>
-            <span class="dersverse-badge" id="user-badge">🔥 Yükleniyor...</span>
-        </div>
-
-        <div class="dersverse-nav-actions">
+    <header>
+        <a href="index.html" class="logo-area">
+            🚀 DersVerse XP Mağazası
+        </a>
+        <div class="user-stats-bar">
+            <div id="user-badge" class="stat-badge">🔥 LGS Canavarı</div>
+            <div class="stat-badge">💎 XP: <span id="user-points">100</span></div>
             <button id="dersverse-theme-toggle" class="dersverse-btn dersverse-btn-outline" onclick="dersverseToggleTheme()">☀️ Gündüz Modu</button>
-            <a href="index.html" class="dersverse-btn dersverse-btn-outline">🏠 Ana Sayfaya Dön</a>
         </div>
     </header>
 
-    <!-- Mağaza Ana İçeriği -->
-    <main class="dersverse-main" style="padding: 20px; max-width: 900px; margin: 0 auto;">
-        <section class="dersverse-hero" style="text-align: center; margin-bottom: 20px;">
-            <h1>🛒 DersVerse XP Mağazası ve Şans Çarkı</h1>
-            <p>Sandıklar al, stokla, toplu satın al, şans çarkını çevir ve özel ayrıcalıklar kazan!</p>
-        </section>
+    <main>
+        <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
+        
+        <div class="shop-header">
+            <h1>Ultra XP Mağazası & Koleksiyon</h1>
+            <p>Biriktirdiğiniz XP'lerle sandıklar açın, şans çarkını çevirin, özel unvanlar ve odak sesleri satın alın!</p>
+        </div>
 
-        <!-- Mağaza Ürünleri Konteyneri (script.js içerisindeki renderShop fonksiyonu burayı otomatik doldurur) -->
-        <div id="shop-items-container" style="display: flex; flex-direction: column; gap: 10px;">
-            <p style="text-align: center; color: #888;">Mağaza ürünleri yükleniyor...</p>
+        <!-- Mağaza Ürünlerinin Dinamik Olarak Basıldığı Alan -->
+        <div id="shop-items-container" class="shop-grid">
+            <!-- JavaScript ile doldurulacak -->
         </div>
     </main>
 
-    <!-- Şans Çarkı / Kutu Açılım Animasyon Modali -->
-    <div id="dersverse-wheel-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 99999;">
-    </div>
-
-    <!-- Harici JavaScript Dosyası -->
+    <!-- script (8.js) Dosyasını Bağlıyoruz -->
     <script src="script.js"></script>
+    <script>
+        // Sayfa açıldığında mağazayı doğrudan çizdir
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderShop === 'function') {
+                renderShop();
+            }
+            if (typeof updateUserStats === 'function') {
+                updateUserStats();
+            }
+        });
+    </script>
 </body>
 </html>
