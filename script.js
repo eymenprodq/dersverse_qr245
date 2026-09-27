@@ -25,7 +25,7 @@ function startLGSTimer() {
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        el.innerHTML = `${days}g ${hours}s ${minutes}d ${seconds}sn`;
+        el.innerText = `${days} Gün ${hours} Saat ${minutes} Dk ${seconds} Sn`;
     }, 1000);
 }
 
@@ -185,6 +185,7 @@ function renderKumbara() {
     questions.forEach((q) => {
         const item = document.createElement("div");
         item.className = "question-card";
+        item.style.cssText = "background: rgba(255,255,255,0.05); padding: 8px; margin-top: 5px; border-radius: 6px; border: 1px solid var(--dersverse-border, #333);";
         item.innerHTML = `
             <strong>${escapeHtml(q.note)}</strong>
             ${q.link ? `<br><a href="${escapeHtml(q.link)}" target="_blank" style="color:#6366f1; font-size: 0.85rem; text-decoration: underline;">🔗 Soruyu Gör / Linke Git</a>` : ''}
@@ -252,6 +253,11 @@ function dersverseCloseModal() {
 
 // Onaylanmış İçerikleri Yükleme
 async function dersverseLoadContents() {
+    const grid = document.getElementById('dersverse-content-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--dersverse-text-muted);">İçerikler yükleniyor...</p>';
+
     const { data, error } = await dersverseSupabase
         .from('contents')
         .select('*')
@@ -259,6 +265,7 @@ async function dersverseLoadContents() {
 
     if (error) {
         console.error("Veri yüklenirken hata:", error);
+        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ef4444;">Yükleme sırasında hata oluştu.</p>';
         return;
     }
 
@@ -285,6 +292,8 @@ function dersverseRenderContents(contents) {
             authorBadge = ' ✔️ 🔨';
         }
 
+        const linkUrl = item.link || item.download_url || '#';
+
         return `
             <div class="dersverse-card">
                 <div>
@@ -295,7 +304,7 @@ function dersverseRenderContents(contents) {
                     <p class="dersverse-card-desc">${escapeHtml(item.description)}</p>
                     <p style="font-size: 0.8rem; color: var(--dersverse-text-muted); margin-bottom: 1rem;">Paylaşan: ${authorDisplay} <span style="color: #6366f1;">${authorBadge}</span></p>
                 </div>
-                <a href="detay.html?id=${item.id}" class="dersverse-btn dersverse-btn-outline" style="text-align: center; text-decoration: none;" onclick="addXP(10)">Detayları Gör & Yorum Yap (+10 XP)</a>
+                <a href="${escapeHtml(linkUrl)}" target="_blank" class="dersverse-btn dersverse-btn-outline" style="text-align: center; text-decoration: none;" onclick="addXP(10)">Detayları Gör & İncele (+10 XP)</a>
             </div>
         `;
     }).join('');
@@ -346,7 +355,6 @@ async function dersverseSubmitContent(e) {
     let manualLink = document.getElementById('dersverse-link') ? document.getElementById('dersverse-link').value.trim() : '';
     const submitBtn = document.getElementById('submit-content-btn');
 
-    // Hiçbir kaynak girilmemişse uyarı ver
     if (!embedLink && !file && !manualLink) {
         alert("Lütfen bir FlipHTML5/Embed bağlantısı ekleyin, dosya yükleyin ya da harici bir indirme bağlantısı girin!");
         return;
@@ -356,12 +364,10 @@ async function dersverseSubmitContent(e) {
     let finalLink = manualLink;
     let uploadUrlField = null;
 
-    // 1. Öncelik: Embed / FlipHTML5 Bağlantısı (Doğrudan onaylı kabul edilir)
     if (embedLink) {
         finalLink = embedLink;
         contentStatus = 'approved';
     } 
-    // 2. Öncelik: Dosya Yükleme
     else if (file) {
         if (submitBtn) {
             submitBtn.innerText = "Yükleniyor... Lütfen Bekleyin";
@@ -392,7 +398,6 @@ async function dersverseSubmitContent(e) {
         finalLink = urlData.publicUrl;
         contentStatus = 'approved'; 
     } 
-    // 3. Öncelik: Harici Link (Onaya gider)
     else {
         contentStatus = 'pending';
     }
