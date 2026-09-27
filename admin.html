@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DersVerse - Admin Yönetim Paneli</title>
+    <meta name="google-site-verification" content="7HO7fMJQkkZRbFemkvJ7JASrZmYOfqoAglMJqsvDW9o" />
+    <title>DersVerse - Gelişmiş Admin Yönetim Paneli</title>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -165,6 +166,30 @@
             gap: 0.5rem;
         }
 
+        .admin-tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 1px solid var(--dersverse-border);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--dersverse-text-muted);
+            padding: 0.8rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--dersverse-primary);
+            border-bottom-color: var(--dersverse-primary);
+        }
+
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -200,6 +225,9 @@
             text-transform: uppercase;
         }
 
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: var(--dersverse-warning); }
+        .status-approved { background: rgba(16, 185, 129, 0.2); color: var(--dersverse-success); }
+        .status-rejected { background: rgba(239, 68, 68, 0.2); color: var(--dersverse-danger); }
         .status-banned { background: rgba(239, 68, 68, 0.3); color: var(--dersverse-danger); border: 1px solid var(--dersverse-danger); }
         .role-teacher { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
         .role-student { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
@@ -208,6 +236,11 @@
             display: flex;
             gap: 0.4rem;
             flex-wrap: wrap;
+        }
+
+        .action-btns button {
+            padding: 0.35rem 0.7rem;
+            font-size: 0.8rem;
         }
 
         .announcement-form {
@@ -224,6 +257,11 @@
             border-radius: 8px;
             color: white;
             font-size: 0.95rem;
+        }
+
+        .announcement-input:focus, .ban-input:focus, .xp-input:focus {
+            outline: none;
+            border-color: var(--dersverse-primary);
         }
 
         .modal-overlay {
@@ -268,6 +306,12 @@
             font-size: 0.85rem;
             color: var(--dersverse-text-muted);
         }
+
+        #unauthorized-screen {
+            display: none;
+            text-align: center;
+            padding: 5rem 1rem;
+        }
     </style>
 </head>
 <body>
@@ -275,17 +319,78 @@
     <header class="admin-header">
         <a href="index.html" class="admin-logo">
             DersVerse
-            <span class="admin-badge">Admin</span>
+            <span class="admin-badge">Süper Admin</span>
         </a>
         <div class="admin-nav-actions">
-            <span style="color: var(--dersverse-text); font-size: 0.95rem; font-weight: 600;">Kadir Eymen Açıkoğlu</span>
+            <span id="admin-user-display" style="color: var(--dersverse-text); font-size: 0.95rem; font-weight: 600;">Kadir Eymen Açıkoğlu <span style="font-size: 1.1rem; margin-left: 4px;" title="Süper Yönetici">✔️ 🔨</span></span>
+            <a href="ogretmen.html" class="btn btn-outline" target="_blank">Öğretmen Portalı</a>
             <a href="index.html" class="btn btn-outline">← Ana Siteye Dön</a>
         </div>
     </header>
 
-    <main class="admin-container">
+    <div id="unauthorized-screen">
+        <h1 style="font-size: 3rem; color: var(--dersverse-danger); margin-bottom: 1rem;">403 - Erişim Engellendi</h1>
+        <p style="color: var(--dersverse-text-muted); font-size: 1.2rem; margin-bottom: 2rem;">Bu yönetim paneline yalnızca yetkili yönetici erişebilir.</p>
+        <a href="index.html" class="btn">Ana Sayfaya Dön</a>
+    </div>
+
+    <main class="admin-container" id="admin-main-screen">
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h4>Gelen Bildirim/Başvuru</h4>
+                    <div id="stat-teacher-count" style="color: var(--dersverse-warning);">0</div>
+                </div>
+                <div class="stat-icon">🔔</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h4>Kayıtlı Kullanıcılar</h4>
+                    <div id="stat-user-count" style="color: #c084fc;">0</div>
+                </div>
+                <div class="stat-icon">👥</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h4>Yayınlanan İçerikler</h4>
+                    <div id="stat-approved-count" style="color: var(--dersverse-success);">0</div>
+                </div>
+                <div class="stat-icon">✅</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h4>Toplam Veri</h4>
+                    <div id="stat-total-count" style="color: var(--dersverse-primary);">0</div>
+                </div>
+                <div class="stat-icon">📊</div>
+            </div>
+        </section>
+
         <div class="admin-section-box">
-            <h2 class="section-title">👥 Kullanıcı ve XP Yönetimi</h2>
+            <h2 class="section-title">🔔 Gelen Başvurular ve Bildirimler (Canlı)</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Başlık</th>
+                            <th>Mesaj</th>
+                            <th>Başvuran E-Posta</th>
+                            <th>Tarih</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="notifications-table-body">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Bildirimler yükleniyor...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-section-box">
+            <h2 class="section-title">👥 Kullanıcı ve Hesap Yönetimi</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -293,115 +398,201 @@
                             <th>Ad Soyad / E-Posta</th>
                             <th>Rol</th>
                             <th>XP Puanı</th>
-                            <th>Durum</th>
-                            <th>İşlemler</th>
+                            <th>Engel Durumu</th>
+                            <th>İşlemler / Yetki Ver</th>
                         </tr>
                     </thead>
                     <tbody id="users-table-body">
-                        <tr><td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Kullanıcılar yükleniyor...</td></tr>
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Kullanıcılar yükleniyor...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <div class="admin-section-box">
+            <h2 class="section-title">📚 Site İçerik ve Materyal Yönetimi</h2>
+            <div class="admin-tabs">
+                <button class="tab-btn active" onclick="filterContents('pending', this)">Bekleyenler</button>
+                <button class="tab-btn" onclick="filterContents('approved', this)">Yayınlananlar</button>
+                <button class="tab-btn" onclick="filterContents('rejected', this)">Reddedilenlar</button>
+                <button class="tab-btn" onclick="filterContents('all', this)">Tümü</button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Başlık</th>
+                            <th>Kategori</th>
+                            <th>Açıklama</th>
+                            <th>Bağlantı</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="content-table-body">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">İçerikler yükleniyor...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-section-box">
+            <h2 class="section-title">📢 Site Geneli Hızlı Duyuru Yayınla</h2>
+            <p style="color: var(--dersverse-text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Bu alandan yazacağınız duyuru anında sisteme kaydedilir ve site genelinde duyuru alanında gösterilir.</p>
+            <div class="announcement-form">
+                <input type="text" id="announcement-input" class="announcement-input" placeholder="Örn: 2026-2027 Eğitim Öğretim Dönemi DersNotları güncellenmiştir!">
+                <button class="btn btn-success" onclick="publishAnnouncement()">Duyuruyu Yayınla</button>
+            </div>
+        </div>
+
     </main>
 
-    <!-- XP Modalı -->
+    <div id="ban-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header" style="color: var(--dersverse-danger);">⛔ Kullanıcıyı Engelle</div>
+            <div class="modal-body">
+                <input type="hidden" id="ban-user-id">
+                <div>
+                    <label>Engelleme Nedeni:</label>
+                    <input type="text" id="ban-reason" class="ban-input" placeholder="Örn: Uygunsuz içerik / Kural ihlali" style="width: 100%; margin-top: 0.4rem;">
+                </div>
+                <div>
+                    <label>Engelin Bitiş Saati/Tarihi:</label>
+                    <input type="datetime-local" id="ban-until" class="ban-input" style="width: 100%; margin-top: 0.4rem; color-scheme: dark;">
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button class="btn btn-outline" onclick="closeBanModal()">İptal</button>
+                <button class="btn btn-danger" onclick="submitBanUser()">Engelle</button>
+            </div>
+        </div>
+    </div>
+
     <div id="xp-modal" class="modal-overlay">
         <div class="modal-box">
-            <div class="modal-header">⚡ Kullanıcıya XP Verme / Düzenleme</div>
+            <div class="modal-header">⚡ Kullanıcıya XP Verme</div>
             <div class="modal-body">
                 <input type="hidden" id="xp-user-id">
                 <input type="hidden" id="xp-current-val">
                 <p id="xp-user-name" style="font-size: 0.9rem; font-weight: bold; color: #c084fc;"></p>
                 <div>
-                    <label>XP Miktarı:</label>
+                    <label>Eklenecek veya Ayarlanacak XP Miktarı:</label>
                     <input type="number" id="xp-amount" class="xp-input" placeholder="Örn: 500" style="width: 100%; margin-top: 0.4rem;">
                 </div>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
                 <button class="btn btn-outline" onclick="closeXpModal()">İptal</button>
                 <button class="btn btn-warning" onclick="submitAddXp(false)">Mevcut XP'ye Ekle</button>
-                <button class="btn btn-success" onclick="submitAddXp(true)">Doğrudan Bu Yap</button>
+                <button class="btn btn-success" onclick="submitAddXp(true)">Doğrudan Bu XP Yap</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { supabase } from './supabase.js';
+        import { kullaniciXpGuncelle } from './admin.js';
+
+        let allContents = [];
+        let currentContentFilter = 'pending';
+
+        async function checkAdminAuth() {
+            document.getElementById('admin-main-screen').style.display = 'block';
+            document.getElementById('unauthorized-screen').style.display = 'none';
+            return true;
+        }
+
+        async function loadAdminData() {
+            await fetchNotifications();
+            await fetchUsers();
+            await fetchContents();
+        }
+
+        async function fetchNotifications() {
+            const tbody = document.getElementById('notifications-table-body');
+            const { data, error } = await supabase
+                .from('notifications')
+                .select('*')
+                .order('id', { ascending: false });
+
+            if (error || !data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Henüz bildirim yok.</td></tr>`;
+                document.getElementById('stat-teacher-count').innerText = "0";
+                return;
+            }
+
+            document.getElementById('stat-teacher-count').innerText = data.length;
+
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td style="font-weight: 600; color: var(--dersverse-warning);">${item.title}</td>
+                    <td>${item.message}</td>
+                    <td style="color: #818cf8;">${item.user_email || 'Belirtilmedi'}</td>
+                    <td style="color: var(--dersverse-text-muted); font-size: 0.8rem;">${new Date(item.created_at || Date.now()).toLocaleString('tr-TR')}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteNotification('${item.id}')">Sil</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.deleteNotification = async function(id) {
+            await supabase.from('notifications').delete().eq('id', id);
+            fetchNotifications();
+        }
 
         async function fetchUsers() {
             const tbody = document.getElementById('users-table-body');
-            
-            // Doğrudan Supabase profiles tablosundan çekiyoruz
-            let { data, error } = await supabase.from('profiles').select('*');
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-            // IF-ELSE İLE HATA KONTROLÜ
             if (error) {
-                console.error("Veritabanı hatası:", error.message);
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--dersverse-danger); padding: 1.5rem;">Veriler çekilemedi: ${error.message}</td></tr>`;
+                console.error("Kullanıcılar çekilirken hata:", error);
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--dersverse-danger); padding: 1.5rem;">Veri yükleme hatası: ${error.message}</td></tr>`;
                 return;
-            } else if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Tabloda henüz kayıtlı kullanıcı bulunmuyor.</td></tr>`;
-                return;
-            } else {
-                // Veriler başarılı şekilde geldiysa tabloya yazdır
-                tbody.innerHTML = data.map(u => {
-                    const nameText = u.full_name || u.email || 'İsimsiz Kullanıcı';
-                    const safeName = nameText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                    const userId = u.id;
-                    const currentXp = u.xp || 0;
-
-                    return `
-                    <tr>
-                        <td><b>${nameText}</b><br><small style="color: var(--dersverse-text-muted);">${u.email || ''}</small></td>
-                        <td><span class="status-badge ${u.role === 'teacher' ? 'role-teacher' : 'role-student'}">${u.role === 'teacher' ? 'Öğretmen' : 'Öğrenci'}</span></td>
-                        <td style="color: #f59e0b; font-weight: bold;">⚡ ${currentXp} XP</td>
-                        <td>${u.is_banned ? '<span class="status-badge status-banned">Engelli</span>' : '<span style="color: var(--dersverse-success);">Aktif</span>'}</td>
-                        <td>
-                            <div class="action-btns">
-                                <button class="btn btn-warning" onclick="openXpModal('${userId}', '${safeName}', ${currentXp})">⚡ XP Düzenle</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-                }).join('');
             }
-        }
 
-        // XP GÜNCELLEME İÇİN KULLANILAN IF-ELSE KOŞULLU BLOKLAR
-        window.submitAddXp = async function(isOverwrite) {
-            const userId = document.getElementById('xp-user-id').value;
-            const currentXp = parseInt(document.getElementById('xp-current-val').value) || 0;
-            const inputVal = parseInt(document.getElementById('xp-amount').value);
-
-            // Koşullu kontrol blokları (İstediğin if-else yapısı)
-            if (isNaN(inputVal)) {
-                alert('Lütfen geçerli bir sayı girin.');
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Kullanıcı bulunamadı.</td></tr>`;
+                document.getElementById('stat-user-count').innerText = "0";
                 return;
-            } else if (inputVal < 0) {
-                alert('Negatif bir değer girilemez.');
-                return;
-            } else {
-                let newXp;
-
-                // Ekleme mi yoksa doğrudan değiştirme mi yapılacağını if-else ile seçiyoruz
-                if (isOverwrite === true) {
-                    newXp = inputVal;
-                } else {
-                    newXp = currentXp + inputVal;
-                }
-
-                // Supabase veritabanına gönder
-                const { error } = await supabase.from('profiles').update({ xp: newXp }).eq('id', userId);
-
-                if (error) {
-                    alert("Güncelleme başarısız: " + error.message);
-                } else {
-                    alert("XP başarıyla güncellendi!");
-                    closeXpModal();
-                    fetchUsers();
-                }
             }
+
+            document.getElementById('stat-user-count').innerText = data.length;
+
+            tbody.innerHTML = data.map(u => {
+                const isBanned = u.is_banned && u.ban_until && new Date(u.ban_until) > new Date();
+                const banText = isBanned 
+                    ? `<span class="status-badge status-banned" title="${u.ban_reason || 'Neden belirtilmedi'}">Engelli</span>` 
+                    : `<span style="color: var(--dersverse-success);">Aktif</span>`;
+
+                const nameText = u.full_name || u.email || 'İsimsiz Kullanıcı';
+                const safeName = nameText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                return `
+                <tr>
+                    <td style="font-weight: 600;">${nameText} ${u.email ? `<br><small style="color: var(--dersverse-text-muted); font-weight: normal;">${u.email}</small>` : ''}</td>
+                    <td><span class="status-badge ${u.role === 'teacher' ? 'role-teacher' : 'role-student'}">${u.role === 'teacher' ? '👨‍🏫 Öğretmen' : '🎓 Öğrenci'}</span></td>
+                    <td style="color: #f59e0b; font-weight: bold; font-size: 1rem;">⚡ ${u.xp || 0} XP</td>
+                    <td>${banText}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn btn-warning" onclick="openXpModal('${u.id}', '${safeName}', ${u.xp || 0})">⚡ XP Ekle</button>
+                            ${u.role !== 'teacher' ? `<button class="btn btn-success" onclick="updateUserRole('${u.id}', 'teacher')">Öğretmen Yap</button>` : `<button class="btn btn-outline" onclick="updateUserRole('${u.id}', 'student')">Öğrenci Yap</button>`}
+                            ${isBanned 
+                                ? `<button class="btn btn-warning" onclick="unbanUser('${u.id}')">🔓 Engeli Kaldır</button>` 
+                                : `<button class="btn btn-danger" onclick="openBanModal('${u.id}')">⛔ Engelle</button>`
+                            }
+                            <button class="btn btn-danger" onclick="deleteUser('${u.id}')">Sil</button>
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
         }
 
         window.openXpModal = function(userId, userName, currentXp) {
@@ -416,8 +607,196 @@
             document.getElementById('xp-modal').style.display = 'none';
         }
 
-        window.onload = () => {
-            fetchUsers();
+        window.submitAddXp = async function(isOverwrite) {
+            const userId = document.getElementById('xp-user-id').value;
+            const currentXp = parseInt(document.getElementById('xp-current-val').value) || 0;
+            const inputVal = parseInt(document.getElementById('xp-amount').value);
+
+            if (isNaN(inputVal)) {
+                alert('Lütfen geçerli bir sayı girin.');
+                return;
+            }
+
+            const newXp = isOverwrite ? inputVal : (currentXp + inputVal);
+
+            // admin.js içerisindeki modüler fonksiyonu çağırıyoruz
+            const basarili = await kullaniciXpGuncelle(userId, newXp);
+
+            if (basarili) {
+                window.closeXpModal();
+                await fetchUsers();
+            }
+        }
+
+        window.openBanModal = function(userId) {
+            document.getElementById('ban-user-id').value = userId;
+            document.getElementById('ban-reason').value = '';
+            document.getElementById('ban-until').value = '';
+            document.getElementById('ban-modal').style.display = 'flex';
+        }
+
+        window.closeBanModal = function() {
+            document.getElementById('ban-modal').style.display = 'none';
+        }
+
+        window.submitBanUser = async function() {
+            const userId = document.getElementById('ban-user-id').value;
+            const reason = document.getElementById('ban-reason').value.trim();
+            const until = document.getElementById('ban-until').value;
+
+            if (!reason || !until) {
+                alert('Lütfen hem engelleme nedenini hem de bitiş saatini doldurun.');
+                return;
+            }
+
+            const { error } = await supabase
+                .from('profiles')
+                .update({ 
+                    is_banned: true, 
+                    ban_reason: reason, 
+                    ban_until: new Date(until).toISOString() 
+                })
+                .eq('id', userId);
+
+            if (error) {
+                alert("Engelleme hatası: " + error.message);
+            } else {
+                alert("Kullanıcı başarıyla engellendi!");
+                window.closeBanModal();
+                fetchUsers();
+            }
+        }
+
+        window.unbanUser = async function(userId) {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ 
+                    is_banned: false, 
+                    ban_reason: null, 
+                    ban_until: null 
+                })
+                .eq('id', userId);
+
+            if (error) alert("Hata: " + error.message);
+            else {
+                alert("Kullanıcının engeli kaldırıldı!");
+                fetchUsers();
+            }
+        }
+
+        window.updateUserRole = async function(userId, newRole) {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ role: newRole })
+                .eq('id', userId);
+
+            if (error) alert("Rol güncellenirken hata oluştu: " + error.message);
+            else fetchUsers();
+        }
+
+        window.deleteUser = async function(userId) {
+            if (!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) return;
+            const { error } = await supabase
+                .from('profiles')
+                .delete()
+                .eq('id', userId);
+
+            if (error) alert("Silme hatası: " + error.message);
+            else fetchUsers();
+        }
+
+        async function fetchContents() {
+            const { data, error } = await supabase
+                .from('contents')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (!error) {
+                allContents = data || [];
+                renderContentsTable();
+                updateStats();
+            }
+        }
+
+        function renderContentsTable() {
+            const tbody = document.getElementById('content-table-body');
+            let filtered = allContents;
+
+            if (currentContentFilter !== 'all') {
+                filtered = allContents.filter(i => i.status === currentContentFilter);
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Bu kategoride içerik bulunmuyor.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => `
+                <tr>
+                    <td style="font-weight: 600;">${item.title}</td>
+                    <td><span style="color: var(--dersverse-primary);">${item.category || 'Genel'}</span></td>
+                    <td style="color: var(--dersverse-text-muted); max-width: 200px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${item.description}</td>
+                    <td><a href="${item.link}" target="_blank" style="color: #60a5fa; text-decoration: none;">Git ↗</a></td>
+                    <td><span class="status-badge status-${item.status}">${getStatusText(item.status)}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            ${item.status !== 'approved' ? `<button class="btn btn-success" onclick="updateContentStatus('${item.id}', 'approved')">Onayla</button>` : ''}
+                            ${item.status !== 'rejected' ? `<button class="btn btn-outline" onclick="updateContentStatus('${item.id}', 'rejected')" style="color: var(--dersverse-warning);">Reddet</button>` : ''}
+                            <button class="btn btn-danger" onclick="deleteContent('${item.id}')">Sil</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.filterContents = function(status, btn) {
+            currentContentFilter = status;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderContentsTable();
+        }
+
+        window.updateContentStatus = async function(id, newStatus) {
+            const { error } = await supabase.from('contents').update({ status: newStatus }).eq('id', id);
+            if (error) alert('Hata: ' + error.message);
+            else fetchContents();
+        }
+
+        window.deleteContent = async function(id) {
+            if (!confirm('Bu içeriği silmek istediğinize emin misiniz?')) return;
+            const { error } = await supabase.from('contents').delete().eq('id', id);
+            if (error) alert('Hata: ' + error.message);
+            else fetchContents();
+        }
+
+        function updateStats() {
+            const approvedContent = allContents.filter(i => i.status === 'approved').length;
+            document.getElementById('stat-approved-count').innerText = approvedContent;
+            document.getElementById('stat-total-count').innerText = allContents.length;
+        }
+
+        function getStatusText(status) {
+            if (status === 'approved') return 'Yayınlandı';
+            if (status === 'rejected') return 'Reddedildi';
+            return 'Bekliyor';
+        }
+
+        window.publishAnnouncement = function() {
+            const text = document.getElementById('announcement-input').value;
+            if (!text.trim()) {
+                alert('Lütfen geçerli bir duyuru metni yazın.');
+                return;
+            }
+            localStorage.setItem('dersverse_global_announcement', text);
+            alert('Duyuru başarıyla yayınlandı!');
+            document.getElementById('announcement-input').value = '';
+        }
+
+        window.onload = async () => {
+            const authorized = await checkAdminAuth();
+            if (authorized) {
+                loadAdminData();
+            }
         };
     </script>
 </body>
