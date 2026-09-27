@@ -99,6 +99,8 @@
         .btn-success:hover { background: #059669; }
         .btn-danger { background: var(--dersverse-danger); }
         .btn-danger:hover { background: #dc2626; }
+        .btn-warning { background: var(--dersverse-warning); color: #000; }
+        .btn-warning:hover { background: #d97706; }
         .btn-outline {
             background: transparent;
             border: 1px solid var(--dersverse-border);
@@ -232,10 +234,14 @@
         .status-pending { background: rgba(245, 158, 11, 0.2); color: var(--dersverse-warning); }
         .status-approved { background: rgba(16, 185, 129, 0.2); color: var(--dersverse-success); }
         .status-rejected { background: rgba(239, 68, 68, 0.2); color: var(--dersverse-danger); }
+        .status-banned { background: rgba(239, 68, 68, 0.3); color: var(--dersverse-danger); border: 1px solid var(--dersverse-danger); }
+        .role-teacher { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+        .role-student { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
 
         .action-btns {
             display: flex;
             gap: 0.4rem;
+            flex-wrap: wrap;
         }
 
         .action-btns button {
@@ -250,7 +256,7 @@
             margin-top: 1rem;
         }
 
-        .announcement-input {
+        .announcement-input, .ban-input {
             flex-grow: 1;
             padding: 0.7rem 1rem;
             background: rgba(255, 255, 255, 0.05);
@@ -260,9 +266,53 @@
             font-size: 0.95rem;
         }
 
-        .announcement-input:focus {
+        .announcement-input:focus, .ban-input:focus {
             outline: none;
             border-color: var(--dersverse-primary);
+        }
+
+        /* Modal (Engelleme Penceresi) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background: #12121f;
+            border: 1px solid var(--dersverse-border);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--dersverse-danger);
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-body label {
+            font-size: 0.85rem;
+            color: var(--dersverse-text-muted);
         }
 
         /* Yetkisiz Erişim Ekranı */
@@ -273,7 +323,6 @@
         }
     </style>
     <script>
-        // Kesin Sağ Tık ve Tuş Engelleme Koruması (Adminler Hariç Tutulabilir veya Tümüyle Kilitlenebilir)
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             return false;
@@ -289,8 +338,7 @@
                 e.key === 's' || e.key === 'S' || 
                 e.key === 'i' || e.key === 'I' || 
                 e.key === 'j' || e.key === 'J' || 
-                e.key === 'c' || e.key === 'C' ||
-                e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67
+                e.key === 'c' || e.key === 'C'
             )) {
                 e.preventDefault();
                 return false;
@@ -315,7 +363,7 @@
     <!-- Yetkisiz Erişim Engeli -->
     <div id="unauthorized-screen">
         <h1 style="font-size: 3rem; color: var(--dersverse-danger); margin-bottom: 1rem;">403 - Erişim Engellendi</h1>
-        <p style="color: var(--dersverse-text-muted); font-size: 1.2rem; margin-bottom: 2rem;">Bu ultra güvenli yönetim paneline yalnızca yetkili yönetici erişebilir.</p>
+        <p style="color: var(--dersverse-text-muted); font-size: 1.2rem; margin-bottom: 2rem;">Bu yönetim paneline yalnızca yetkili yönetici erişebilir.</p>
         <a href="index.html" class="btn">Ana Sayfaya Dön</a>
     </div>
 
@@ -326,17 +374,17 @@
         <section class="stats-grid">
             <div class="stat-card">
                 <div class="stat-info">
-                    <h4>Bekleyen Öğretmen</h4>
+                    <h4>Gelen Bildirim/Başvuru</h4>
                     <div id="stat-teacher-count" style="color: var(--dersverse-warning);">0</div>
                 </div>
-                <div class="stat-icon">👨‍🏫</div>
+                <div class="stat-icon">🔔</div>
             </div>
             <div class="stat-card">
                 <div class="stat-info">
-                    <h4>Onay Bekleyen İçerik</h4>
-                    <div id="stat-content-pending" style="color: var(--dersverse-warning);">0</div>
+                    <h4>Kayıtlı Kullanıcılar</h4>
+                    <div id="stat-user-count" style="color: #c084fc;">0</div>
                 </div>
-                <div class="stat-icon">⏳</div>
+                <div class="stat-icon">👥</div>
             </div>
             <div class="stat-card">
                 <div class="stat-info">
@@ -354,31 +402,53 @@
             </div>
         </section>
 
-        <!-- Bölüm 1: Öğretmen Başvuruları Yönetimi -->
+        <!-- Bölüm 1: Gelen Bildirimler ve Öğretmen Başvuruları -->
         <div class="admin-section-box">
-            <h2 class="section-title">👨‍🏫 Öğretmen Başvuru Onayları</h2>
+            <h2 class="section-title">🔔 Gelen Başvurular ve Bildirimler (Canlı)</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>Ad Soyad</th>
-                            <th>E-posta</th>
-                            <th>Okul</th>
-                            <th>Branş</th>
-                            <th>Durum</th>
+                            <th>Başlık</th>
+                            <th>Mesaj</th>
+                            <th>Başvuran E-Posta</th>
+                            <th>Tarih</th>
                             <th>İşlemler</th>
                         </tr>
                     </thead>
-                    <tbody id="teacher-table-body">
+                    <tbody id="notifications-table-body">
                         <tr>
-                            <td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Öğretmen başvuruları yükleniyor...</td>
+                            <td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Bildirimler yükleniyor...</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Bölüm 2: Paylaşılan İçerikler Yönetimi -->
+        <!-- Bölüm 2: Giriş Yapan ve Kayıtlı Kullanıcıların Yönetimi -->
+        <div class="admin-section-box">
+            <h2 class="section-title">👥 Kullanıcı ve Hesap Yönetimi</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ad Soyad</th>
+                            <th>Rol</th>
+                            <th>XP Puanı</th>
+                            <th>Engel Durumu</th>
+                            <th>İşlemler / Yetki Ver</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Kullanıcılar yükleniyor...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bölüm 3: Paylaşılan İçerikler Yönetimi -->
         <div class="admin-section-box">
             <h2 class="section-title">📚 Site İçerik ve Materyal Yönetimi</h2>
             <div class="admin-tabs">
@@ -408,7 +478,7 @@
             </div>
         </div>
 
-        <!-- Bölüm 3: Hızlı Sistem Duyurusu Yayınla -->
+        <!-- Bölüm 4: Hızlı Sistem Duyurusu Yayınla -->
         <div class="admin-section-box">
             <h2 class="section-title">📢 Site Geneli Hızlı Duyuru Yayınla</h2>
             <p style="color: var(--dersverse-text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Bu alandan yazacağınız duyuru anında sisteme kaydedilir ve site genelinde duyuru alanında gösterilir.</p>
@@ -419,6 +489,28 @@
         </div>
 
     </main>
+
+    <!-- Engelleme Modalı -->
+    <div id="ban-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">⛔ Kullanıcıyı Engelle</div>
+            <div class="modal-body">
+                <input type="hidden" id="ban-user-id">
+                <div>
+                    <label>Engelleme Nedeni:</label>
+                    <input type="text" id="ban-reason" class="ban-input" placeholder="Örn: Uygunsuz içerik / Kural ihlali" style="width: 100%; margin-top: 0.4rem;">
+                </div>
+                <div>
+                    <label>Engelin Bitiş Saati/Tarihi:</label>
+                    <input type="datetime-local" id="ban-until" class="ban-input" style="width: 100%; margin-top: 0.4rem; color-scheme: dark;">
+                </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
+                <button class="btn btn-outline" onclick="closeBanModal()">İptal</button>
+                <button class="btn btn-danger" onclick="submitBanUser()">Engelle</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Tawk.to Canlı Destek -->
     <script type="text/javascript">
@@ -442,7 +534,6 @@
         let allContents = [];
         let currentContentFilter = 'pending';
 
-        // Özel İsim ve Rozet Tanımlama Fonksiyonu
         function getFormattedUserDisplay(email) {
             if (email === 'femememe1973@gmail.com') {
                 return {
@@ -458,7 +549,6 @@
             };
         }
 
-        // Güvenlik ve Yetki Kontrolü
         async function checkAdminAuth() {
             const { data: { user } } = await dersverseSupabase.auth.getUser();
 
@@ -474,13 +564,177 @@
             return true;
         }
 
-        // Verileri Yükle
         async function loadAdminData() {
+            await fetchNotifications();
+            await fetchUsers();
             await fetchContents();
-            await fetchTeachers();
+            setupRealtimeNotifications();
         }
 
-        // 1. İçerikleri Çek ve Yönet
+        // 1. Canlı Bildirimleri Çek
+        async function fetchNotifications() {
+            const tbody = document.getElementById('notifications-table-body');
+            const { data, error } = await dersverseSupabase
+                .from('notifications')
+                .select('*')
+                .order('id', { ascending: false });
+
+            if (error || !data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Henüz bildirim yok.</td></tr>`;
+                document.getElementById('stat-teacher-count').innerText = "0";
+                return;
+            }
+
+            document.getElementById('stat-teacher-count').innerText = data.length;
+
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td style="font-weight: 600; color: var(--dersverse-warning);">${item.title}</td>
+                    <td>${item.message}</td>
+                    <td style="color: #818cf8;">${item.user_email || 'Belirtilmedi'}</td>
+                    <td style="color: var(--dersverse-text-muted); font-size: 0.8rem;">${new Date(item.created_at || Date.now()).toLocaleString('tr-TR')}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteNotification('${item.id}')">Sil</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function setupRealtimeNotifications() {
+            dersverseSupabase
+                .channel('public:notifications')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications' }, payload => {
+                    alert("🔔 YENİ ÖĞRETMEN BAŞVURUSU GELDİ!\n" + payload.new.message);
+                    fetchNotifications();
+                })
+                .subscribe();
+        }
+
+        async function deleteNotification(id) {
+            await dersverseSupabase.from('notifications').delete().eq('id', id);
+            fetchNotifications();
+        }
+
+        // 2. Kayıtlı Kullanıcıları Yönet & Engelleme
+        async function fetchUsers() {
+            const tbody = document.getElementById('users-table-body');
+            const { data, error } = await dersverseSupabase
+                .from('profiles')
+                .select('*')
+                .order('updated_at', { ascending: false });
+
+            if (error || !data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Kullanıcı bulunamadı.</td></tr>`;
+                document.getElementById('stat-user-count').innerText = "0";
+                return;
+            }
+
+            document.getElementById('stat-user-count').innerText = data.length;
+
+            tbody.innerHTML = data.map(u => {
+                const isBanned = u.is_banned && new Date(u.ban_until) > new Date();
+                const banText = isBanned 
+                    ? `<span class="status-badge status-banned" title="${u.ban_reason || 'Neden belirtilmedi'}">Engelli (${new Date(u.ban_until).toLocaleString('tr-TR')}'e kadar)</span>` 
+                    : `<span style="color: var(--dersverse-success);">Aktif</span>`;
+
+                return `
+                <tr>
+                    <td style="font-weight: 600;">${u.full_name || 'İsimsiz Kullanıcı'}</td>
+                    <td><span class="status-badge ${u.role === 'teacher' ? 'role-teacher' : 'role-student'}">${u.role === 'teacher' ? '👨‍🏫 Öğretmen' : '🎓 Öğrenci'}</span></td>
+                    <td style="color: #f59e0b; font-weight: bold;">⚡ ${u.xp || 0} XP</td>
+                    <td>${banText}</td>
+                    <td>
+                        <div class="action-btns">
+                            ${u.role !== 'teacher' ? `<button class="btn btn-success" onclick="updateUserRole('${u.id}', 'teacher')">Öğretmen Yap</button>` : `<button class="btn btn-outline" onclick="updateUserRole('${u.id}', 'student')">Öğrenci Yap</button>`}
+                            ${isBanned 
+                                ? `<button class="btn btn-warning" onclick="unbanUser('${u.id}')">🔓 Engeli Kaldır</button>` 
+                                : `<button class="btn btn-danger" onclick="openBanModal('${u.id}')">⛔ Engelle</button>`
+                            }
+                            <button class="btn btn-danger" onclick="deleteUser('${u.id}')">Sil</button>
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function openBanModal(userId) {
+            document.getElementById('ban-user-id').value = userId;
+            document.getElementById('ban-reason').value = '';
+            document.getElementById('ban-until').value = '';
+            document.getElementById('ban-modal').style.display = 'flex';
+        }
+
+        function closeBanModal() {
+            document.getElementById('ban-modal').style.display = 'none';
+        }
+
+        async function submitBanUser() {
+            const userId = document.getElementById('ban-user-id').value;
+            const reason = document.getElementById('ban-reason').value.trim();
+            const until = document.getElementById('ban-until').value;
+
+            if (!reason || !until) {
+                alert('Lütfen hem engelleme nedenini hem de bitiş saatini doldurun.');
+                return;
+            }
+
+            const { error } = await dersverseSupabase
+                .from('profiles')
+                .update({ 
+                    is_banned: true, 
+                    ban_reason: reason, 
+                    ban_until: new Date(until).toISOString() 
+                })
+                .eq('id', userId);
+
+            if (error) {
+                alert("Engelleme hatası: " + error.message);
+            } else {
+                alert("Kullanıcı başarıyla engellendi!");
+                closeBanModal();
+                fetchUsers();
+            }
+        }
+
+        async function unbanUser(userId) {
+            const { error } = await dersverseSupabase
+                .from('profiles')
+                .update({ 
+                    is_banned: false, 
+                    ban_reason: null, 
+                    ban_until: null 
+                })
+                .eq('id', userId);
+
+            if (error) alert("Hata: " + error.message);
+            else {
+                alert("Kullanıcının engeli kaldırıldı!");
+                fetchUsers();
+            }
+        }
+
+        async function updateUserRole(userId, newRole) {
+            const { error } = await dersverseSupabase
+                .from('profiles')
+                .update({ role: newRole })
+                .eq('id', userId);
+
+            if (error) alert("Rol güncellenirken hata oluştu: " + error.message);
+            else fetchUsers();
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) return;
+            const { error } = await dersverseSupabase
+                .from('profiles')
+                .delete()
+                .eq('id', userId);
+
+            if (error) alert("Silme hatası: " + error.message);
+            else fetchUsers();
+        }
+
+        // 3. İçerik Yönetimi
         async function fetchContents() {
             const { data, error } = await dersverseSupabase
                 .from('contents')
@@ -545,23 +799,8 @@
             else fetchContents();
         }
 
-        // 2. Öğretmen Başvurularını Yönet
-        async function fetchTeachers() {
-            const tbody = document.getElementById('teacher-table-body');
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align: center; color: var(--dersverse-text-muted); padding: 1.5rem;">Şu an onay bekleyen öğretmen başvurusu bulunmuyor.</td>
-                </tr>
-            `;
-            document.getElementById('stat-teacher-count').innerText = "0";
-        }
-
-        // 3. İstatistikleri Güncelle
         function updateStats() {
-            const pendingContent = allContents.filter(i => i.status === 'pending').length;
             const approvedContent = allContents.filter(i => i.status === 'approved').length;
-            
-            document.getElementById('stat-content-pending').innerText = pendingContent;
             document.getElementById('stat-approved-count').innerText = approvedContent;
             document.getElementById('stat-total-count').innerText = allContents.length;
         }
@@ -572,7 +811,6 @@
             return 'Bekliyor';
         }
 
-        // 4. Duyuru Yayınlama Fonksiyonu
         function publishAnnouncement() {
             const text = document.getElementById('announcement-input').value;
             if (!text.trim()) {
