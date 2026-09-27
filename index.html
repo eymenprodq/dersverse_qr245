@@ -11,400 +11,11 @@
     <link rel="icon" type="image/png" href="dersverse-logo-512x512.png">
     <link rel="apple-touch-icon" href="dersverse-logo-512x512.png">
 
+    <!-- Harici CSS Tasarım Dosyası -->
+    <link rel="stylesheet" href="style.css">
+
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --dersverse-bg: #0a0a12;
-            --dersverse-card-bg: rgba(255, 255, 255, 0.05);
-            --dersverse-border: rgba(255, 255, 255, 0.1);
-            --dersverse-primary: #6366f1;
-            --dersverse-primary-hover: #4f46e5;
-            --dersverse-text: #f3f4f6;
-            --dersverse-text-muted: #9ca3af;
-            --dersverse-badge-gold: #f59e0b;
-        }
-
-        body.light-theme {
-            --dersverse-bg: #f8fafc;
-            --dersverse-card-bg: #ffffff;
-            --dersverse-border: #e2e8f0;
-            --dersverse-text: #0f172a;
-            --dersverse-text-muted: #64748b;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--dersverse-bg);
-            color: var(--dersverse-text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            user-select: none;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        /* LGS ÜST GERİ SAYIM BARI */
-        .dersverse-top-bar {
-            background: linear-gradient(90deg, #4f46e5, #7c3aed);
-            color: #ffffff;
-            padding: 0.6rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .dersverse-lgs-timer {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.95rem;
-        }
-
-        .dersverse-lgs-timer span {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-
-        .dersverse-top-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .dersverse-btn-theme, .dersverse-btn-pomo, .dersverse-btn-kumbara {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #ffffff;
-            padding: 4px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: background 0.2s ease;
-        }
-
-        .dersverse-btn-theme:hover, .dersverse-btn-pomo:hover, .dersverse-btn-kumbara:hover {
-            background: rgba(255, 255, 255, 0.4);
-        }
-
-        header.dersverse-header {
-            background: rgba(10, 10, 18, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--dersverse-border);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            transition: background 0.3s ease;
-        }
-
-        body.light-theme header.dersverse-header {
-            background: rgba(255, 255, 255, 0.85);
-        }
-
-        .dersverse-logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #6366f1, #a855f7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-decoration: none;
-        }
-
-        /* KULLANICI PROFİL & ROZET ALANI */
-        .dersverse-user-stats {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--dersverse-card-bg);
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 1px solid var(--dersverse-border);
-            font-size: 0.85rem;
-        }
-
-        .dersverse-badge {
-            background: var(--dersverse-badge-gold);
-            color: #000000;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 0.75rem;
-        }
-
-        .dersverse-nav-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .dersverse-btn {
-            background: var(--dersverse-primary);
-            color: white;
-            border: none;
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .dersverse-btn:hover {
-            background: var(--dersverse-primary-hover);
-        }
-
-        .dersverse-btn-outline {
-            background: transparent;
-            border: 1px solid var(--dersverse-border);
-            color: var(--dersverse-text);
-        }
-
-        .dersverse-btn-outline:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .dersverse-btn-apk {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-
-        .dersverse-btn-apk:hover {
-            background: linear-gradient(135deg, #059669, #047857);
-        }
-
-        main.dersverse-main {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-            width: 100%;
-        }
-
-        .dersverse-hero {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .dersverse-hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .dersverse-hero p {
-            color: var(--dersverse-text-muted);
-            font-size: 1.1rem;
-        }
-
-        .dersverse-filter-container {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .dersverse-search-input {
-            flex: 2;
-            min-width: 220px;
-            padding: 0.75rem 1rem;
-            background: var(--dersverse-card-bg);
-            border: 1px solid var(--dersverse-border);
-            border-radius: 8px;
-            color: var(--dersverse-text);
-            font-size: 0.95rem;
-            outline: none;
-        }
-
-        .dersverse-search-input:focus {
-            border-color: var(--dersverse-primary);
-        }
-
-        .dersverse-category-select {
-            flex: 1;
-            min-width: 160px;
-            padding: 0.75rem 1rem;
-            background: var(--dersverse-card-bg);
-            border: 1px solid var(--dersverse-border);
-            border-radius: 8px;
-            color: var(--dersverse-text);
-            font-size: 0.95rem;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .dersverse-category-select option {
-            background: #12121f;
-            color: var(--dersverse-text);
-        }
-
-        body.light-theme .dersverse-category-select option {
-            background: #ffffff;
-            color: #0f172a;
-        }
-
-        .dersverse-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .dersverse-card {
-            background: var(--dersverse-card-bg);
-            border: 1px solid var(--dersverse-border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            position: relative;
-        }
-
-        /* ÖĞRETMEN TAVSİYESİ ETİKETİ */
-        .teacher-recommended {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: #ffffff;
-            font-size: 0.7rem;
-            font-weight: bold;
-            padding: 3px 8px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .dersverse-card-tag {
-            font-size: 0.8rem;
-            color: var(--dersverse-primary);
-            text-transform: uppercase;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .dersverse-card-title {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .dersverse-card-desc {
-            color: var(--dersverse-text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .dersverse-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .dersverse-modal-content {
-            background: #12121f;
-            border: 1px solid var(--dersverse-border);
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            color: #ffffff;
-        }
-
-        body.light-theme .dersverse-modal-content {
-            background: #ffffff;
-            color: #0f172a;
-        }
-
-        .dersverse-form-group {
-            margin-bottom: 1rem;
-        }
-
-        .dersverse-form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--dersverse-text-muted);
-        }
-
-        .dersverse-form-group input, 
-        .dersverse-form-group select, 
-        .dersverse-form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--dersverse-border);
-            border-radius: 6px;
-            color: inherit;
-            outline: none;
-        }
-
-        body.light-theme .dersverse-form-group input,
-        body.light-theme .dersverse-form-group select,
-        body.light-theme .dersverse-form-group textarea {
-            background: #f1f5f9;
-        }
-
-        .dersverse-divider {
-            text-align: center;
-            margin: 10px 0;
-            color: var(--dersverse-text-muted);
-            font-size: 0.9rem;
-        }
-
-        .pomodoro-display {
-            font-size: 3rem;
-            font-weight: bold;
-            text-align: center;
-            margin: 1.5rem 0;
-            color: #6366f1;
-            font-family: monospace;
-        }
-
-        .pomodoro-controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        /* SANAL SORU KUMBARASI KARTLARI */
-        .question-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--dersverse-border);
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
-            text-align: left;
-        }
-    </style>
 </head>
 <body>
 
@@ -420,10 +31,11 @@
         </div>
     </div>
 
+    <!-- Üst Menü / Navigasyon Barı -->
     <header class="dersverse-header">
         <a href="#" class="dersverse-logo">DersVerse</a>
         
-        <!-- CANLI PUAN VE ROZET ALANI -->
+        <!-- Canlı Puan ve Rozet Alanı (Gamification) -->
         <div class="dersverse-user-stats">
             <span>⭐ Puan: <strong id="user-points">120</strong> XP</span>
             <span class="dersverse-badge" id="user-badge">🔥 LGS Canavarı</span>
@@ -438,6 +50,7 @@
         </div>
     </header>
 
+    <!-- Ana İçerik Alanı -->
     <main class="dersverse-main">
         <section class="dersverse-hero">
             <h1>DersVerse Evrenine Hoş Geldiniz</h1>
@@ -458,8 +71,9 @@
             </select>
         </div>
 
+        <!-- Kartların Dinamik Yüklendiği Izgara Alanı -->
         <div class="dersverse-grid" id="dersverse-content-grid">
-            <!-- ÖRNEK ÖĞRETMEN TAVSİYELİ KART -->
+            <!-- Örnek Öğretmen Onaylı Kart -->
             <div class="dersverse-card">
                 <div class="teacher-recommended">✔ Öğretmen Onaylı</div>
                 <div>
@@ -472,7 +86,7 @@
         </div>
     </main>
 
-    <!-- İçerik Paylaşım Modalı -->
+    <!-- 1. İçerik Paylaşım Modalı -->
     <div class="dersverse-modal" id="dersverse-add-modal">
         <div class="dersverse-modal-content">
             <h2 style="margin-bottom: 1rem;">Yeni İçerik Paylaş</h2>
@@ -522,7 +136,7 @@
         </div>
     </div>
 
-    <!-- Pomodoro Modalı -->
+    <!-- 2. Pomodoro Ders Çalışma Kronometresi Modalı -->
     <div class="dersverse-modal" id="dersverse-pomodoro-modal">
         <div class="dersverse-modal-content" style="text-align: center;">
             <h2>⏱️ Ders Çalışma Kronometresi</h2>
@@ -542,7 +156,7 @@
         </div>
     </div>
 
-    <!-- SANAL SORU KUMBARASI MODALI -->
+    <!-- 3. Sanal Soru Kumbarası Modalı -->
     <div class="dersverse-modal" id="dersverse-kumbara-modal">
         <div class="dersverse-modal-content">
             <h2>📌 Sanal Soru Kumbarası</h2>
@@ -557,7 +171,7 @@
             <button class="dersverse-btn" style="width: 100%; margin-bottom: 15px;" onclick="addQuestionToKumbara()">Soruyu Kumbaraya Ekle (+15 XP)</button>
 
             <div id="kumbara-list">
-                <!-- Eklenecek sorular burada listelenecek -->
+                <!-- Soru kartları JavaScript tarafında buraya yerleşecek -->
             </div>
 
             <div style="text-align: right; margin-top: 15px;">
@@ -565,159 +179,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Bütünleşik JavaScript İşlevleri -->
-    <script>
-        // 1. LGS CANLI GERİ SAYIM
-        function startLGSTimer() {
-            const lgsDate = new Date("June 6, 2027 09:30:00").getTime();
-            setInterval(function() {
-                const now = new Date().getTime();
-                const distance = lgsDate - now;
-                if (distance < 0) {
-                    document.getElementById("lgs-countdown").innerText = "Sınav Başladı!";
-                    return;
-                }
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                const el = document.getElementById("lgs-countdown");
-                if (el) el.innerHTML = `${days}g ${hours}s ${minutes}d ${seconds}sn`;
-            }, 1000);
-        }
-
-        // 2. TEMA DEĞİŞTİRME
-        function dersverseToggleTheme() {
-            document.body.classList.toggle("light-theme");
-            const isLight = document.body.classList.contains("light-theme");
-            localStorage.setItem("dersverse_theme", isLight ? "light" : "dark");
-            const btn = document.getElementById("dersverse-theme-toggle");
-            if (btn) btn.innerText = isLight ? "🌙 Gece Modu" : "☀️ Gündüz Modu";
-        }
-
-        function loadSavedTheme() {
-            const savedTheme = localStorage.getItem("dersverse_theme");
-            const btn = document.getElementById("dersverse-theme-toggle");
-            if (savedTheme === "light") {
-                document.body.classList.add("light-theme");
-                if (btn) btn.innerText = "🌙 Gece Modu";
-            }
-        }
-
-        // 3. POMODORO KRONOMETRESİ
-        let pomoInterval = null;
-        let pomoTimeLeft = 25 * 60;
-        let isPomoRunning = false;
-
-        function openPomodoroModal() { document.getElementById("dersverse-pomodoro-modal").style.display = "flex"; }
-        function closePomodoroModal() { document.getElementById("dersverse-pomodoro-modal").style.display = "none"; }
-
-        function updatePomoDisplay() {
-            const minutes = Math.floor(pomoTimeLeft / 60);
-            const seconds = pomoTimeLeft % 60;
-            document.getElementById("pomodoro-timer-display").innerText = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        }
-
-        function startPomodoro() {
-            if (isPomoRunning) return;
-            isPomoRunning = true;
-            pomoInterval = setInterval(() => {
-                if (pomoTimeLeft > 0) {
-                    pomoTimeLeft--;
-                    updatePomoDisplay();
-                } else {
-                    clearInterval(pomoInterval);
-                    isPomoRunning = false;
-                    addXP(50); // Pomodoro bitirene 50 XP
-                    alert("Tebrikler! Pomodoro seansını tamamladınız ve 50 XP kazandınız!");
-                }
-            }, 1000);
-        }
-
-        function pausePomodoro() { clearInterval(pomoInterval); isPomoRunning = false; }
-        function resetPomodoro() { pausePomodoro(); pomoTimeLeft = 25 * 60; updatePomoDisplay(); }
-
-        // 4. GAMIFICATION / PUAN VE ROZET SİSTEMİ
-        let userPoints = parseInt(localStorage.getItem("dersverse_xp") || "120");
-
-        function addXP(amount) {
-            userPoints += amount;
-            localStorage.setItem("dersverse_xp", userPoints);
-            updateUserStats();
-        }
-
-        function updateUserStats() {
-            document.getElementById("user-points").innerText = userPoints;
-            const badgeEl = document.getElementById("user-badge");
-            
-            if (userPoints >= 300) {
-                badgeEl.innerText = "👑 LGS Şampiyonu";
-            } else if (userPoints >= 200) {
-                badgeEl.innerText = "⚡ Bilgi Ustası";
-            } else {
-                badgeEl.innerText = "🔥 LGS Canavarı";
-            }
-        }
-
-        // 5. SANAL SORU KUMBARASI
-        function openKumbaraModal() {
-            document.getElementById("dersverse-kumbara-modal").style.display = "flex";
-            renderKumbara();
-        }
-        function closeKumbaraModal() {
-            document.getElementById("dersverse-kumbara-modal").style.display = "none";
-        }
-
-        function addQuestionToKumbara() {
-            const note = document.getElementById("kumbara-note").value;
-            const link = document.getElementById("kumbara-link").value;
-
-            if (!note) {
-                alert("Lütfen soru için bir not yazın.");
-                return;
-            }
-
-            const questions = JSON.parse(localStorage.getItem("dersverse_kumbara") || "[]");
-            questions.push({ note, link });
-            localStorage.setItem("dersverse_kumbara", JSON.stringify(questions));
-
-            document.getElementById("kumbara-note").value = "";
-            document.getElementById("kumbara-link").value = "";
-
-            addXP(15);
-            renderKumbara();
-        }
-
-        function renderKumbara() {
-            const questions = JSON.parse(localStorage.getItem("dersverse_kumbara") || "[]");
-            const listEl = document.getElementById("kumbara-list");
-            listEl.innerHTML = "";
-
-            if (questions.length === 0) {
-                listEl.innerHTML = "<p style='color: var(--dersverse-text-muted); font-size: 0.9rem;'>Henüz kaydedilmiş soru yok.</p>";
-                return;
-            }
-
-            questions.forEach((q, index) => {
-                const item = document.createElement("div");
-                item.className = "question-card";
-                item.innerHTML = `
-                    <strong>${q.note}</strong>
-                    ${q.link ? `<br><a href="${q.link}" target="_blank" style="color:#6366f1; font-size: 0.85rem;">🔗 Soruyu Göreşle / Linke Git</a>` : ''}
-                `;
-                listEl.appendChild(item);
-            });
-        }
-
-        // Sayfa Yüklendiğinde Tetiklenen Fonksiyonlar
-        document.addEventListener("DOMContentLoaded", () => {
-            startLGSTimer();
-            loadSavedTheme();
-            updateUserStats();
-        });
-    </script>
 
     <!-- Tawk.to Canlı Destek Entegrasyonu -->
     <script type="text/javascript">
@@ -732,7 +193,7 @@
     })();
     </script>
 
-    <!-- Harici script.js Bağlantısı -->
+    <!-- Harici JavaScript Kod Dosyası -->
     <script src="script.js"></script>
 </body>
 </html>
