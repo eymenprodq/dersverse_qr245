@@ -22,9 +22,9 @@
             --dersverse-primary-hover: #4f46e5;
             --dersverse-text: #f3f4f6;
             --dersverse-text-muted: #9ca3af;
+            --dersverse-badge-gold: #f59e0b;
         }
 
-        /* GÜNDÜZ MODU (LIGHT MODE) TEMA DEĞİŞKENLERİ */
         body.light-theme {
             --dersverse-bg: #f8fafc;
             --dersverse-card-bg: #ffffff;
@@ -85,7 +85,7 @@
             gap: 10px;
         }
 
-        .dersverse-btn-theme, .dersverse-btn-pomo {
+        .dersverse-btn-theme, .dersverse-btn-pomo, .dersverse-btn-kumbara {
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: #ffffff;
@@ -97,7 +97,7 @@
             transition: background 0.2s ease;
         }
 
-        .dersverse-btn-theme:hover, .dersverse-btn-pomo:hover {
+        .dersverse-btn-theme:hover, .dersverse-btn-pomo:hover, .dersverse-btn-kumbara:hover {
             background: rgba(255, 255, 255, 0.4);
         }
 
@@ -126,6 +126,27 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-decoration: none;
+        }
+
+        /* KULLANICI PROFİL & ROZET ALANI */
+        .dersverse-user-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--dersverse-card-bg);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--dersverse-border);
+            font-size: 0.85rem;
+        }
+
+        .dersverse-badge {
+            background: var(--dersverse-badge-gold);
+            color: #000000;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.75rem;
         }
 
         .dersverse-nav-actions {
@@ -164,7 +185,6 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* APK İndir Butonuna Özel Vurgu */
         .dersverse-btn-apk {
             background: linear-gradient(135deg, #10b981, #059669);
         }
@@ -195,7 +215,6 @@
             font-size: 1.1rem;
         }
 
-        /* Arama ve Filtre Kontrol Alanı */
         .dersverse-filter-container {
             display: flex;
             gap: 1rem;
@@ -257,6 +276,23 @@
             flex-direction: column;
             justify-content: space-between;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* ÖĞRETMEN TAVSİYESİ ETİKETİ */
+        .teacher-recommended {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .dersverse-card-tag {
@@ -344,7 +380,6 @@
             font-size: 0.9rem;
         }
 
-        /* POMODORO SAYAÇ STİLLERİ */
         .pomodoro-display {
             font-size: 3rem;
             font-weight: bold;
@@ -359,16 +394,27 @@
             justify-content: center;
             gap: 10px;
         }
+
+        /* SANAL SORU KUMBARASI KARTLARI */
+        .question-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
 
-    <!-- LGS Sınav Sayacı ve Tema/Kronometre Kontrol Barı -->
+    <!-- LGS Sınav Sayacı ve Kontrol Barı -->
     <div class="dersverse-top-bar">
         <div class="dersverse-lgs-timer">
             🎯 <strong>LGS 2027 Kalan Süre:</strong> <span id="lgs-countdown">Yükleniyor...</span>
         </div>
         <div class="dersverse-top-actions">
+            <button class="dersverse-btn-kumbara" onclick="openKumbaraModal()">📌 Soru Kumbarası</button>
             <button class="dersverse-btn-pomo" onclick="openPomodoroModal()">⏱️ Ders Kronometresi</button>
             <button id="dersverse-theme-toggle" class="dersverse-btn-theme" onclick="dersverseToggleTheme()">☀️ Gündüz Modu</button>
         </div>
@@ -376,8 +422,14 @@
 
     <header class="dersverse-header">
         <a href="#" class="dersverse-logo">DersVerse</a>
+        
+        <!-- CANLI PUAN VE ROZET ALANI -->
+        <div class="dersverse-user-stats">
+            <span>⭐ Puan: <strong id="user-points">120</strong> XP</span>
+            <span class="dersverse-badge" id="user-badge">🔥 LGS Canavarı</span>
+        </div>
+
         <div class="dersverse-nav-actions">
-            <!-- APK İndir Butonu -->
             <a href="https://dersverse.vercel.app/DersVerse.apk" download class="dersverse-btn dersverse-btn-apk">
                 📱 APK İndir
             </a>
@@ -407,18 +459,27 @@
         </div>
 
         <div class="dersverse-grid" id="dersverse-content-grid">
-            <!-- İçerikler Supabase'den Yüklenecek -->
+            <!-- ÖRNEK ÖĞRETMEN TAVSİYELİ KART -->
+            <div class="dersverse-card">
+                <div class="teacher-recommended">✔ Öğretmen Onaylı</div>
+                <div>
+                    <div class="dersverse-card-tag">Matematik</div>
+                    <div class="dersverse-card-title">8. Sınıf LGS Yeni Nesil Matematik</div>
+                    <div class="dersverse-card-desc">Öğretmenlerimiz tarafından tavsiye edilen, aşamalı soru bankası dijital notları.</div>
+                </div>
+                <button class="dersverse-btn" onclick="addXP(10)">📖 İncele (+10 XP)</button>
+            </div>
         </div>
     </main>
 
-    <!-- DersVerse İçerik Paylaşım Modalı -->
+    <!-- İçerik Paylaşım Modalı -->
     <div class="dersverse-modal" id="dersverse-add-modal">
         <div class="dersverse-modal-content">
             <h2 style="margin-bottom: 1rem;">Yeni İçerik Paylaş</h2>
             <form id="dersverse-content-form" onsubmit="dersverseSubmitContent(event)">
                 <div class="dersverse-form-group">
                     <label>Başlık</label>
-                    <input type="text" id="dersverse-title" required placeholder="Örn: 7. Sınıf Matematik Notları">
+                    <input type="text" id="dersverse-title" required placeholder="Örn: 8. Sınıf İnkılap Notları">
                 </div>
                 <div class="dersverse-form-group">
                     <label>Ders / Kategori</label>
@@ -436,13 +497,11 @@
                     <textarea id="dersverse-description" rows="3" required placeholder="İçerik detayları..."></textarea>
                 </div>
                 
-                <!-- AKILLI EMBED / FLIPHTML5 ALANI -->
                 <div class="dersverse-form-group" style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--dersverse-primary);">
                     <label style="font-weight: bold;">🔗 Embed / FlipHTML5 / YouTube Linki</label>
                     <input type="text" id="dersverse-embed-link" placeholder="https://online.fliphtml5.com/... veya iframe">
                 </div>
 
-                <!-- DOSYA YÜKLEME ALANI -->
                 <div class="dersverse-form-group" style="background: rgba(99, 102, 241, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed var(--dersverse-primary); margin-top: 10px;">
                     <label style="font-weight: bold;">Dosya Yükle (Direkt Yayınlanır)</label>
                     <input type="file" id="dersverse-file-upload" accept=".pdf,.html,.mp4,.mp3,.zip,.png,.jpg,.jpeg" style="border: none; padding: 0.5rem 0;">
@@ -463,7 +522,7 @@
         </div>
     </div>
 
-    <!-- Ders & Test Çözme Kronometresi (Pomodoro) Modalı -->
+    <!-- Pomodoro Modalı -->
     <div class="dersverse-modal" id="dersverse-pomodoro-modal">
         <div class="dersverse-modal-content" style="text-align: center;">
             <h2>⏱️ Ders Çalışma Kronometresi</h2>
@@ -483,44 +542,59 @@
         </div>
     </div>
 
-    <!-- Bütünleşik Özellikler ve Temel Fonksiyonlar JS -->
-    <script>
-        // --- 1. LGS CANLI GERİ SAYIM SAYACI ---
-        function startLGSTimer() {
-            // LGS Tahmini Tarihi (6 Haziran 2027)
-            const lgsDate = new Date("June 6, 2027 09:30:00").getTime();
+    <!-- SANAL SORU KUMBARASI MODALI -->
+    <div class="dersverse-modal" id="dersverse-kumbara-modal">
+        <div class="dersverse-modal-content">
+            <h2>📌 Sanal Soru Kumbarası</h2>
+            <p style="color: var(--dersverse-text-muted); margin-bottom: 15px; font-size: 0.85rem;">Yapamadığınız veya tekrar bakmak istediğiniz soruları buraya kaydedin.</p>
 
+            <div class="dersverse-form-group">
+                <input type="text" id="kumbara-note" placeholder="Soru notu veya başlığı (Örn: Fen Kalıtım Çaprazlama Sorusu)">
+            </div>
+            <div class="dersverse-form-group">
+                <input type="text" id="kumbara-link" placeholder="Soru Görseli / Drive Linki">
+            </div>
+            <button class="dersverse-btn" style="width: 100%; margin-bottom: 15px;" onclick="addQuestionToKumbara()">Soruyu Kumbaraya Ekle (+15 XP)</button>
+
+            <div id="kumbara-list">
+                <!-- Eklenecek sorular burada listelenecek -->
+            </div>
+
+            <div style="text-align: right; margin-top: 15px;">
+                <button class="dersverse-btn dersverse-btn-outline" onclick="closeKumbaraModal()">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bütünleşik JavaScript İşlevleri -->
+    <script>
+        // 1. LGS CANLI GERİ SAYIM
+        function startLGSTimer() {
+            const lgsDate = new Date("June 6, 2027 09:30:00").getTime();
             setInterval(function() {
                 const now = new Date().getTime();
                 const distance = lgsDate - now;
-
                 if (distance < 0) {
                     document.getElementById("lgs-countdown").innerText = "Sınav Başladı!";
                     return;
                 }
-
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
                 const el = document.getElementById("lgs-countdown");
-                if (el) {
-                    el.innerHTML = `${days}g ${hours}s ${minutes}d ${seconds}sn`;
-                }
+                if (el) el.innerHTML = `${days}g ${hours}s ${minutes}d ${seconds}sn`;
             }, 1000);
         }
 
-        // --- 2. TEMA DEĞİŞTİRME (DARK / LIGHT MODE) ---
+        // 2. TEMA DEĞİŞTİRME
         function dersverseToggleTheme() {
             document.body.classList.toggle("light-theme");
             const isLight = document.body.classList.contains("light-theme");
             localStorage.setItem("dersverse_theme", isLight ? "light" : "dark");
-            
             const btn = document.getElementById("dersverse-theme-toggle");
-            if (btn) {
-                btn.innerText = isLight ? "🌙 Gece Modu" : "☀️ Gündüz Modu";
-            }
+            if (btn) btn.innerText = isLight ? "🌙 Gece Modu" : "☀️ Gündüz Modu";
         }
 
         function loadSavedTheme() {
@@ -529,29 +603,21 @@
             if (savedTheme === "light") {
                 document.body.classList.add("light-theme");
                 if (btn) btn.innerText = "🌙 Gece Modu";
-            } else {
-                if (btn) btn.innerText = "☀️ Gündüz Modu";
             }
         }
 
-        // --- 3. POMODORO KRONOMETRESİ MANTIĞI ---
+        // 3. POMODORO KRONOMETRESİ
         let pomoInterval = null;
-        let pomoTimeLeft = 25 * 60; // 25 Dakika
+        let pomoTimeLeft = 25 * 60;
         let isPomoRunning = false;
 
-        function openPomodoroModal() {
-            document.getElementById("dersverse-pomodoro-modal").style.display = "flex";
-        }
-
-        function closePomodoroModal() {
-            document.getElementById("dersverse-pomodoro-modal").style.display = "none";
-        }
+        function openPomodoroModal() { document.getElementById("dersverse-pomodoro-modal").style.display = "flex"; }
+        function closePomodoroModal() { document.getElementById("dersverse-pomodoro-modal").style.display = "none"; }
 
         function updatePomoDisplay() {
             const minutes = Math.floor(pomoTimeLeft / 60);
             const seconds = pomoTimeLeft % 60;
-            const display = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-            document.getElementById("pomodoro-timer-display").innerText = display;
+            document.getElementById("pomodoro-timer-display").innerText = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
         }
 
         function startPomodoro() {
@@ -564,26 +630,92 @@
                 } else {
                     clearInterval(pomoInterval);
                     isPomoRunning = false;
-                    alert("Süre doldu! Harika bir çalışma seansı geçirdiniz. 5 dakika mola verin.");
+                    addXP(50); // Pomodoro bitirene 50 XP
+                    alert("Tebrikler! Pomodoro seansını tamamladınız ve 50 XP kazandınız!");
                 }
             }, 1000);
         }
 
-        function pausePomodoro() {
-            clearInterval(pomoInterval);
-            isPomoRunning = false;
+        function pausePomodoro() { clearInterval(pomoInterval); isPomoRunning = false; }
+        function resetPomodoro() { pausePomodoro(); pomoTimeLeft = 25 * 60; updatePomoDisplay(); }
+
+        // 4. GAMIFICATION / PUAN VE ROZET SİSTEMİ
+        let userPoints = parseInt(localStorage.getItem("dersverse_xp") || "120");
+
+        function addXP(amount) {
+            userPoints += amount;
+            localStorage.setItem("dersverse_xp", userPoints);
+            updateUserStats();
         }
 
-        function resetPomodoro() {
-            pausePomodoro();
-            pomoTimeLeft = 25 * 60;
-            updatePomoDisplay();
+        function updateUserStats() {
+            document.getElementById("user-points").innerText = userPoints;
+            const badgeEl = document.getElementById("user-badge");
+            
+            if (userPoints >= 300) {
+                badgeEl.innerText = "👑 LGS Şampiyonu";
+            } else if (userPoints >= 200) {
+                badgeEl.innerText = "⚡ Bilgi Ustası";
+            } else {
+                badgeEl.innerText = "🔥 LGS Canavarı";
+            }
         }
 
-        // Sayfa Yüklendiğinde Başlatılacak Olaylar
+        // 5. SANAL SORU KUMBARASI
+        function openKumbaraModal() {
+            document.getElementById("dersverse-kumbara-modal").style.display = "flex";
+            renderKumbara();
+        }
+        function closeKumbaraModal() {
+            document.getElementById("dersverse-kumbara-modal").style.display = "none";
+        }
+
+        function addQuestionToKumbara() {
+            const note = document.getElementById("kumbara-note").value;
+            const link = document.getElementById("kumbara-link").value;
+
+            if (!note) {
+                alert("Lütfen soru için bir not yazın.");
+                return;
+            }
+
+            const questions = JSON.parse(localStorage.getItem("dersverse_kumbara") || "[]");
+            questions.push({ note, link });
+            localStorage.setItem("dersverse_kumbara", JSON.stringify(questions));
+
+            document.getElementById("kumbara-note").value = "";
+            document.getElementById("kumbara-link").value = "";
+
+            addXP(15);
+            renderKumbara();
+        }
+
+        function renderKumbara() {
+            const questions = JSON.parse(localStorage.getItem("dersverse_kumbara") || "[]");
+            const listEl = document.getElementById("kumbara-list");
+            listEl.innerHTML = "";
+
+            if (questions.length === 0) {
+                listEl.innerHTML = "<p style='color: var(--dersverse-text-muted); font-size: 0.9rem;'>Henüz kaydedilmiş soru yok.</p>";
+                return;
+            }
+
+            questions.forEach((q, index) => {
+                const item = document.createElement("div");
+                item.className = "question-card";
+                item.innerHTML = `
+                    <strong>${q.note}</strong>
+                    ${q.link ? `<br><a href="${q.link}" target="_blank" style="color:#6366f1; font-size: 0.85rem;">🔗 Soruyu Göreşle / Linke Git</a>` : ''}
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        // Sayfa Yüklendiğinde Tetiklenen Fonksiyonlar
         document.addEventListener("DOMContentLoaded", () => {
             startLGSTimer();
             loadSavedTheme();
+            updateUserStats();
         });
     </script>
 
