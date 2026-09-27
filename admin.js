@@ -1,15 +1,17 @@
 import { supabase } from './supabase.js'
 
-// Fonksiyonları dışarıdan (HTML içindeki onclick'lerden) tetiklenebilmesi için window'a bağlıyoruz:
-window.bekleyenIcerikleriGetir = async function() {
+// Onay bekleyenleri çekme
+export async function bekleyenIcerikleriGetir() {
   const { data, error } = await supabase
     .from('contents')
     .select('*')
     .eq('status', 'pending');
+
   return data;
 }
 
-window.icerikOnayla = async function(contentId) {
+// İçeriği onaylama (Durumu approved yapar)
+export async function icerikOnayla(contentId) {
   const { error } = await supabase
     .from('contents')
     .update({ status: 'approved' })
@@ -17,11 +19,11 @@ window.icerikOnayla = async function(contentId) {
 
   if (!error) {
     alert("İçerik onaylandı ve canlıya alındı!");
-    location.reload();
   }
 }
 
-window.icerikSil = async function(contentId) {
+// İçeriği reddetme/silme
+export async function icerikSil(contentId) {
   const { error } = await supabase
     .from('contents')
     .delete()
@@ -29,27 +31,19 @@ window.icerikSil = async function(contentId) {
 
   if (!error) {
     alert("İçerik veritabanından silindi.");
-    location.reload();
   }
 }
 
-// XP Güncelleme Fonksiyonu
-window.kullaniciXpGuncelle = async function(userId, yeniXpDegeri) {
-  console.log("XP Güncelleniyor... Kullanıcı ID:", userId, "Yeni XP:", yeniXpDegeri);
-
+// Kullanıcıları ve XP bilgilerini getiren fonksiyon
+export async function adminKullanicilariGetir() {
   const { data, error } = await supabase
     .from('profiles')
-    .update({ xp: yeniXpDegeri, updated_at: new Date().toISOString() })
-    .eq('id', userId)
-    .select();
+    .select('id, email, full_name, role, xp'); // Özellikle 'xp' sütununu çektiğimizden emin oluyoruz
 
   if (error) {
-    console.error("Supabase XP Güncelleme Hatası:", error);
-    alert("XP Güncellenirken Hata Oluştu: " + error.message);
-    return false;
+    console.error("Kullanıcılar çekilemedi:", error);
+    return [];
   }
 
-  console.log("Güncelleme Başarılı:", data);
-  alert("Kullanıcının XP puanı başarıyla güncellendi!");
-  return true;
+  return data;
 }
