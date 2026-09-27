@@ -3,20 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DersVerse XP Mağazası</title>
+    <title>DersVerse - Ultra Mağaza & Koleksiyon</title>
     
     <!-- Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
-        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
-        let dersverseSupabase;
-        try {
-            dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
-        } catch (error) {
-            console.error('Supabase başlatılırken hata:', error);
-        }
-    </script>
 
     <style>
         :root {
@@ -49,7 +39,6 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
         }
 
         body {
@@ -122,6 +111,7 @@
             gap: 8px;
             box-shadow: 0 4px 12px var(--accent-glow);
             transition: transform 0.2s ease, background-color 0.2s ease;
+            text-decoration: none;
         }
 
         .dersverse-btn:hover {
@@ -180,27 +170,11 @@
             gap: 24px;
         }
 
-        .loading-container {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 60px;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            background: var(--bg-card);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-        }
-
-        @media (max-width: 768px) {
-            .dersverse-container {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .dersverse-nav-right {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
+        /* Özel Efekt Sınıfları (script.js ile uyumlu) */
+        .neon-border { border: 2px solid #6366f1 !important; box-shadow: 0 0 15px rgba(99,102,241,0.5); }
+        .fire-aura { border: 2px solid #ef4444 !important; box-shadow: 0 0 15px rgba(239,68,68,0.5); }
+        .galaxy-bg { background: linear-gradient(135deg, #111827, #312e81) !important; }
+        .lightning-aura { border: 2px solid #f59e0b !important; box-shadow: 0 0 15px rgba(245,158,11,0.5); }
     </style>
 </head>
 <body>
@@ -212,8 +186,8 @@
             </a>
             
             <div class="dersverse-nav-right">
-                <span id="user-badge" class="dersverse-badge">Yükleniyor...</span>
-                <span class="dersverse-badge">💎 <span id="user-points">0</span> XP</span>
+                <span id="user-badge" class="dersverse-badge">🔥 LGS Canavarı</span>
+                <span class="dersverse-badge">💎 <span id="user-points">100</span> XP</span>
                 <button id="dersverse-theme-toggle" class="dersverse-btn dersverse-btn-outline" onclick="dersverseToggleTheme()">
                     ☀️ Gündüz Modu
                 </button>
@@ -223,76 +197,23 @@
 
     <main class="dersverse-main-content">
         <div style="margin-bottom: 25px;">
-            <a href="index.html" class="dersverse-btn dersverse-btn-outline" style="text-decoration: none;">
+            <a href="index.html" class="dersverse-btn dersverse-btn-outline">
                 ← Ana Sayfaya Dön
             </a>
         </div>
 
         <div class="shop-header-section">
-            <h1>Ultra XP Mağazası & Koleksiyon</h1>
-            <p>Biriktirdiğiniz XP'lerle sandıklar açın, şans çarkını çevirin, özel unvanlar ve odak sesleri satın alarak deneyiminizi özelleştirin!</p>
+            <h1>Ultra XP Mağazası & 250+ Eşsiz Öğe</h1>
+            <p>Sandıklar açın, şans çarkını çevirin, unvanlar ve odak sesleri satın alarak DersVerse deneyiminizi zirveye taşıyın!</p>
         </div>
 
+        <!-- Script.js içerisindeki renderShop buraya doğrudan çıktı basacak -->
         <div id="shop-items-container" class="dersverse-grid">
-            <div class="loading-container">
-                <p>Mağaza ürünleri yükleniyor...</p>
-            </div>
+            <!-- Ürünler script.js tarafından otomatik yüklenecek -->
         </div>
     </main>
 
-    <!-- Doğru Dosya Adı: script.js -->
+    <!-- Senin hazırladığın script.js dosyasını buraya bağlıyoruz -->
     <script src="script.js"></script>
-    <script>
-        function dersverseToggleTheme() {
-            const htmlElement = document.documentElement;
-            htmlElement.classList.toggle('light-theme');
-            const isLight = htmlElement.classList.contains('light-theme');
-            localStorage.setItem('dersverse_theme', isLight ? 'light' : 'dark');
-            
-            const btn = document.getElementById('dersverse-theme-toggle');
-            if (btn) {
-                btn.innerHTML = isLight ? '🌙 Gece Modu' : '☀️ Gündüz Modu';
-            }
-        }
-
-        window.addEventListener('load', async () => {
-            const savedTheme = localStorage.getItem('dersverse_theme');
-            if (savedTheme === 'light') {
-                document.documentElement.classList.add('light-theme');
-                const btn = document.getElementById('dersverse-theme-toggle');
-                if (btn) btn.innerHTML = '🌙 Gece Modu';
-            }
-
-            setTimeout(() => {
-                try {
-                    if (typeof updateUserStats === 'function') updateUserStats();
-                    
-                    if (typeof renderShop === 'function') {
-                        renderShop();
-                    } else {
-                        const container = document.getElementById('shop-items-container');
-                        if (container && typeof shopItems !== 'undefined') {
-                            container.innerHTML = shopItems.map(item => `
-                                <div style="background: var(--bg-card); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
-                                    <div>
-                                        <strong style="font-size: 1.05rem;">${item.name}</strong><br>
-                                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 6px;">${item.desc || ''}</p>
-                                    </div>
-                                    <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="color: var(--primary); font-weight: bold; font-size: 0.9rem;">${item.cost} XP</span>
-                                        <button class="dersverse-btn" style="padding: 6px 12px; font-size: 0.8rem;" onclick="buyShopItem('${item.id}', ${item.cost}, 1)">Satın Al</button>
-                                    </div>
-                                </div>
-                            `).join('');
-                        } else {
-                            container.innerHTML = '<div class="loading-container" style="color: #ef4444;">script.js dosyası başarıyla yüklendi ancak renderShop fonksiyonu veya ürün listesi bulunamadı.</div>';
-                        }
-                    }
-                } catch (err) {
-                    console.error("Mağaza yükleme hatası:", err);
-                }
-            }, 300);
-        });
-    </script>
 </body>
 </html>
