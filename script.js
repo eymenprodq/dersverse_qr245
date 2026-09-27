@@ -34,10 +34,8 @@ function dersverseToggleTheme() {
     document.body.classList.toggle("light-theme");
     const isLight = document.body.classList.contains("light-theme");
     
-    // Tercihi yerel hafızaya kaydet
     localStorage.setItem("dersverse_theme", isLight ? "light" : "dark");
     
-    // Buton metnini ve ikonunu güncelle
     const btn = document.getElementById("dersverse-theme-toggle");
     if (btn) {
         btn.innerText = isLight ? "🌙 Gece Modu" : "☀️ Gündüz Modu";
@@ -107,8 +105,10 @@ function resetPomodoro() {
     updatePomoDisplay();
 }
 
-// --- 4. GAMIFICATION / PUAN VE ROZET SİSTEMİ ---
-let userPoints = parseInt(localStorage.getItem("dersverse_xp") || "120");
+// --- 4. GELİŞMİŞ GAMIFICATION / PUAN VE MAĞAZA SİSTEMİ ---
+let userPoints = parseInt(localStorage.getItem("dersverse_xp") || "100");
+let userInventory = JSON.parse(localStorage.getItem("dersverse_inventory") || "[]");
+let activeTitle = localStorage.getItem("dersverse_active_title") || "🔥 LGS Canavarı";
 
 function addXP(amount) {
     userPoints += amount;
@@ -116,21 +116,99 @@ function addXP(amount) {
     updateUserStats();
 }
 
+function deductXP(amount) {
+    if (userPoints >= amount) {
+        userPoints -= amount;
+        localStorage.setItem("dersverse_xp", userPoints);
+        updateUserStats();
+        return true;
+    }
+    return false;
+}
+
 function updateUserStats() {
     const pointsEl = document.getElementById("user-points");
     const badgeEl = document.getElementById("user-badge");
 
     if (pointsEl) pointsEl.innerText = userPoints;
+    if (badgeEl) badgeEl.innerText = activeTitle;
+}
 
-    if (badgeEl) {
-        if (userPoints >= 300) {
-            badgeEl.innerText = "👑 LGS Şampiyonu";
-        } else if (userPoints >= 200) {
-            badgeEl.innerText = "⚡ Bilgi Ustası";
-        } else {
-            badgeEl.innerText = "🔥 LGS Canavarı";
-        }
+// XP Mağazası Aç / Kapat
+function openShopModal() {
+    const modal = document.getElementById("dersverse-shop-modal");
+    if (modal) {
+        modal.style.display = "flex";
+        renderShop();
     }
+}
+
+function closeShopModal() {
+    const modal = document.getElementById("dersverse-shop-modal");
+    if (modal) modal.style.display = "none";
+}
+
+// Mağaza Ürünleri ve Satın Alma
+const shopItems = [
+    { id: 'title_dahi', name: '🧠 LGS Dahisi Unvanı', cost: 150, type: 'title', value: '🧠 LGS Dahisi' },
+    { id: 'title_efsane', name: '⚡ Ders Efsanesi Unvanı', cost: 300, type: 'title', value: '⚡ Ders Efsanesi' },
+    { id: 'title_derece', name: '👑 LGS Birincisi Unvanı', cost: 500, type: 'title', value: '👑 LGS Birincisi' }
+];
+
+function renderShop() {
+    const shopList = document.getElementById("shop-items-container");
+    if (!shopList) return;
+
+    shopList.innerHTML = shopItems.map(item => {
+        const isOwned = userInventory.includes(item.id);
+        const isActive = activeTitle === item.value;
+
+        return `
+            <div style="background: rgba(255,255,255,0.05); padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--dersverse-border, #333);">
+                <div>
+                    <strong>${item.name}</strong><br>
+                    <small style="color: #6366f1;">Maliyet: ${item.cost} XP</small>
+                </div>
+                <div>
+                    ${isOwned 
+                        ? (isActive 
+                            ? `<span style="color:#10b981; font-weight:bold;">Kullanılıyor</span>`
+                            : `<button class="dersverse-btn dersverse-btn-outline" onclick="equipTitle('${item.value}')">Kuşan</button>`)
+                        : `<button class="dersverse-btn" onclick="buyShopItem('${item.id}',${item.cost})">Satın Al</button>`
+                    }
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function buyShopItem(itemId, cost) {
+    if (userInventory.includes(itemId)) {
+        alert("Bu eşyaya zaten sahipsiniz!");
+        return;
+    }
+
+    if (deductXP(cost)) {
+        userInventory.push(itemId);
+        localStorage.setItem("dersverse_inventory", JSON.stringify(userInventory));
+        
+        const item = shopItems.find(i => i.id === itemId);
+        if (item && item.type === 'title') {
+            equipTitle(item.value);
+        }
+        
+        alert("Satın alma başarılı! Ürün hesabınıza tanımlandı.");
+        renderShop();
+    } else {
+        alert("Yetersiz XP! Daha fazla ders çalışarak veya soru ekleyerek XP kazanabilirsiniz.");
+    }
+}
+
+function equipTitle(titleValue) {
+    activeTitle = titleValue;
+    localStorage.setItem("dersverse_active_title", activeTitle);
+    updateUserStats();
+    renderShop();
 }
 
 // --- 5. SANAL SORU KUMBARASI ---
@@ -168,6 +246,7 @@ function addQuestionToKumbara() {
 
     addXP(15);
     renderKumbara();
+    alert("Soru kaydedildi! (+15 XP Kazandınız)");
 }
 
 function renderKumbara() {
@@ -331,7 +410,7 @@ function dersverseFilterContents() {
     dersverseRenderContents(filtered);
 }
 
-// İçerik Ekleme (FlipHTML5/Embed, Dosya Yükleme veya Harici Link Desteğiyle)
+// İçerik Ekleme
 async function dersverseSubmitContent(e) {
     e.preventDefault();
     const { data: { user } } = await dersverseSupabase.auth.getUser();
