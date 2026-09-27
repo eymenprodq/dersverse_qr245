@@ -47,3 +47,20 @@ export async function adminKullanicilariGetir() {
 
   return data;
 }
+
+// Kullanıcının XP değerini güncelleyen fonksiyon (Eksik olan ve hataya sebep olan fonksiyon buydu)
+export async function kullaniciXpGuncelle(userId, yeniXp) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ xp: yeniXp })
+    .eq('id', userId);
+
+  if (error) {
+    console.error("XP güncellenemedi:", error.message);
+    alert("XP güncellenirken bir hata oluştu!");
+    return false;
+  }
+
+  alert("Kullanıcı XP'si başarıyla güncellendi!");
+  return true;
+}
