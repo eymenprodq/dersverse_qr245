@@ -1,219 +1,409 @@
-<!DOCTYPE html>
-<html lang="tr" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DersVerse - Ultra Mağaza & Koleksiyon</title>
+// DersVerse - Supabase Bağlantı Yapılandırması
+const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
+const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
+const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+
+let currentLoggedInUser = null;
+
+// --- 1. LGS CANLI GERİ SAYIM SAYACI ---
+function startLGSTimer() {
+    const lgsDate = new Date("June 6, 2027 09:30:00").getTime();
+    setInterval(function() {
+        const now = new Date().getTime();
+        const distance = lgsDate - now;
+
+        const el = document.getElementById("lgs-countdown");
+        if (!el) return;
+
+        if (distance < 0) {
+            el.innerText = "Sınav Başladı!";
+            return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        el.innerText = `${days} Gün ${hours} Saat ${minutes} Dk ${seconds} Sn`;
+    }, 1000);
+}
+
+// --- 2. TEMA DEĞİŞTİRME ---
+function dersverseToggleTheme() {
+    document.body.classList.toggle("light-theme");
+    const isLight = document.body.classList.contains("light-theme");
+    localStorage.setItem("dersverse_theme", isLight ? "light" : "dark");
     
-    <!-- Supabase CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    const btn = document.getElementById("dersverse-theme-toggle");
+    if (btn) {
+        btn.innerText = isLight ? "🌙 Gece Modu" : "☀️ Gündüz Modu";
+    }
+}
 
-    <style>
-        :root {
-            --bg-main: #0b0f19;
-            --bg-card: #111827;
-            --bg-card-hover: #1f2937;
-            --border-color: #1f2937;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --accent-glow: rgba(99, 102, 241, 0.25);
-            --transition-speed: 0.3s;
+function loadSavedTheme() {
+    const savedTheme = localStorage.getItem("dersverse_theme");
+    const btn = document.getElementById("dersverse-theme-toggle");
+    
+    if (savedTheme === "light") {
+        document.body.classList.add("light-theme");
+        if (btn) btn.innerText = "🌙 Gece Modu";
+    } else {
+        document.body.classList.remove("light-theme");
+        if (btn) btn.innerText = "☀️ Gündüz Modu";
+    }
+}
+
+// --- 3. 250+ DİNAMİK ÜRÜN KATALOĞU ÜRETİCİSİ ---
+function generateLargeShopCatalog() {
+    let items = [
+        { id: 'chest_1', name: '🎁 Bronz Şans Sandığı', cost: 100, type: 'chest', value: 'bronz', desc: 'İçinden 50-300 arası XP çıkar! Stoklanabilir.' },
+        { id: 'chest_2', name: '🎁 Gümüş Şans Sandığı', cost: 250, type: 'chest', value: 'gumus', desc: 'İçinden 150-600 arası XP çıkar! Stoklanabilir.' },
+        { id: 'chest_3', name: '🎁 Altın Şans Sandığı', cost: 500, type: 'chest', value: 'altin', desc: 'İçinden 400-1200 arası XP çıkar! Stoklanabilir.' },
+        { id: 'chest_4', name: '👑 Efsanevi Krallık Sandığı', cost: 1000, type: 'chest', value: 'efsanevi', desc: 'İçinden 800-2500 arası XP çıkar! Stoklanabilir.' },
+        { id: 'chest_5', name: '🌌 Kozmik Gizem Sandığı', cost: 1800, type: 'chest', value: 'kozmik', desc: 'İçinden 1500-5000 XP ve ultra nadir ödüller çıkar!' }
+    ];
+
+    const titlePrefixes = ['LGS', 'Ders', 'Fen', 'Matematik', 'Türkçe', 'Sosyal', 'İngilizce', 'Robotik', 'Yazılım', 'Kral', 'Efsane', 'Dahisi', 'Canavarı', 'Şampiyonu', 'Lideri', 'Uzmanı', 'Kasırgası', 'Yıldızı', 'Kordinatörü', 'Reisi'];
+    const titleSuffixes = ['Dahisi', 'Canavarı', 'Şampiyonu', 'Efsanesi', 'Kralı', 'Üstadı', 'Lideri', 'Neferi', 'Piri', 'Gurusu'];
+    
+    for (let i = 1; i <= 100; i++) {
+        let p = titlePrefixes[i % titlePrefixes.length];
+        let s = titleSuffixes[i % titleSuffixes.length];
+        items.push({
+            id: `auto_title_${i}`,
+            name: `🏆 Özel Unvan #${i}: ${p} ${s}`,
+            cost: i * 25,
+            type: 'title',
+            value: `🏆 ${p} ${s} (${i})`,
+            desc: `Profilinizde sergileyebileceğiniz prestijli 8. sınıf unvanı.`
+        });
+    }
+
+    const effectTypes = ['Neon', 'Alev', 'Galaksi', 'Yıldırım', 'Buz', 'Altın', 'Kozmik', 'Siber', 'Matrix', 'Lazer'];
+    for (let i = 1; i <= 50; i++) {
+        let eff = effectTypes[i % effectTypes.length];
+        items.push({
+            id: `auto_effect_${i}`,
+            name: `✨ ${eff} Aura & Çerçeve #${i}`,
+            cost: i * 40,
+            type: 'effect',
+            value: `effect-custom-${i}`,
+            desc: `Profil kartınıza özel ${eff} görsel tema efekti ekler.`
+        });
+    }
+
+    const soundTypes = ['Yağmur', 'Kütüphane', 'Şömine', 'Orman', 'Kahvehane', 'Fırtına', 'Dalga', 'Uzay'];
+    for (let i = 1; i <= 40; i++) {
+        let snd = soundTypes[i % soundTypes.length];
+        items.push({
+            id: `auto_audio_${i}`,
+            name: `🎧 Odak Sesi: ${snd} Vibe #${i}`,
+            cost: i * 30,
+            type: 'audio',
+            value: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_4a0e10b2df.mp3',
+            desc: `Ders çalışırken dinleyebileceğiniz özel ${snd} odak ambiansı.`
+        });
+    }
+
+    for (let i = 1; i <= 60; i++) {
+        items.push({
+            id: `auto_boost_${i}`,
+            name: `⚡ XP Çarpanı & Güçlendirici #${i}`,
+            cost: i * 50,
+            type: 'booster',
+            value: `booster_${i}`,
+            desc: `Belirli bir süre boyunca görevlerden ekstra XP kazanmanızı sağlar.`
+        });
+    }
+
+    return items;
+}
+
+const shopItems = generateLargeShopCatalog();
+
+// --- 4. DİNAMİK KONFETİ ANİMASYONU ---
+function triggerConfetti() {
+    const confettiCount = 50;
+    const container = document.body;
+
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'dersverse-confetti';
+        
+        const size = Math.floor(Math.random() * 8) + 6;
+        const color = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#3b82f6', '#8b5cf6'][Math.floor(Math.random() * 7)];
+        
+        confetti.style.cssText = `
+            position: fixed;
+            width: ${size}px;
+            height: ${size}px;
+            background-color: ${color};
+            top: -10px;
+            left: ${Math.random() * 100}vw;
+            opacity: 1;
+            border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+            z-index: 999999;
+            pointer-events: none;
+            transition: transform 1.5s ease-out, top 1.5s ease-in, opacity 1.5s ease-in;
+        `;
+        
+        container.appendChild(confetti);
+
+        setTimeout(() => {
+            confetti.style.transform = `translate(${(Math.random() - 0.5) * 200}px, ${window.innerHeight + 50}px) rotate(${Math.random() * 360}deg)`;
+            confetti.style.opacity = '0';
+        }, 50);
+
+        setTimeout(() => { confetti.remove(); }, 1600);
+    }
+}
+
+// --- 5. HESABA BAĞLI VERİ YÖNETİMİ ---
+let userPoints = 100;
+let userInventory = [];
+let userChestStock = {};
+let activeTitle = "🔥 LGS Canavarı";
+let activeThemeEffect = "none";
+let activeAudioTheme = "none";
+
+function isUserAdmin() {
+    return currentLoggedInUser && currentLoggedInUser.email === 'femememe1973@gmail.com';
+}
+
+async function loadUserData() {
+    if (currentLoggedInUser) {
+        try {
+            const { data } = await dersverseSupabase
+                .from('profiles')
+                .select('xp, inventory, chest_stock, active_title, active_effect, active_audio')
+                .eq('id', currentLoggedInUser.id)
+                .single();
+
+            if (data) {
+                userPoints = data.xp ?? 100;
+                userInventory = data.inventory ?? [];
+                userChestStock = data.chest_stock ?? {};
+                activeTitle = data.active_title ?? "🔥 LGS Canavarı";
+                activeThemeEffect = data.active_effect ?? "none";
+                activeAudioTheme = data.active_audio ?? "none";
+            }
+        } catch (err) {
+            console.error("Veri yükleme hatası:", err);
+        }
+    } else {
+        userPoints = parseInt(localStorage.getItem("dersverse_xp") || "100");
+        userInventory = JSON.parse(localStorage.getItem("dersverse_inventory") || "[]");
+        userChestStock = JSON.parse(localStorage.getItem("dersverse_chest_stock") || "{}");
+        activeTitle = localStorage.getItem("dersverse_active_title") || "🔥 LGS Canavarı";
+        activeThemeEffect = localStorage.getItem("dersverse_active_effect") || "none";
+        activeAudioTheme = localStorage.getItem("dersverse_active_audio") || "none";
+    }
+    updateUserStats();
+}
+
+async function saveUserData() {
+    if (currentLoggedInUser) {
+        try {
+            await dersverseSupabase
+                .from('profiles')
+                .upsert({
+                    id: currentLoggedInUser.id,
+                    xp: userPoints,
+                    inventory: userInventory,
+                    chest_stock: userChestStock,
+                    active_title: activeTitle,
+                    active_effect: activeThemeEffect,
+                    active_audio: activeAudioTheme,
+                    updated_at: new Date()
+                });
+        } catch (err) {
+            console.error("Veri kaydetme hatası:", err);
+        }
+    } else {
+        localStorage.setItem("dersverse_xp", userPoints);
+        localStorage.setItem("dersverse_inventory", JSON.stringify(userInventory));
+        localStorage.setItem("dersverse_chest_stock", JSON.stringify(userChestStock));
+        localStorage.setItem("dersverse_active_title", activeTitle);
+        localStorage.setItem("dersverse_active_effect", activeThemeEffect);
+        localStorage.setItem("dersverse_active_audio", activeAudioTheme);
+    }
+}
+
+function addXP(amount) {
+    userPoints += amount;
+    saveUserData();
+    updateUserStats();
+}
+
+function deductXP(amount) {
+    if (isUserAdmin()) return true; 
+    if (userPoints >= amount) {
+        userPoints -= amount;
+        saveUserData();
+        updateUserStats();
+        return true;
+    }
+    return false;
+}
+
+function updateUserStats() {
+    const pointsEl = document.getElementById("user-points");
+    const badgeEl = document.getElementById("user-badge");
+
+    if (pointsEl) pointsEl.innerText = isUserAdmin() ? "♾️ Sınırsız XP" : userPoints;
+    if (badgeEl) badgeEl.innerText = activeTitle;
+}
+
+function renderShop() {
+    const shopList = document.getElementById("shop-items-container") || document.getElementById("shop-items-page-container");
+    if (!shopList) return;
+
+    shopList.innerHTML = shopItems.map(item => {
+        const isOwned = userInventory.includes(item.id);
+        const stockCount = userChestStock[item.id] || 0;
+        const isEquipped = (item.type === 'title' && activeTitle === item.value) || 
+                           (item.type === 'effect' && activeThemeEffect === item.value) ||
+                           (item.type === 'audio' && activeAudioTheme === item.value);
+
+        let stockInfoHtml = item.type === 'chest' ? `<br><small style="color: #10b981; font-weight: bold;">Envanterdeki Stok: ${stockCount} Adet</small>` : '';
+        let actionButtons = '';
+
+        if (item.type === 'chest') {
+            actionButtons = `
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                    <div style="display: flex; gap: 4px;">
+                        <button class="dersverse-btn" style="padding: 5px 10px; font-size: 0.75rem;" onclick="buyShopItem('${item.id}', ${item.cost}, 1)">Satın Al</button>
+                        <button class="dersverse-btn dersverse-btn-outline" style="padding: 5px 10px; font-size: 0.75rem;" onclick="buyBulkPrompt('${item.id}', ${item.cost})">Toplu Al</button>
+                    </div>
+                    ${stockCount > 0 ? `<button class="dersverse-btn" style="background: #10b981; color: white; width: 100%; padding: 5px; font-size: 0.75rem;" onclick="triggerWheelAnimation('${item.value}', '${item.id}')">🎡 Çevir (${stockCount})</button>` : ''}
+                </div>
+            `;
+        } else {
+            if (isOwned && isEquipped) {
+                actionButtons = `<span style="color:#10b981; font-weight:bold; font-size: 0.85rem;">Aktif / Kuşanıldı</span>`;
+            } else {
+                actionButtons = `
+                    <div style="display: flex; gap: 4px;">
+                        ${!isOwned ? `<button class="dersverse-btn" style="padding: 5px 10px; font-size: 0.75rem;" onclick="buyShopItem('${item.id}',${item.cost}, 1)">Satın Al</button>` : ''}
+                        <button class="dersverse-btn dersverse-btn-outline" style="padding: 5px 10px; font-size: 0.75rem;" onclick="equipItem('${item.type}', '${item.value}', '${item.id}')">Kuşan</button>
+                    </div>
+                `;
+            }
         }
 
-        .light-theme {
-            --bg-main: #f3f4f6;
-            --bg-card: #ffffff;
-            --bg-card-hover: #f9fafb;
-            --border-color: #e5e7eb;
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --accent-glow: rgba(79, 70, 229, 0.15);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .dersverse-header {
-            background-color: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-
-        .dersverse-container {
-            max-width: 1280px;
-            width: 100%;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .dersverse-logo {
-            font-size: 1.35rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .dersverse-nav-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .dersverse-badge {
-            background: var(--accent-glow);
-            color: var(--primary);
-            padding: 7px 16px;
-            border-radius: 9999px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            border: 1px solid var(--border-color);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .dersverse-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px var(--accent-glow);
-            transition: transform 0.2s ease, background-color 0.2s ease;
-            text-decoration: none;
-        }
-
-        .dersverse-btn:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-2px);
-        }
-
-        .dersverse-btn-outline {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            box-shadow: none;
-        }
-
-        .dersverse-btn-outline:hover {
-            background: var(--bg-card-hover);
-            color: var(--primary);
-            border-color: var(--primary);
-        }
-
-        main.dersverse-main-content {
-            flex: 1;
-            max-width: 1280px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        .shop-header-section {
-            margin-bottom: 35px;
-            text-align: center;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .shop-header-section h1 {
-            font-size: 2.25rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-
-        .shop-header-section p {
-            color: var(--text-muted);
-            font-size: 1rem;
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.5;
-        }
-
-        .dersverse-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-        }
-
-        /* Özel Efekt Sınıfları (script.js ile uyumlu) */
-        .neon-border { border: 2px solid #6366f1 !important; box-shadow: 0 0 15px rgba(99,102,241,0.5); }
-        .fire-aura { border: 2px solid #ef4444 !important; box-shadow: 0 0 15px rgba(239,68,68,0.5); }
-        .galaxy-bg { background: linear-gradient(135deg, #111827, #312e81) !important; }
-        .lightning-aura { border: 2px solid #f59e0b !important; box-shadow: 0 0 15px rgba(245,158,11,0.5); }
-    </style>
-</head>
-<body>
-
-    <header class="dersverse-header">
-        <div class="dersverse-container">
-            <a href="index.html" class="dersverse-logo">
-                🚀 DersVerse XP Mağazası
-            </a>
-            
-            <div class="dersverse-nav-right">
-                <span id="user-badge" class="dersverse-badge">🔥 LGS Canavarı</span>
-                <span class="dersverse-badge">💎 <span id="user-points">100</span> XP</span>
-                <button id="dersverse-theme-toggle" class="dersverse-btn dersverse-btn-outline" onclick="dersverseToggleTheme()">
-                    ☀️ Gündüz Modu
-                </button>
+        return `
+            <div style="background: rgba(255,255,255,0.05); padding: 12px; margin-bottom: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--dersverse-border, #333);">
+                <div style="max-width: 60%;">
+                    <strong>${item.name}</strong><br>
+                    <small style="color: #aaa; font-size: 0.8rem;">${item.desc || ''}</small>${stockInfoHtml}<br>
+                    <small style="color: #6366f1; font-weight: bold; font-size: 0.8rem;">Maliyet: ${isUserAdmin() ? 'Ücretsiz (Admin)' : item.cost + ' XP'}</small>
+                </div>
+                <div>${actionButtons}</div>
             </div>
-        </div>
-    </header>
+        `;
+    }).join('');
+}
 
-    <main class="dersverse-main-content">
-        <div style="margin-bottom: 25px;">
-            <a href="index.html" class="dersverse-btn dersverse-btn-outline">
-                ← Ana Sayfaya Dön
-            </a>
-        </div>
+function buyShopItem(itemId, cost, quantity = 1) {
+    const item = shopItems.find(i => i.id === itemId);
+    const totalCost = isUserAdmin() ? 0 : cost * quantity;
 
-        <div class="shop-header-section">
-            <h1>Ultra XP Mağazası & 250+ Eşsiz Öğe</h1>
-            <p>Sandıklar açın, şans çarkını çevirin, unvanlar ve odak sesleri satın alarak DersVerse deneyiminizi zirveye taşıyın!</p>
-        </div>
+    if (isUserAdmin() || deductXP(totalCost)) {
+        if (item.type === 'chest') {
+            userChestStock[itemId] = (userChestStock[itemId] || 0) + quantity;
+        } else {
+            if (!userInventory.includes(itemId)) userInventory.push(itemId);
+        }
+        saveUserData();
+        triggerConfetti();
+        renderShop();
+    } else {
+        alert("Yetersiz XP!");
+    }
+}
 
-        <!-- Script.js içerisindeki renderShop buraya doğrudan çıktı basacak -->
-        <div id="shop-items-container" class="dersverse-grid">
-            <!-- Ürünler script.js tarafından otomatik yüklenecek -->
-        </div>
-    </main>
+function buyBulkPrompt(itemId, cost) {
+    const qtyInput = prompt("Kaç adet satın almak istiyorsunuz?", "5");
+    if (!qtyInput) return;
+    const qty = parseInt(qtyInput);
+    if (!isNaN(qty) && qty > 0) buyShopItem(itemId, cost, qty);
+}
 
-    <!-- Senin hazırladığın script.js dosyasını buraya bağlıyoruz -->
-    <script src="script.js"></script>
-</body>
-</html>
+// --- 6. ŞANS ÇARKI ANİMASYONU ---
+function triggerWheelAnimation(chestType, itemId) {
+    if (!userChestStock[itemId] || userChestStock[itemId] <= 0) return;
+
+    userChestStock[itemId]--;
+    saveUserData();
+
+    let wheelModal = document.getElementById("dersverse-wheel-modal");
+    if (!wheelModal) {
+        wheelModal = document.createElement("div");
+        wheelModal.id = "dersverse-wheel-modal";
+        wheelModal.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; justify-content:center; align-items:center; z-index:99999;";
+        document.body.appendChild(wheelModal);
+    }
+
+    wheelModal.innerHTML = `
+        <div style="background: #111827; padding: 30px; border-radius: 16px; border: 2px solid #6366f1; text-align: center; max-width: 360px; width: 90%; color: white;">
+            <h3 style="margin-top:0;">🎡 Şans Çarkı Dönüyor...</h3>
+            <div id="wheel-spinner-container" style="margin: 20px auto; width: 140px; height: 140px; border-radius: 50%; border: 8px solid #312e81; border-top: 8px solid #ef4444; animation: spinWheel 0.6s linear infinite;"></div>
+            <div id="wheel-result-text" style="font-size: 1.2rem; font-weight: bold; margin-top: 15px; color: #f59e0b;">...</div>
+        </div>
+        <style>@keyframes spinWheel { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+    `;
+    wheelModal.style.display = "flex";
+
+    let rewardXP = Math.floor(Math.random() * 500) + 50;
+
+    setTimeout(() => {
+        const spinner = document.getElementById("wheel-spinner-container");
+        const resultText = document.getElementById("wheel-result-text");
+
+        if (spinner) {
+            spinner.style.animation = "none";
+            spinner.innerHTML = "🎉";
+            spinner.style.fontSize = "50px";
+            spinner.style.lineHeight = "125px";
+        }
+        if (resultText) resultText.innerText = `TEBRİKLER!\n+${rewardXP} XP Kazandınız!`;
+
+        addXP(rewardXP);
+        triggerConfetti();
+        renderShop();
+
+        setTimeout(() => { wheelModal.style.display = "none"; }, 2000);
+    }, 2500);
+}
+
+function equipItem(type, value, itemId) {
+    if (itemId && !userInventory.includes(itemId)) userInventory.push(itemId);
+    if (type === 'title') activeTitle = value;
+    if (type === 'effect') activeThemeEffect = value;
+    if (type === 'audio') activeAudioTheme = value;
+
+    saveUserData();
+    updateUserStats();
+    renderShop();
+}
+
+// --- 7. OTURUM KONTROLÜ ---
+async function dersverseCheckUser() {
+    const { data: { user } } = await dersverseSupabase.auth.getUser();
+    currentLoggedInUser = user;
+    await loadUserData();
+
+    const authBtn = document.getElementById('dersverse-auth-btn');
+    if (authBtn && user) {
+        authBtn.innerText = 'Çıkış Yap (' + (user.email === 'femememe1973@gmail.com' ? 'Kadir Eymen ✔️' : user.email.split('@')[0]) + ')';
+    }
+    renderShop();
+}
+
+window.onload = async () => {
+    startLGSTimer();
+    loadSavedTheme();
+    await dersverseCheckUser();
+    renderShop();
+};
