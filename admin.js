@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js'
 
-export async function bekleyenIcerikleriGetir() {
+// Fonksiyonları dışarıdan (HTML içindeki onclick'lerden) tetiklenebilmesi için window'a bağlıyoruz:
+window.bekleyenIcerikleriGetir = async function() {
   const { data, error } = await supabase
     .from('contents')
     .select('*')
@@ -8,38 +9,47 @@ export async function bekleyenIcerikleriGetir() {
   return data;
 }
 
-export async function icerikOnayla(contentId) {
+window.icerikOnayla = async function(contentId) {
   const { error } = await supabase
     .from('contents')
     .update({ status: 'approved' })
     .eq('id', contentId);
 
-  if (!error) alert("İçerik onaylandı ve canlıya alındı!");
+  if (!error) {
+    alert("İçerik onaylandı ve canlıya alındı!");
+    location.reload();
+  }
 }
 
-export async function icerikSil(contentId) {
+window.icerikSil = async function(contentId) {
   const { error } = await supabase
     .from('contents')
     .delete()
     .eq('id', contentId);
 
-  if (!error) alert("İçerik veritabanından silindi.");
+  if (!error) {
+    alert("İçerik veritabanından silindi.");
+    location.reload();
+  }
 }
 
-// Doğrudan Supabase update komutu (Fonksiyonsuz, saf JS)
-export async function kullaniciXpGuncelle(userId, yeniXpDegeri) {
+// XP Güncelleme Fonksiyonu
+window.kullaniciXpGuncelle = async function(userId, yeniXpDegeri) {
+  console.log("XP Güncelleniyor... Kullanıcı ID:", userId, "Yeni XP:", yeniXpDegeri);
+
   const { data, error } = await supabase
     .from('profiles')
-    .update({ xp: yeniXpDegeri })
+    .update({ xp: yeniXpDegeri, updated_at: new Date().toISOString() })
     .eq('id', userId)
     .select();
 
   if (error) {
-    alert("XP Güncelleme Hatası: " + error.message);
-    console.error("Supabase Error:", error);
+    console.error("Supabase XP Güncelleme Hatası:", error);
+    alert("XP Güncellenirken Hata Oluştu: " + error.message);
     return false;
   }
 
+  console.log("Güncelleme Başarılı:", data);
   alert("Kullanıcının XP puanı başarıyla güncellendi!");
   return true;
 }
