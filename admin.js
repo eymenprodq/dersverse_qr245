@@ -34,7 +34,7 @@ export async function icerikSil(contentId) {
   }
 }
 
-// Doğrudan SQL fonksiyonunu tetikleyen XP Güncelleme
+// Güvenli ve yetki engeline takılmayan XP Güncelleme
 export async function kullaniciXpGuncelle(userId, yeniXpDegeri) {
   const { error } = await supabase.rpc('update_user_xp', {
     target_user_id: userId,
