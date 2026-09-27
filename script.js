@@ -272,24 +272,24 @@ function renderKumbara() {
 }
 
 // --- 6. KULLANICI ENGELLEME KONTROLÜ ---
-async function checkUserBannedStatus() {[cite: 4]
+async function checkUserBannedStatus() {
     try {
-        const { data: { user } } = await dersverseSupabase.auth.getUser();[cite: 4]
-        if (!user) return;[cite: 4]
+        const { data: { user } } = await dersverseSupabase.auth.getUser();
+        if (!user) return;
 
-        if (user.email === 'femememe1973@gmail.com') return;[cite: 4]
+        if (user.email === 'femememe1973@gmail.com') return;
 
-        const { data, error } = await dersverseSupabase[cite: 4]
-            .from('profiles')[cite: 4]
-            .select('is_banned')[cite: 4]
-            .eq('id', user.id)[cite: 4]
-            .single();[cite: 4]
+        const { data, error } = await dersverseSupabase
+            .from('profiles')
+            .select('is_banned')
+            .eq('id', user.id)
+            .single();
 
-        if (data && data.is_banned) {[cite: 4]
-            window.location.href = 'engellendiniz.html';[cite: 4]
+        if (data && data.is_banned) {
+            window.location.href = 'engellendiniz.html';
         }
     } catch (err) {
-        console.error("Engelleme kontrolü hatası:", err);[cite: 4]
+        console.error("Engelleme kontrolü hatası:", err);
     }
 }
 
@@ -373,26 +373,26 @@ async function dersverseLoadContents() {
 }
 
 // İçerik Kartlarını Ekrana Basma (Çift Butonlu ve Yorum Destekli)
-function dersverseRenderContents(contents) {[cite: 4]
-    const grid = document.getElementById('dersverse-content-grid');[cite: 4]
-    if (!grid) return;[cite: 4]
+function dersverseRenderContents(contents) {
+    const grid = document.getElementById('dersverse-content-grid');
+    if (!grid) return;
 
-    if (!contents || contents.length === 0) {[cite: 4]
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--dersverse-text-muted);">Aradığınız kriterlere uygun içerik bulunamadı.</p>';[cite: 4]
-        return;[cite: 4]
+    if (!contents || contents.length === 0) {
+        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--dersverse-text-muted);">Aradığınız kriterlere uygun içerik bulunamadı.</p>';
+        return;
     }
 
-    grid.innerHTML = contents.map(item => {[cite: 4]
-        let authorDisplay = escapeHtml(item.user_name || 'Kullanıcı');[cite: 4]
-        let authorBadge = '';[cite: 4]
+    grid.innerHTML = contents.map(item => {
+        let authorDisplay = escapeHtml(item.user_name || 'Kullanıcı');
+        let authorBadge = '';
         
-        if (authorDisplay === 'Kadir Eymen Açıkoğlu' || (item.user_email && item.user_email === 'femememe1973@gmail.com')) {[cite: 4]
-            authorDisplay = 'Kadir Eymen Açıkoğlu';[cite: 4]
-            authorBadge = ' ✔️ 🔨';[cite: 4]
+        if (authorDisplay === 'Kadir Eymen Açıkoğlu' || (item.user_email && item.user_email === 'femememe1973@gmail.com')) {
+            authorDisplay = 'Kadir Eymen Açıkoğlu';
+            authorBadge = ' ✔️ 🔨';
         }
 
-        const linkUrl = item.link || item.download_url || '#';[cite: 4]
-        const detailUrl = item.id ? `detay.html?id=${item.id}` : '#';[cite: 4]
+        const linkUrl = item.link || item.download_url || '#';
+        const detailUrl = item.id ? `detay.html?id=${item.id}` : '#';
 
         return `
             <div class="dersverse-card" style="display: flex; flex-direction: column; justify-content: space-between;">
@@ -410,11 +410,11 @@ function dersverseRenderContents(contents) {[cite: 4]
                     <a href="${escapeHtml(linkUrl)}" target="_blank" class="dersverse-btn" style="flex: 1; text-align: center; text-decoration: none; font-size: 0.8rem; padding: 8px 4px;">🚀 Kitaba Git</a>
                 </div>
             </div>
-        `;[cite: 4]
+        `;
     }).join('');
 }
 
-// Arama ve Kategori Filtreleme Mantığı
+// Arama dan Kategori Filtreleme Mantığı
 function dersverseFilterContents() {
     const searchInput = document.getElementById('dersverse-search-input');
     const categoryFilter = document.getElementById('dersverse-category-filter');
@@ -559,5 +559,5 @@ window.onload = () => {
     updateUserStats();
     dersverseCheckUser();
     dersverseLoadContents();
-    checkUserBannedStatus();[cite: 4]
+    checkUserBannedStatus();
 };
