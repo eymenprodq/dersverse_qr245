@@ -16,6 +16,28 @@
 
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        /* Doğrulama Bildirim Bannerı */
+        .verification-alert {
+            display: none;
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid var(--dersverse-warning, #f59e0b);
+            color: #fbbf24;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 1rem 2rem 0 2rem;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
 
@@ -46,9 +68,17 @@
                 📱 APK İndir
             </a>
             <button class="dersverse-btn dersverse-btn-outline" onclick="dersverseOpenModal()">İçerik Paylaş</button>
+            
+            <!-- Kullanıcı Oturum / Profil Alanı -->
+            <div id="nav-user-profile" style="display: none; align-items: center; gap: 0.8rem;"></div>
             <button class="dersverse-btn" id="dersverse-auth-btn" onclick="dersverseHandleAuth()">Kayıt Ol / Giriş Yap</button>
         </div>
     </header>
+
+    <!-- E-posta Doğrulama Bildirimi -->
+    <div id="verification-notice" class="verification-alert">
+        📩 <strong>Aramıza Hoş Geldin!</strong> Doğrulama e-postası gönderildi. Lütfen e-posta kutunuzu kontrol edin ve gelen bağlantıya tıklayın.
+    </div>
 
     <!-- Ana İçerik Alanı -->
     <main class="dersverse-main">
@@ -191,6 +221,111 @@
     s1.setAttribute('crossorigin','*');
     s0.parentNode.insertBefore(s1,s0);
     })();
+    </script>
+
+    <!-- Supabase Doğrulama, Oturum ve Engelleme Yönetim Scripti -->
+    <script>
+        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
+        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
+        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+
+        function showVerificationNotice(msg) {
+            const noticeBox = document.getElementById('verification-notice');
+            if (noticeBox) {
+                if (msg) noticeBox.innerHTML = msg;
+                noticeBox.style.display = 'block';
+            }
+        }
+
+        function hideVerificationNotice() {
+            const noticeBox = document.getElementById('verification-notice');
+            if (noticeBox) noticeBox.style.display = 'none';
+        }
+
+        async function processUserSession(session) {
+            const loginBtn = document.getElementById('dersverse-auth-btn');
+            const userProfileArea = document.getElementById('nav-user-profile');
+
+            if (session && session.user) {
+                const user = session.user;
+
+                // E-posta henüz doğrulanmadıysa uyarı ver
+                if (user.confirmed_at === null && user.email_confirmed_at === null) {
+                    showVerificationNotice('📩 <strong>E-posta Doğrulaması Bekleniyor:</strong> Lütfen e-posta adresinize (<strong>' + user.email + '</strong>) gönderilen doğrulama bağlantısına tıklayın.');
+                } else {
+                    hideVerificationNotice();
+                }
+
+                // 1. Profil Verisini Çek veya Oluştur
+                let { data: profile } = await dersverseSupabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (!profile) {
+                    const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
+                    const { data: newProfile } = await dersverseSupabase
+                        .from('profiles')
+                        .insert([{ id: user.id, full_name: fullName, role: 'student', xp: 0 }])
+                        .select()
+                        .single();
+                    profile = newProfile;
+                }
+
+                // 2. Engelleme Kontrolü
+                if (profile && profile.is_banned && new Date(profile.ban_until) > new Date()) {
+                    const banDate = new Date(profile.ban_until).toLocaleString('tr-TR');
+                    alert(`Erişiminiz Engellendi!\nNeden: ${profile.ban_reason || 'Belirtilmedi'}\nEngelin Bitiş Tarihi: ${banDate}`);
+                    await dersverseSupabase.auth.signOut();
+                    window.location.reload();
+                    return;
+                }
+
+                // 3. Arayüzü Güncelle
+                if (loginBtn) loginBtn.style.display = 'none';
+                if (userProfileArea) {
+                    userProfileArea.style.display = 'flex';
+                    const displayName = profile?.full_name || user.email;
+                    userProfileArea.innerHTML = `
+                        <span style="color: #fff; font-weight: 600; font-size: 0.9rem;">👋 ${displayName}</span>
+                        <button onclick="logoutUser()" class="dersverse-btn dersverse-btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Çıkış Yap</button>
+                    `;
+                }
+
+                if (profile && profile.xp !== undefined) {
+                    const pointsEl = document.getElementById('user-points');
+                    if (pointsEl) pointsEl.innerText = profile.xp;
+                }
+            } else {
+                if (loginBtn) loginBtn.style.display = 'inline-block';
+                if (userProfileArea) userProfileArea.style.display = 'none';
+            }
+        }
+
+        async function checkUserAuth() {
+            const { data: { session } } = await dersverseSupabase.auth.getSession();
+            await processUserSession(session);
+        }
+
+        async function logoutUser() {
+            await dersverseSupabase.auth.signOut();
+            window.location.reload();
+        }
+
+        // Supabase Auth Değişiklik Dinleyicisi
+        dersverseSupabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                await processUserSession(session);
+            } else if (event === 'SIGNED_OUT') {
+                hideVerificationNotice();
+                processUserSession(null);
+            } else if (event === 'USER_UPDATED') {
+                showVerificationNotice('📩 Doğrulama e-postası gönderildi, lütfen e-posta kutunuzu kontrol edin!');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', checkUserAuth);
     </script>
 
     <!-- Harici JavaScript Kod Dosyası -->
