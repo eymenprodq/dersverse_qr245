@@ -152,7 +152,7 @@ function triggerConfetti() {
     }
 }
 
-// --- 5. GAMIFICATION / STOKLAMALI ULTRA MAĞAZA VE ŞANS ÇARKI (250+ EŞSİZ ÖĞE) ---
+// --- 5. GAMIFICATION / YENİ NESİL MAĞAZA VE ŞANS ÇARKI ---
 let userPoints = parseInt(localStorage.getItem("dersverse_xp") || "100");
 let userInventory = JSON.parse(localStorage.getItem("dersverse_inventory") || "[]");
 let userChestStock = JSON.parse(localStorage.getItem("dersverse_chest_stock") || "{}");
@@ -206,78 +206,66 @@ function closeShopModal() {
     if (modal) modal.style.display = "none";
 }
 
-// Birbirinden Farklı 250+ Ürün Üreteçli Dinamik Mağaza Kataloğu
+// Yeni Nesil Ürün Kataloğu (Eski Ürünler Temilendi, Yepyeni Seçenekler Eklendi)
 function generateMassiveShopCatalog() {
     let items = [
-        // Sabit Özel Sandıklar
-        { id: 'chest_1', name: '🎁 Bronz Şans Sandığı', cost: 100, type: 'chest', value: 'bronz', desc: 'İçinden 50-300 arası XP çıkar! Stoklanabilir.' },
-        { id: 'chest_2', name: '🎁 Gümüş Şans Sandığı', cost: 250, type: 'chest', value: 'gumus', desc: 'İçinden 150-600 arası XP çıkar! Stoklanabilir.' },
-        { id: 'chest_3', name: '🎁 Altın Şans Sandığı', cost: 500, type: 'chest', value: 'altin', desc: 'İçinden 400-1200 arası XP çıkar! Stoklanabilir.' },
-        { id: 'chest_4', name: '👑 Efsanevi Krallık Sandığı', cost: 1000, type: 'chest', value: 'efsanevi', desc: 'İçinden 800-2500 arası XP çıkar! Stoklanabilir.' },
-        { id: 'chest_5', name: '🌌 Kozmik Gizem Sandığı', cost: 1800, type: 'chest', value: 'kozmik', desc: 'İçinden 1500-5000 XP ve ultra nadir ödüller çıkar!' },
+        // Özel Şans Sandıkları
+        { id: 'new_chest_bronze', name: '🎁 Yeni Sezon Bronz Sandık', cost: 120, type: 'chest', value: 'bronz', desc: 'İçinden 75-350 arası XP çıkar. Stoklanabilir.' },
+        { id: 'new_chest_silver', name: '🎁 Yeni Sezon Gümüş Sandık', cost: 280, type: 'chest', value: 'gumus', desc: 'İçinden 200-700 arası XP çıkar. Stoklanabilir.' },
+        { id: 'new_chest_gold', name: '🎁 Yeni Sezon Altın Sandık', cost: 550, type: 'chest', value: 'altin', desc: 'İçinden 500-1400 arası XP çıkar. Stoklanabilir.' },
+        { id: 'new_chest_diamond', name: '💎 Elmas Akademi Sandığı', cost: 1200, type: 'chest', value: 'efsanevi', desc: 'İçinden 1000-3000 arası XP çıkar. Stoklanabilir.' },
+        { id: 'new_chest_ultra', name: '🌌 Ultra Galaktik Sandık', cost: 2000, type: 'chest', value: 'kozmik', desc: 'İçinden 2000-6000 XP ve özel rozetler çıkar!' },
         
-        // Sabit Güçlendiriciler ve Perkler
-        { id: 'boost_1', name: '⚡ 2x XP Katlayıcı İksir', cost: 300, type: 'booster', value: 'xp_double', desc: 'XP kazançlarını 2 katına çıkarır.' },
-        { id: 'boost_2', name: '🛡️ Seri Koruma Kalkanı', cost: 200, type: 'booster', value: 'streak_shield', desc: 'Giremediğin günlerde serini korur.' },
-        { id: 'boost_3', name: '📌 Soru Öne Çıkarma Bileti', cost: 150, type: 'perk', value: 'pin_question', desc: 'Sorunu üst sıraya taşır.' },
-        { id: 'boost_4', name: '💎 Süper XP Mıknatısı', cost: 450, type: 'booster', value: 'xp_magnet', desc: 'Her etkinlikten ekstra %50 bonus XP kazandırır.' },
-        { id: 'boost_5', name: '⏳ Zaman Bükücü Kum Saati', cost: 350, type: 'perk', value: 'time_bender', desc: 'Pomodoro seanslarında ekstra mola hakkı tanır.' }
+        // Yeni Güçlendiriciler ve Avantajlar
+        { id: 'new_boost_2x', name: '⚡ 3x Turbo XP İksiri', cost: 400, type: 'booster', value: 'xp_double', desc: 'Tüm XP kazançlarını katlar.' },
+        { id: 'new_boost_shield', name: '🛡️ Süper Seri Kalkanı', cost: 250, type: 'booster', value: 'streak_shield', desc: 'Çalışma serinizin bozulmasını engeller.' },
+        { id: 'new_perk_pin', name: '📌 Yıldızlı Soru Öne Çıkarma', cost: 180, type: 'perk', value: 'pin_question', desc: 'Sorularınızı toplulukta öne çıkarır.' },
+        { id: 'new_boost_magnet', name: '🧲 Mega XP Mıknatısı', cost: 500, type: 'booster', value: 'xp_magnet', desc: 'Etkinliklerden ekstra %75 bonus kazandırır.' },
+        { id: 'new_perk_clock', name: '⏳ Esnek Zaman Kum Saati', cost: 380, type: 'perk', value: 'time_bender', desc: 'Pomodoro seanslarında ek mola hakkı tanır.' }
     ];
 
-    // 1) 100 Adet Tamamen Benzersiz Prestij Unvanı (Title)
-    const prefixes = ['LGS', 'Fen', 'Matematik', 'Türkçe', 'Sosyal', 'İngilizce', 'Robotik', 'Yazılım', 'Kral', 'Efsane', 'Dahi', 'Canavar', 'Şampiyon', 'Lider', 'Uzman', 'Kasırga', 'Yıldız', 'Koordinatör', 'Reis', 'Atom', 'Kuantum', 'Siber', 'Galaktik', 'Titan', 'Alfa', 'Omega', 'Vorteks', 'Pioner', 'Nova', 'Zenith'];
-    const suffixes = ['Dahisi', 'Canavarı', 'Şampiyonu', 'Efsanesi', 'Kralı', 'Üstadı', 'Lideri', 'Neferi', 'Piri', 'Gurusu', 'Muhafızı', 'Fatihi', 'Avcısı', 'Lordu', 'Mimarı', 'Kahramanı', 'Yolcusu', 'Kılavuzu', 'Dehası', 'Büyücüsü'];
+    // 1) 50 Adet Yepyeni Prestij Unvanı (Title)
+    const prefixes = ['Elmas', 'Kuantum', 'Zirve', 'Prime', 'Apex', 'Yıldız', 'Nova', 'Ultra', 'Mega', 'Hyper', 'Titan', 'Master', 'Elite', 'Cyber', 'Neon'];
+    const suffixes = ['Lideri', 'Şampiyonu', 'Kralı', 'Dahisi', 'Efsanesi', 'Reisi', 'Mimarı', 'Fatihi', 'Dehası', 'Gurusu'];
     
-    for (let i = 1; i <= 100; i++) {
-        let p = prefixes[i % prefixes.length];
-        let s = suffixes[(i * 3) % suffixes.length];
-        items.push({
-            id: `unique_title_${i}`,
-            name: `🏆 Özel Unvan #${i}: ${p} ${s}`,
-            cost: 120 + (i * 15),
-            type: 'title',
-            value: `🏆 ${p} ${s} (${i})`,
-            desc: `Profilinizde sergileyebileceğiniz prestijli 8. sınıf unvanı #${i}.`
-        });
-    }
-
-    // 2) 70 Adet Benzersiz Profil/Aura Görsel Efekti (Effect)
-    const effectTypes = ['Neon', 'Alev', 'Galaksi', 'Yıldırım', 'Buz', 'Altın', 'Kozmik', 'Siber', 'Matrix', 'Lazer', 'Plazma', 'Kandil', 'Güneş', 'Karanlık', 'Elmas', 'Kristal', 'Zümrüt', 'Yakut', 'Safir', 'Nükleer'];
-    for (let i = 1; i <= 70; i++) {
-        let eff = effectTypes[i % effectTypes.length];
-        items.push({
-            id: `unique_effect_${i}`,
-            name: `✨ ${eff} Aura & Çerçeve V${i}`,
-            cost: 150 + (i * 18),
-            type: 'effect',
-            value: `effect-custom-${i}`,
-            desc: `Profil kartınıza özel ${eff} görsel tema efekti ekler (Stil #${i}).`
-        });
-    }
-
-    // 3) 50 Adet Benzersiz Çalışma Odak Sesi ve Ambiyansı (Audio)
-    const soundTypes = ['Yağmur', 'Kütüphane', 'Şömine', 'Orman', 'Kafe', 'Fırtına', 'Dalga', 'Uzay', 'Rüzgar', 'Nehir', 'Gece', 'Kar', 'Tren', 'Kumsal', 'Şelale'];
     for (let i = 1; i <= 50; i++) {
-        let snd = soundTypes[i % soundTypes.length];
+        let p = prefixes[i % prefixes.length];
+        let s = suffixes[(i * 2) % suffixes.length];
         items.push({
-            id: `unique_audio_${i}`,
-            name: `🎧 Odak Sesi: ${snd} Mix #${i}`,
-            cost: 100 + (i * 12),
+            id: `new_title_${i}`,
+            name: `🌟 Akademi Unvanı #${i}: ${p} ${s}`,
+            cost: 150 + (i * 20),
+            type: 'title',
+            value: `🌟 ${p} ${s} (${i})`,
+            desc: `Profilinizde fark yaratacak yeni sezon özel unvanı #${i}.`
+        });
+    }
+
+    // 2) 30 Adet Yepyeni Profil Efekti ve Çerçeve (Effect)
+    const effects = ['Alev', 'Cyber', 'Plazma', 'Kristal', 'Elmas', 'Gümüş', 'Altın', 'Kozmik', 'Lazer', 'Fırtına'];
+    for (let i = 1; i <= 30; i++) {
+        let eff = effects[i % effects.length];
+        items.push({
+            id: `new_effect_${i}`,
+            name: `✨ Özel ${eff} Çerçeve V${i}`,
+            cost: 180 + (i * 22),
+            type: 'effect',
+            value: `effect-new-${i}`,
+            desc: `Profil kartınız için yeni nesil ${eff} parlama efekti #${i}.`
+        });
+    }
+
+    // 3) 25 Adet Yepyeni Odak Sesi ve Ambiyans (Audio)
+    const sounds = ['Lo-Fi', 'Uzay İstasyonu', 'Sakin Kafe', 'Derin Orman', 'Huzurlu Yağmur', 'Şömine Ateşi', 'Neon Şehir'];
+    for (let i = 1; i <= 25; i++) {
+        let snd = sounds[i % sounds.length];
+        items.push({
+            id: `new_audio_${i}`,
+            name: `🎧 Yeni Nesil Odak Sesi: ${snd} #${i}`,
+            cost: 130 + (i * 15),
             type: 'audio',
             value: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_4a0e10b2df.mp3',
-            desc: `Ders çalışırken dinleyebileceğiniz özel ${snd} odak ambiansı serisi #${i}.`
-        });
-    }
-
-    // 4) 25 Adet Özel Koleksiyon Rozeti ve Nadir Eşya (Perk/Booster)
-    for (let i = 1; i <= 25; i++) {
-        items.push({
-            id: `unique_relic_${i}`,
-            name: `🔮 Nadir Koleksiyon Eşyası #${i}`,
-            cost: 500 + (i * 50),
-            type: 'perk',
-            value: `relic_${i}`,
-            desc: `Envanterinizde gururla saklayacağınız nadir DersVerse hatıra parçası #${i}.`
+            desc: `Ders çalışırken odaklanmanızı sağlayacak ${snd} ambiansı #${i}.`
         });
     }
 
@@ -479,7 +467,7 @@ function usePerk(itemId, perkValue) {
     }
     if (perkValue === 'xp_double') {
         localStorage.setItem("dersverse_xp_booster", "true");
-        alert("⚡ 2x XP Katlayıcı İksir etkinleştirildi!");
+        alert("⚡ 3x Turbo XP İksiri etkinleştirildi!");
     } else {
         alert("Perk başarıyla kullanıldı!");
     }
