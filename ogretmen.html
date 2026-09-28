@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğretmen Paneli - DersVerse</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --dersverse-bg: #0a0a12;
+            --dersverse-card-bg: rgba(255, 255, 255, 0.05);
+            --dersverse-border: rgba(255, 255, 255, 0.1);
+            --dersverse-primary: #6366f1;
+            --dersverse-primary-hover: #4f46e5;
+            --dersverse-text: #f3f4f6;
+            --dersverse-text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dersverse-bg);
+            color: var(--dersverse-text);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--dersverse-card-bg);
+            border-right: 1px solid var(--dersverse-border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-menu li {
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: var(--dersverse-text-muted);
+            transition: all 0.2s;
+        }
+
+        .sidebar-menu li:hover, .sidebar-menu li.aktif {
+            background: var(--dersverse-primary);
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--dersverse-border);
+            padding-bottom: 20px;
+        }
+
+        .card {
+            background: var(--dersverse-card-bg);
+            border: 1px solid var(--dersverse-border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn {
+            background: var(--dersverse-primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--dersverse-primary-hover);
+        }
+
+        .grid-oturma {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .sira-kutu {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--dersverse-border);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .sira-kutu input {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--dersverse-border);
+            color: white;
+            padding: 6px;
+            border-radius: 4px;
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Yan Menü -->
+    <div class="sidebar">
+        <div>
+            <div class="sidebar-logo">Öğretmen Portalı</div>
+            <ul class="sidebar-menu">
+                <li class="aktif" onclick="sekmeDegistir('notlar', this)">📝 Dijital Not Defteri</li>
+                <li onclick="sekmeDegistir('yoklama', this)">📋 Yoklama Sistemi</li>
+                <li onclick="sekmeDegistir('oturma', this)">🪑 Oturma Düzeni</li>
+                <li onclick="sekmeDegistir('rubrik', this)">⭐ Rubrik Puanlama</li>
+            </ul>
+        </div>
+        <div>
+            <button onclick="cikisYap()" class="btn" style="width: 100%; background: #ef4444;">Çıkış Yap</button>
+        </div>
+    </div>
+
+    <!-- Ana İçerik Alanı -->
+    <div class="main-content">
+        <div class="panel-header">
+            <h1 id="sayfa-basligi">Dijital Not Defteri</h1>
+            <span id="kullanici-bilgi" style="color: var(--dersverse-text-muted);">Yükleniyor...</span>
+        </div>
+
+        <!-- Sekme 1: Notlar -->
+        <div id="icerik-notlar" class="panel-bolum">
+            <div class="card">
+                <h3>Öğrenci Not Girişi</h3>
+                <p style="color: var(--dersverse-text-muted); margin-bottom: 15px; font-size: 0.9rem;">Sınıf içi performans ve sınav notlarını buradan kaydedebilirsin.</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="ogrenci-adi" placeholder="Öğrenci Ad Soyad" style="flex:2; padding:8px; background:rgba(255,255,255,0.05); border:1px solid var(--dersverse-border); border-radius:6px; color:white;">
+                    <input type="number" id="ogrenci-not" placeholder="Not" style="flex:1; padding:8px; background:rgba(255,255,255,0.05); border:1px solid var(--dersverse-border); border-radius:6px; color:white;">
+                    <button class="btn" onclick="notEkle()">Kaydet</button>
+                </div>
+                <ul id="notlar-listesi" style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+                    <!-- Dinamik Notlar -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Sekme 2: Yoklama -->
+        <div id="icerik-yoklama" class="panel-bolum" style="display: none;">
+            <div class="card">
+                <h3>Hızlı Yoklama Listesi</h3>
+                <p style="color: var(--dersverse-text-muted); margin-bottom: 15px; font-size: 0.9rem;">Öğrencilerin dersteki devam durumlarını işaretleyin.</p>
+                <div id="yoklama-listesi" style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 6px;">
+                        <span>Ahmet Yılmaz (No: 101)</span>
+                        <input type="checkbox" checked style="transform: scale(1.2);">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 6px;">
+                        <span>Zeynep Demir (No: 102)</span>
+                        <input type="checkbox" checked style="transform: scale(1.2);">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sekme 3: Oturma Düzeni -->
+        <div id="icerik-oturma" class="panel-bolum" style="display: none;">
+            <div class="card">
+                <h3>Sınıf Yerleşim Planı</h3>
+                <div style="background: var(--dersverse-border); text-align: center; padding: 8px; border-radius: 6px; margin-bottom: 15px; font-size: 0.85rem; color: var(--dersverse-text-muted);">
+                    --- TAHTA ---
+                </div>
+                <div class="grid-oturma" id="oturma-grid">
+                    <div class="sira-kutu"><span>Sıra 1</span><input type="text" value="Ahmet"></div>
+                    <div class="sira-kutu"><span>Sıra 2</span><input type="text" value="Zeynep"></div>
+                    <div class="sira-kutu"><span>Sıra 3</span><input type="text" value="Boş"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sekme 4: Rubrik -->
+        <div id="icerik-rubrik" class="panel-bolum" style="display: none;">
+            <div class="card">
+                <h3>Performans Değerlendirme (Rubrik)</h3>
+                <p style="color: var(--dersverse-text-muted); font-size: 0.9rem;">Proje ödevleri ve sunumlar için dereceli puanlama kriterleri.</p>
+                <br>
+                <p>• Hazırlık ve Araştırma (1 - 5 Puan)</p>
+                <p>• Sunum ve Anlatım (1 - 5 Puan)</p>
+                <p>• Görsel Tasarım (1 - 5 Puan)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DERSVERSE_SUPABASE_URL = 'https://dyxghgzquvsngehjjvcb.supabase.co';
+        const DERSVERSE_SUPABASE_KEY = 'sb_publishable_qgcYdZz60VDBkfLZ3UVftw_G9o30nYd'; 
+        const dersverseSupabase = supabase.createClient(DERSVERSE_SUPABASE_URL, DERSVERSE_SUPABASE_KEY);
+
+        // Oturum kontrolü
+        async function kontrolEt() {
+            const { data: { user } } = await dersverseSupabase.auth.getUser();
+            if (!user) {
+                window.location.href = 'ogretmenlogin.html';
+            } else {
+                document.getElementById('kullanici-bilgi').innerText = user.email;
+            }
+        }
+        kontrolEt();
+
+        function sekmeDegistir(sekmeAdi, element) {
+            document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('aktif'));
+            element.classList.add('aktif');
+
+            document.querySelectorAll('.panel-bolum').forEach(bolum => bolum.style.display = 'none');
+            document.getElementById('icerik-' + sekmeAdi).style.display = 'block';
+
+            const basliklar = {
+                'notlar': 'Dijital Not Defteri',
+                'yoklama': 'Yoklama Sistemi',
+                'oturma': 'Oturma Düzeni Planlayıcı',
+                'rubrik': 'Rubrik Değerlendirme'
+            };
+            document.getElementById('sayfa-basligi').innerText = basliklar[sekmeAdi];
+        }
+
+        function notEkle() {
+            const ad = document.getElementById('ogrenci-adi').value;
+            const not = document.getElementById('ogrenci-not').value;
+            if(!ad || !not) return;
+
+            const liste = document.getElementById('notlar-listesi');
+            const li = document.createElement('li');
+            li.style.cssText = "display: flex; justify-content: space-between; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 6px;";
+            li.innerHTML = `<span>${ad}</span> <strong>${not} Puan</strong>`;
+            liste.appendChild(li);
+
+            document.getElementById('ogrenci-adi').value = '';
+            document.getElementById('ogrenci-not').value = '';
+        }
+
+        async function cikisYap() {
+            await dersverseSupabase.auth.signOut();
+            window.location.href = 'ogretmenlogin.html';
+        }
+    </script>
+</body>
+</html>
