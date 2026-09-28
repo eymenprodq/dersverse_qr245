@@ -105,16 +105,6 @@ function resetPomodoro() {
     updatePomoDisplay();
 }
 
-// --- 4. SORU KUMBARASI MODAL YÖNETİMİ ---
-function openKumbaraModal() {
-    const modal = document.getElementById('dersverse-soru-kumbarasi-modal');
-    if (modal) modal.style.display = 'flex';
-}
-
-function closeKumbaraModal() {
-    const modal = document.getElementById('dersverse-soru-kumbarasi-modal');
-    if (modal) modal.style.display = 'none';
-}
 
 // --- 5. KULLANICI ENGELLEME VE OTURUM KONTROLÜ ---
 async function checkUserBannedStatus() {
