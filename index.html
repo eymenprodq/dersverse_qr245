@@ -151,28 +151,6 @@
         </div>
     </div>
 
-    <!-- 3. Sanal Soru Kumbarası Modalı -->
-    <div class="dersverse-modal" id="dersverse-kumbara-modal" style="display: none;">
-        <div class="dersverse-modal-content">
-            <h2>📌 Sanal Soru Kumbarası</h2>
-            <p style="color: var(--dersverse-text-muted); margin-bottom: 15px; font-size: 0.85rem;">Yapamadığınız veya tekrar bakmak istediğiniz soruları buraya kaydedin.</p>
-
-            <div class="dersverse-form-group">
-                <input type="text" id="kumbara-note" placeholder="Soru notu veya başlığı (Örn: Fen Kalıtım Çaprazlama Sorusu)">
-            </div>
-            <div class="dersverse-form-group">
-                <input type="text" id="kumbara-link" placeholder="Soru Görseli / Drive Linki">
-            </div>
-            <button class="dersverse-btn" style="width: 100%; margin-bottom: 15px;" onclick="addQuestionToKumbara()">Soruyu Kumbaraya Ekle (+15 XP)</button>
-
-            <div id="kumbara-list"></div>
-
-            <div style="text-align: right; margin-top: 15px;">
-                <button class="dersverse-btn dersverse-btn-outline" onclick="closeKumbaraModal()">Kapat</button>
-            </div>
-        </div>
-    </div>
-
     <!-- 4. İçerik Detay ve Yorum Modalı -->
     <div id="content-detail-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center;">
         <div style="background: #12121f; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 2rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; color: #f3f4f6; box-sizing: border-box;">
