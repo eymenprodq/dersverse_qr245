@@ -117,7 +117,7 @@
             gap: 20px;
         }
 
-        /* script.js içerisindeki dinamik kartlar için stil desteği */
+        /* Dinamik kartlar için stil desteği */
         #shop-items-container > div {
             background: var(--dersverse-card) !important;
             border: 1px solid var(--dersverse-border) !important;
@@ -150,7 +150,7 @@
             <a href="index.html" class="dersverse-btn dersverse-btn-outline" style="text-decoration: none; display: inline-flex; align-items: center;">← Ana Sayfaya Dön</a>
         </div>
 
-        <!-- MAĞAZA ÜRÜNLERİNİN script.js TARAFINDAN OTOMATİK YÜKLENDİĞİ KRİTİK ALAN -->
+        <!-- MAĞAZA ÜRÜNLERİNİN script.js TARAFINDAN OTOMATİK YÜKLENDİĞİ ALAN -->
         <div id="shop-items-container" class="shop-grid">
             <!-- script.js içerisindeki renderShop() burayı otomatik dolduracak -->
         </div>
@@ -159,7 +159,7 @@
     <!-- Bağlı Olan script.js Dosyası ve Otomatik Tetikleyici -->
     <script src="script.js"></script>
     <script>
-        // Sayfa yüklendiği an mağazanın ekrana basılmasını zorunlu kılan tetikleyici
+        // Sayfa yüklendiği an mağazanın ekrana basılmasını sağlayan tetikleyici
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof renderShop === 'function') {
                 renderShop();
