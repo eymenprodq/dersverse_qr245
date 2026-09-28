@@ -150,47 +150,47 @@
 
     <div class="dersverse-auth-container">
         <a href="index.html" class="dersverse-logo">DersVerse</a>
-        <div id="dersverse-form-subtitle" class="dersverse-subtitle">Öğretmen Portalı - Giriş Yap[cite: 2]</div>
+        <div id="dersverse-form-subtitle" class="dersverse-subtitle">Öğretmen Portalı - Giriş Yap</div>
 
         <div class="dersverse-badge-info">
-            ⚡ Doğrulama veya onay beklemeden direkt kayıt olup giriş yapabilirsiniz.
+            ⚡ Doğrulama veya onay beklemeden doğrudan kayıt olup giriş yapabilirsiniz.
         </div>
 
         <form id="dersverse-teacher-auth-form" onsubmit="dersverseHandleTeacherAuth(event)">
             <div class="dersverse-form-group" id="name-group" style="display: none;">
-                <label for="dersverse-fullname">Ad Soyad (Örn: Öğr. Ahmet Yılmaz)[cite: 2]</label>
-                <input type="text" id="dersverse-fullname" class="dersverse-form-input" placeholder="Adınızı ve unvanınızı girin[cite: 2]">
+                <label for="dersverse-fullname">Ad Soyad (Örn: Öğr. Ahmet Yılmaz)</label>
+                <input type="text" id="dersverse-fullname" class="dersverse-form-input" placeholder="Adınızı ve unvanınızı girin">
             </div>
 
             <div class="dersverse-form-group" id="school-group" style="display: none;">
-                <label for="dersverse-school">Görev Yaptığınız Okul[cite: 2]</label>
-                <input type="text" id="dersverse-school" class="dersverse-form-input" placeholder="Örn: Atatürk Anadolu Lisesi[cite: 2]">
+                <label for="dersverse-school">Görev Yaptığınız Okul</label>
+                <input type="text" id="dersverse-school" class="dersverse-form-input" placeholder="Örn: Atatürk Anadolu Lisesi">
             </div>
 
             <div class="dersverse-form-group" id="branch-group" style="display: none;">
-                <label for="dersverse-branch">Branşınız[cite: 2]</label>
-                <input type="text" id="dersverse-branch" class="dersverse-form-input" placeholder="Örn: Matematik[cite: 2]">
+                <label for="dersverse-branch">Branşınız</label>
+                <input type="text" id="dersverse-branch" class="dersverse-form-input" placeholder="Örn: Matematik">
             </div>
 
             <div class="dersverse-form-group">
-                <label for="dersverse-email">E-posta Adresi[cite: 2]</label>
-                <input type="email" id="dersverse-email" required class="dersverse-form-input" placeholder="ornek@email.com[cite: 2]">
+                <label for="dersverse-email">E-posta Adresi</label>
+                <input type="email" id="dersverse-email" required class="dersverse-form-input" placeholder="ornek@email.com">
             </div>
 
             <div class="dersverse-form-group">
-                <label for="dersverse-password">Şifre[cite: 2]</label>
-                <input type="password" id="dersverse-password" required class="dersverse-form-input" placeholder="••••••••[cite: 2]">
+                <label for="dersverse-password">Şifre</label>
+                <input type="password" id="dersverse-password" required class="dersverse-form-input" placeholder="••••••••">
             </div>
 
-            <button type="submit" id="dersverse-auth-submit-btn" class="dersverse-btn">Giriş Yap[cite: 2]</button>
+            <button type="submit" id="dersverse-auth-submit-btn" class="dersverse-btn">Giriş Yap</button>
         </form>
 
         <div class="dersverse-toggle-mode">
-            <span id="dersverse-toggle-text">Hesabınız yok mu?[cite: 2]</span> 
-            <a href="#" onclick="dersverseToggleMode(event)" id="dersverse-toggle-link">Öğretmen Kaydı Oluştur[cite: 2]</a>
+            <span id="dersverse-toggle-text">Hesabınız yok mu?</span> 
+            <a href="#" onclick="dersverseToggleMode(event)" id="dersverse-toggle-link">Öğretmen Kaydı Oluştur</a>
         </div>
 
-        <a href="index.html" class="back-home">← Ana Sayfaya Dön[cite: 2]</a>
+        <a href="index.html" class="back-home">← Ana Sayfaya Dön</a>
     </div>
 
     <script>
@@ -218,16 +218,16 @@
                 schoolGroup.style.display = "block";
                 branchGroup.style.display = "block";
                 submitBtn.innerText = "Kayıt Ol ve Giriş Yap";
-                toggleText.innerText = "Zaten hesabınız var mı?[cite: 2]";
-                toggleLink.innerText = "Giriş Yap[cite: 2]";
+                toggleText.innerText = "Zaten hesabınız var mı?";
+                toggleLink.innerText = "Giriş Yap";
             } else {
-                subtitle.innerText = "Öğretmen Portalı - Giriş Yap[cite: 2]";
+                subtitle.innerText = "Öğretmen Portalı - Giriş Yap";
                 nameGroup.style.display = "none";
                 schoolGroup.style.display = "none";
                 branchGroup.style.display = "none";
-                submitBtn.innerText = "Giriş Yap[cite: 2]";
-                toggleText.innerText = "Hesabınız yok mu?[cite: 2]";
-                toggleLink.innerText = "Öğretmen Kaydı Oluştur[cite: 2]";
+                submitBtn.innerText = "Giriş Yap";
+                toggleText.innerText = "Hesabınız yok mu?";
+                toggleLink.innerText = "Öğretmen Kaydı Oluştur";
             }
         }
 
@@ -244,7 +244,6 @@
                 const school = document.getElementById('dersverse-school').value;
                 const branch = document.getElementById('dersverse-branch').value;
 
-                // Doğrulama istemeden direkt kayıt açma
                 const { data, error } = await dersverseSupabase.auth.signUp({
                     email: email,
                     password: password,
@@ -263,8 +262,8 @@
                     alert("Kayıt hatası: " + error.message);
                     submitBtn.disabled = false;
                 } else {
-                    alert("Kayıt başarıyla tamamlandı Hesabınızı doğrulamak için E-postanızı kontrol ediniz!");
-                    window.location.href = "ogretmen.html"; // Doğrudan panele yönlendirir
+                    alert("Kayıt başarıyla tamamlandı ve otomatik giriş yapıldı!");
+                    window.location.href = "ogretmen.html";
                 }
 
             } else {
@@ -278,7 +277,7 @@
                     submitBtn.disabled = false;
                 } else {
                     alert("Başarıyla giriş yapıldı!");
-                    window.location.href = "ogretmen.html"; // Doğrudan panele yönlendirir
+                    window.location.href = "ogretmen.html";
                 }
             }
         }
