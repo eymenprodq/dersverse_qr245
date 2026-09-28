@@ -106,12 +106,12 @@ function resetPomodoro() {
 }
 
 // --- 4. SORU KUMBARASI MODAL YÖNETİMİ ---
-function openSoruKumbarasiModal() {
+function openKumbaraModal() {
     const modal = document.getElementById('dersverse-soru-kumbarasi-modal');
     if (modal) modal.style.display = 'flex';
 }
 
-function closeSoruKumbarasiModal() {
+function closeKumbaraModal() {
     const modal = document.getElementById('dersverse-soru-kumbarasi-modal');
     if (modal) modal.style.display = 'none';
 }
